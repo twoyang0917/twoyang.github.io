@@ -5,7 +5,7 @@
   
 
 
-<html class="theme-next pisces use-motion">
+<html class="theme-next mist use-motion">
 <head>
   <meta charset="UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
@@ -57,26 +57,35 @@
 
 
 
-<meta name="description" content="首先确认安装了openssl和openssl-libs123[root@localhost ~]# rpm -qa | grep opensslopenssl-libs-1.0.1e-42.el7.x86_64openssl-1.0.1e-42.el7.x86_64
-配置文件/etc/pki/tls/openssl.cnf是ini风格的，其中比较常用的配置就是CA自身的配置和req发证请求相关的配">
+<meta name="description" content="1. 准备工作
+首先确认安装了openssl和openssl-libs123[root@localhost ~]# rpm -qa | grep opensslopenssl-libs-1.0.1e-42.el7.x86_64openssl-1.0.1e-42.el7.x86_64
+
+
+配置文件/etc/pki/tls/openssl.cnf是ini风格的，其中比较常用的配置就是CA自身的配置和r">
 <meta property="og:type" content="article">
 <meta property="og:title" content="使用OpenSSL创建私有CA">
 <meta property="og:url" content="http://www.twoyang.net/2016/04/11/使用OpenSSL创建私有CA/index.html">
 <meta property="og:site_name" content="TwOyAng'blog">
-<meta property="og:description" content="首先确认安装了openssl和openssl-libs123[root@localhost ~]# rpm -qa | grep opensslopenssl-libs-1.0.1e-42.el7.x86_64openssl-1.0.1e-42.el7.x86_64
-配置文件/etc/pki/tls/openssl.cnf是ini风格的，其中比较常用的配置就是CA自身的配置和req发证请求相关的配">
-<meta property="og:updated_time" content="2016-04-11T15:04:15.486Z">
+<meta property="og:description" content="1. 准备工作
+首先确认安装了openssl和openssl-libs123[root@localhost ~]# rpm -qa | grep opensslopenssl-libs-1.0.1e-42.el7.x86_64openssl-1.0.1e-42.el7.x86_64
+
+
+配置文件/etc/pki/tls/openssl.cnf是ini风格的，其中比较常用的配置就是CA自身的配置和r">
+<meta property="og:updated_time" content="2016-04-12T02:24:50.011Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="使用OpenSSL创建私有CA">
-<meta name="twitter:description" content="首先确认安装了openssl和openssl-libs123[root@localhost ~]# rpm -qa | grep opensslopenssl-libs-1.0.1e-42.el7.x86_64openssl-1.0.1e-42.el7.x86_64
-配置文件/etc/pki/tls/openssl.cnf是ini风格的，其中比较常用的配置就是CA自身的配置和req发证请求相关的配">
+<meta name="twitter:description" content="1. 准备工作
+首先确认安装了openssl和openssl-libs123[root@localhost ~]# rpm -qa | grep opensslopenssl-libs-1.0.1e-42.el7.x86_64openssl-1.0.1e-42.el7.x86_64
+
+
+配置文件/etc/pki/tls/openssl.cnf是ini风格的，其中比较常用的配置就是CA自身的配置和r">
 
 
 
 <script type="text/javascript" id="hexo.configuration">
   var NexT = window.NexT || {};
   var CONFIG = {
-    scheme: 'Pisces',
+    scheme: 'Mist',
     sidebar: {"position":"left","display":"post"},
     fancybox: true,
     motion: true,
@@ -282,32 +291,32 @@
       
 
       
-        <p>首先确认安装了<code>openssl</code>和<code>openssl-libs</code><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# rpm -qa | grep openssl</span><br><span class="line">openssl-libs-1.0.1e-42.el7.x86_64</span><br><span class="line">openssl-1.0.1e-42.el7.x86_64</span><br></pre></td></tr></table></figure></p>
+        <h1 id="1-准备工作"><a href="#1-准备工作" class="headerlink" title="1. 准备工作"></a>1. 准备工作</h1><ul>
+<li>首先确认安装了<code>openssl</code>和<code>openssl-libs</code><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# rpm -qa | grep openssl</span><br><span class="line">openssl-libs-1.0.1e-42.el7.x86_64</span><br><span class="line">openssl-1.0.1e-42.el7.x86_64</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
 <p>配置文件<code>/etc/pki/tls/openssl.cnf</code>是<code>ini</code>风格的，其中比较常用的配置就是<code>CA</code>自身的配置和<code>req</code>发证请求相关的配置。配置文件中各配置项的作用描述得很详细了，没必要逐项解释，需要说明的是：</p>
 <ul>
 <li><p><code>CA</code>自身的配置主要就是<code>CA</code>的工作目录与文件的结构和命名，因此在后面创建<code>CA</code>时，不存在的目录和文件需要手动创建，且命名需要如配置文件中匹配。</p>
 </li>
-<li><p><code>req</code>发证请求配置主要是在需要找<code>CA</code>发证的各客户端上去配置的。主要是配置一些默认信息，免得每次都需要填写相同的信息。</p>
+<li><p><code>req</code>发证请求配置主要是在需要在<code>CA</code>发证的各客户端上去配置的。主要是配置一些默认信息，免得每次都需要填写相同的信息。</p>
 </li>
 </ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br></pre></td><td class="code"><pre><span class="line">......</span><br><span class="line"></span><br><span class="line">####################################################################</span><br><span class="line">[ ca ]</span><br><span class="line">default_ca	= CA_default		# The default ca section</span><br><span class="line"></span><br><span class="line">####################################################################</span><br><span class="line">[ CA_default ]</span><br><span class="line"></span><br><span class="line">dir		= /etc/pki/CA		# Where everything is kept</span><br><span class="line">certs		= $dir/certs		# Where the issued certs are kept</span><br><span class="line">crl_dir		= $dir/crl		# Where the issued crl are kept</span><br><span class="line">database	= $dir/index.txt	# database index file.</span><br><span class="line">#unique_subject	= no			# Set to &apos;no&apos; to allow creation of</span><br><span class="line">					# several ctificates with same subject.</span><br><span class="line">new_certs_dir	= $dir/newcerts		# default place for new certs.</span><br><span class="line"></span><br><span class="line">certificate	= $dir/cacert.pem 	# The CA certificate</span><br><span class="line">serial		= $dir/serial 		# The current serial number</span><br><span class="line">crlnumber	= $dir/crlnumber	# the current crl number</span><br><span class="line">					# must be commented out to leave a V1 CRL</span><br><span class="line">crl		= $dir/crl.pem 		# The current CRL</span><br><span class="line">private_key	= $dir/private/cakey.pem# The private key</span><br><span class="line">RANDFILE	= $dir/private/.rand	# private random number file</span><br><span class="line"></span><br><span class="line">x509_extensions	= usr_cert		# The extentions to add to the cert</span><br><span class="line"></span><br><span class="line"># Comment out the following two lines for the &quot;traditional&quot;</span><br><span class="line"># (and highly broken) format.</span><br><span class="line">name_opt 	= ca_default		# Subject Name options</span><br><span class="line">cert_opt 	= ca_default		# Certificate field options</span><br><span class="line"></span><br><span class="line"># Extension copying option: use with caution.</span><br><span class="line"># copy_extensions = copy</span><br><span class="line"></span><br><span class="line"># Extensions to add to a CRL. Note: Netscape communicator chokes on V2 CRLs</span><br><span class="line"># so this is commented out by default to leave a V1 CRL.</span><br><span class="line"># crlnumber must also be commented out to leave a V1 CRL.</span><br><span class="line"># crl_extensions	= crl_ext</span><br><span class="line"></span><br><span class="line">default_days	= 365			# how long to certify for</span><br><span class="line">default_crl_days= 30			# how long before next CRL</span><br><span class="line">default_md	= sha256		# use SHA-256 by default</span><br><span class="line">preserve	= no			# keep passed DN ordering</span><br><span class="line"></span><br><span class="line"># A few difference way of specifying how similar the request should look</span><br><span class="line"># For type CA, the listed attributes must be the same, and the optional</span><br><span class="line"># and supplied fields are just that :-)</span><br><span class="line">policy		= policy_match</span><br><span class="line"></span><br><span class="line"># For the CA policy</span><br><span class="line">[ policy_match ]</span><br><span class="line">countryName		= match</span><br><span class="line">stateOrProvinceName	= match</span><br><span class="line">organizationName	= match</span><br><span class="line">organizationalUnitName	= optional</span><br><span class="line">commonName		= supplied</span><br><span class="line">emailAddress		= optional</span><br><span class="line"></span><br><span class="line"># For the &apos;anything&apos; policy</span><br><span class="line"># At this point in time, you must list all acceptable &apos;object&apos;</span><br><span class="line"># types.</span><br><span class="line">[ policy_anything ]</span><br><span class="line">countryName		= optional</span><br><span class="line">stateOrProvinceName	= optional</span><br><span class="line">localityName		= optional</span><br><span class="line">organizationName	= optional</span><br><span class="line">organizationalUnitName	= optional</span><br><span class="line">commonName		= supplied</span><br><span class="line">emailAddress		= optional</span><br><span class="line"></span><br><span class="line">####################################################################</span><br><span class="line">[ req ]</span><br><span class="line">default_bits		= 2048</span><br><span class="line">default_md		= sha256</span><br><span class="line">default_keyfile 	= privkey.pem</span><br><span class="line">distinguished_name	= req_distinguished_name</span><br><span class="line">attributes		= req_attributes</span><br><span class="line">x509_extensions	= v3_ca	# The extentions to add to the self signed cert</span><br><span class="line"></span><br><span class="line"># Passwords for private keys if not present they will be prompted for</span><br><span class="line"># input_password = secret</span><br><span class="line"># output_password = secret</span><br><span class="line"></span><br><span class="line"># This sets a mask for permitted string types. There are several options. </span><br><span class="line"># default: PrintableString, T61String, BMPString.</span><br><span class="line"># pkix	 : PrintableString, BMPString (PKIX recommendation before 2004)</span><br><span class="line"># utf8only: only UTF8Strings (PKIX recommendation after 2004).</span><br><span class="line"># nombstr : PrintableString, T61String (no BMPStrings or UTF8Strings).</span><br><span class="line"># MASK:XXXX a literal mask value.</span><br><span class="line"># WARNING: ancient versions of Netscape crash on BMPStrings or UTF8Strings.</span><br><span class="line">string_mask = utf8only</span><br><span class="line"></span><br><span class="line"># req_extensions = v3_req # The extensions to add to a certificate request</span><br><span class="line"></span><br><span class="line">[ req_distinguished_name ]</span><br><span class="line">countryName			= Country Name (2 letter code)</span><br><span class="line">countryName_default		= XX</span><br><span class="line">countryName_min			= 2</span><br><span class="line">countryName_max			= 2</span><br><span class="line"></span><br><span class="line">stateOrProvinceName		= State or Province Name (full name)</span><br><span class="line">#stateOrProvinceName_default	= Default Province</span><br><span class="line"></span><br><span class="line">localityName			= Locality Name (eg, city)</span><br><span class="line">localityName_default		= Default City</span><br><span class="line"></span><br><span class="line">0.organizationName		= Organization Name (eg, company)</span><br><span class="line">0.organizationName_default	= Default Company Ltd</span><br><span class="line"></span><br><span class="line"># we can do this but it is not needed normally :-)</span><br><span class="line">#1.organizationName		= Second Organization Name (eg, company)</span><br><span class="line">#1.organizationName_default	= World Wide Web Pty Ltd</span><br><span class="line"></span><br><span class="line">organizationalUnitName		= Organizational Unit Name (eg, section)</span><br><span class="line">#organizationalUnitName_default	=</span><br><span class="line"></span><br><span class="line">commonName			= Common Name (eg, your name or your server\&apos;s hostname)</span><br><span class="line">commonName_max			= 64</span><br><span class="line"></span><br><span class="line">emailAddress			= Email Address</span><br><span class="line">emailAddress_max		= 64</span><br><span class="line"></span><br><span class="line"># SET-ex3			= SET extension number 3</span><br><span class="line"></span><br><span class="line">[ req_attributes ]</span><br><span class="line">challengePassword		= A challenge password</span><br><span class="line">challengePassword_min		= 4</span><br><span class="line">challengePassword_max		= 20</span><br><span class="line"></span><br><span class="line">unstructuredName		= An optional company name</span><br><span class="line"></span><br><span class="line">......</span><br></pre></td></tr></table></figure>
-<h2 id="创建CA"><a href="#创建CA" class="headerlink" title="创建CA"></a>创建<code>CA</code></h2><ol>
-<li>首先看下<code>CA</code>的工作目录和文件是否如配置文件中那样齐全，如果缺了需要手动建立。<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# ls /etc/pki/CA/</span><br><span class="line">certs  crl  newcerts  private</span><br></pre></td></tr></table></figure>
+<h1 id="2-创建CA"><a href="#2-创建CA" class="headerlink" title="2. 创建CA"></a>2. 创建<code>CA</code></h1><ul>
+<li>首先看下<code>CA</code>的工作目录和文件是否如配置文件中那样齐全，如果缺了需要手动建立。可以看到目录基本都有（如果没有，也需要手动建立），但还缺少一些文件。<br><code>index.txt</code>是证书信息存储的数据库文件，无需写入任何内容，均为自动生成，但必须事先创建。<br><code>serial</code>是记录发证起始编号的文件，必须将发证起始编号写入此文件，否则<code>CA</code>签发证书时会失败。<br><code>crlnumber</code>是记录证书吊销起始编号的文件，必须将吊销证书起始编号写入此文件，否则<code>CA</code>更新证书吊销列表时会失败。<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# ls /etc/pki/CA/</span><br><span class="line">certs  crl  newcerts  private</span><br><span class="line">[root@localhost ~]# cd /etc/pki/CA/</span><br><span class="line">[root@localhost CA]# touch index.txt serial crlnumber</span><br><span class="line">[root@localhost CA]# echo 01 &gt; serial</span><br><span class="line">[root@localhost CA]# echo 01 &gt; crlnumber</span><br></pre></td></tr></table></figure>
 </li>
-</ol>
-<p>可以看到目录基本都有（如果没有，也需要手动建立），缺少一些文件。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# cd /etc/pki/CA/</span><br><span class="line">[root@localhost CA]# touch index.txt serial crlnumber</span><br></pre></td></tr></table></figure></p>
-<p><code>index.txt</code>是证书信息存储的数据库文件，无需写入任何内容，均为自动生成，但必须事先创建。<br><code>serial</code>是记录发证起始编号的文件，必须将发证起始编号写入此文件，否则<code>CA</code>签发证书时会失败。<br><code>crlnumber</code>是记录证书吊销起始编号的文件，必须将吊销证书起始编号写入此文件，否则<code>CA</code>更新证书吊销列表时会失败。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost CA]# echo 01 &gt; serial</span><br><span class="line">[root@localhost CA]# echo 01 &gt; crlnumber</span><br></pre></td></tr></table></figure></p>
-<p>还有两个文件，一个是<code>CA</code>的私钥，一个是<code>CA</code>的自签证书，都是通过<code>openssl</code>工具来生成的。</p>
-<ol>
+</ul>
+<p>还有两个文件，一个是<code>CA</code>的私钥<code>cakey.pem</code>，一个是<code>CA</code>的自签证书<code>cacert.pem</code>，都是通过<code>openssl</code>工具来生成的。</p>
+<ul>
 <li><p>给<code>CA</code>生成私钥，私钥的安全很重要，必须保证只有自己有权限操作。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost CA]# (umask 077; openssl genrsa -out private/cakey.pem 4096)</span><br><span class="line">Generating RSA private key, 4096 bit long modulus</span><br><span class="line">...........................................................++</span><br><span class="line">.......................................................................++</span><br><span class="line">e is 65537 (0x10001)</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>生成自签证书</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost CA]# openssl req -new -x509 -key private/cakey.pem -out cacert.pem -days 3650</span><br><span class="line">You are about to be asked to enter information that will be incorporated</span><br><span class="line">into your certificate request.</span><br><span class="line">What you are about to enter is what is called a Distinguished Name or a DN.</span><br><span class="line">There are quite a few fields but you can leave some blank</span><br><span class="line">For some fields there will be a default value,</span><br><span class="line">If you enter &apos;.&apos;, the field will be left blank.</span><br><span class="line">\-----</span><br><span class="line">Country Name (2 letter code) [XX]:CN</span><br><span class="line">State or Province Name (full name) []:Beijing</span><br><span class="line">Locality Name (eg, city) [Default City]:Beijing</span><br><span class="line">Organization Name (eg, company) [Default Company Ltd]:Magedu</span><br><span class="line">Organizational Unit Name (eg, section) []:devops   </span><br><span class="line">Common Name (eg, your name or your server&apos;s hostname) []:devops.magedu.com </span><br><span class="line">Email Address []:twoyang@magedu.com</span><br></pre></td></tr></table></figure>
 </li>
-</ol>
+</ul>
 <p><strong>注意：只有在生成自签证书时需要加上<code>-x509</code>选项。</strong></p>
-<h2 id="签发证书"><a href="#签发证书" class="headerlink" title="签发证书"></a>签发证书</h2><ol>
+<h1 id="3-签发证书"><a href="#3-签发证书" class="headerlink" title="3. 签发证书"></a>3. 签发证书</h1><ul>
 <li><p>客户端生成私钥</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# (umask 077; openssl genrsa -out www.magedu.com.key 2048)</span><br></pre></td></tr></table></figure>
 </li>
@@ -321,8 +330,8 @@
 </li>
 <li><p>将签发过的证书文件返还给客户端</p>
 </li>
-</ol>
-<h2 id="吊销证书"><a href="#吊销证书" class="headerlink" title="吊销证书"></a>吊销证书</h2><ol>
+</ul>
+<h1 id="4-吊销证书"><a href="#4-吊销证书" class="headerlink" title="4. 吊销证书"></a>4. 吊销证书</h1><ul>
 <li><p>客户端查询证书信息</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# openssl x509 -in www.magedu.com.crt -noout -serial -subject</span><br><span class="line">serial=01</span><br><span class="line">subject= /C=CN/ST=Beijing/O=Magedu/OU=dev/CN=www.magedu.com/emailAddress=admin@magedu.com</span><br></pre></td></tr></table></figure>
 </li>
@@ -331,7 +340,7 @@
 </li>
 <li><p>生成证书吊销列表</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# openssl ca -gencrl -out /etc/pki/CA/crl/thisca.crl</span><br><span class="line">Using configuration from /etc/pki/tls/openssl.cnf</span><br><span class="line">[root@localhost ~]# ls /etc/pki/CA/crl/thisca.crl -al</span><br><span class="line">-rw-r--r-- 1 root root 1097 Mar 17 22:12 /etc/pki/CA/crl/thisca.crl</span><br><span class="line">[root@localhost ~]# cat /etc/pki/CA/index.txt</span><br><span class="line">R	170317135820Z	160317141000Z	01	unknown	/C=CN/ST=Beijing/O=Magedu/OU=dev/CN=www.magedu.com/emailAddress=admin@magedu.com</span><br><span class="line">[root@localhost ~]# openssl crl -in /etc/pki/CA/crl/thisca.crl -text -noout</span><br><span class="line">Certificate Revocation List (CRL):</span><br><span class="line">        Version 2 (0x1)</span><br><span class="line">    Signature Algorithm: sha256WithRSAEncryption</span><br><span class="line">        Issuer: /C=CN/ST=Beijing/L=Beijing/O=Magedu/OU=devops/CN=devops.magedu.com/emailAddress=twoyang@magedu.com</span><br><span class="line">        Last Update: Mar 17 14:12:18 2016 GMT</span><br><span class="line">        Next Update: Apr 16 14:12:18 2016 GMT</span><br><span class="line">        CRL extensions:</span><br><span class="line">            X509v3 CRL Number: </span><br><span class="line">                1</span><br><span class="line">Revoked Certificates:</span><br><span class="line">    Serial Number: 01</span><br><span class="line">        Revocation Date: Mar 17 14:10:00 2016 GMT</span><br><span class="line">    Signature Algorithm: sha256WithRSAEncryption</span><br><span class="line">         1b:f6:cc:f9:d4:fb:ed:d4:32:fc:82:aa:a6:9f:36:55:ca:01:</span><br><span class="line">         90:6c:db:b0:06:af:39:de:42:e3:ff:0b:29:c4:1c:87:f1:2c:</span><br><span class="line">         d7:90:7c:62:2f:7d:8a:98:8d:4a:37:60:ea:fb:45:25:d2:bd:</span><br><span class="line">         89:ea:44:92:a0:68:f5:b8:aa:0a:0a:c8:bf:88:18:e2:88:75:</span><br><span class="line">         f5:9c:6b:72:22:a0:66:6f:62:ad:59:fb:49:90:8a:1f:db:bf:</span><br><span class="line">         63:aa:f9:bd:4f:35:53:1e:b1:f1:7b:c4:89:29:09:fc:c9:51:</span><br><span class="line">         85:5c:fc:7e:c2:0b:0f:28:c5:a3:e4:08:c1:d6:06:29:79:ea:</span><br><span class="line">         d7:37:64:d2:b2:4c:b1:2c:54:ef:b1:98:f7:2b:df:e6:8a:26:</span><br><span class="line">         95:a7:fb:4c:5f:52:cc:da:d6:07:c6:a3:b4:4a:38:3c:8c:2c:</span><br><span class="line">         0d:c6:72:a4:64:ed:e6:89:1a:e1:92:65:e4:7c:64:ec:3a:a8:</span><br><span class="line">         ba:1e:67:2d:3c:18:fd:cb:37:88:a5:76:39:8d:04:ed:ba:78:</span><br><span class="line">         c6:a4:db:84:31:6b:32:a5:7d:a5:6c:65:17:2e:bc:d0:4b:da:</span><br><span class="line">         a3:ad:c3:9a:3f:b9:a9:bf:e1:56:27:38:79:af:e6:25:65:f4:</span><br><span class="line">         52:d7:24:13:e2:85:90:3a:1a:88:b3:6d:36:ac:37:44:30:0c:</span><br><span class="line">         16:c5:df:29:40:74:66:33:74:47:5a:a8:15:73:fe:da:23:e3:</span><br><span class="line">         29:ba:1f:e8:3c:25:ba:a6:63:69:9c:95:71:15:b9:fc:49:08:</span><br><span class="line">         43:d4:a5:77:c1:d6:75:e0:d5:e7:9b:f6:6f:e2:ee:47:1c:19:</span><br><span class="line">         f4:3c:0f:7c:f4:b6:cb:fe:25:90:68:53:60:bb:5c:68:35:8b:</span><br><span class="line">         3a:74:d1:85:d5:22:19:9e:f4:ff:90:d3:b4:e8:69:dd:f2:9f:</span><br><span class="line">         5d:51:ee:33:d6:a0:e2:92:05:b1:02:d6:f7:fd:6c:9c:ab:88:</span><br><span class="line">         50:c7:3f:c8:77:91:ad:70:62:68:b8:32:a3:ce:e6:60:91:d8:</span><br><span class="line">         b6:0c:3b:0b:21:3e:3e:b4:6b:af:03:e3:55:12:ac:a7:95:c9:</span><br><span class="line">         5a:c1:02:a2:5e:f9:e0:95:6d:be:cb:45:af:0b:0c:99:19:2e:</span><br><span class="line">         5b:9b:e3:b7:cf:f6:d3:bb:87:c4:24:7f:18:4a:4d:eb:89:a8:</span><br><span class="line">         69:88:08:fc:fa:ef:c7:aa:4a:ff:b2:34:f2:a3:98:4d:8e:6f:</span><br><span class="line">         57:69:76:bb:c9:09:4f:1c:e3:a4:41:69:bb:3c:5c:1c:c3:3a:</span><br><span class="line">         73:6c:63:40:78:55:98:18:01:72:bb:f3:ba:7e:be:be:0b:31:</span><br><span class="line">         17:15:f3:34:32:03:a6:91:54:86:b8:32:b9:ee:6c:4d:cb:72:</span><br><span class="line">         c5:e7:ae:a1:56:b6:bc:cf</span><br></pre></td></tr></table></figure></li>
-</ol>
+</ul>
 
       
     </div>
@@ -414,7 +423,7 @@
                src="http://7xltax.com1.z0.glb.clouddn.com/twoyang.jpg"
                alt="twoyang" />
           <p class="site-author-name" itemprop="name">twoyang</p>
-          <p class="site-description motion-element" itemprop="description">The quieter you become. The more you are able to hear.</p>
+          <p class="site-description motion-element" itemprop="description">The quieter you become.The more you are able to hear.</p>
         </div>
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
@@ -463,6 +472,14 @@
                   <a href="http://www.magedu.com/" target="_blank">马哥教育</a>
                 </li>
               
+                <li class="links-of-blogroll-item">
+                  <a href="https://shadowsocks.be/9.html" target="_blank">科学上网</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.isetsuna.com/hexo/introduction/" target="_blank">Hexo博客系列</a>
+                </li>
+              
             </ul>
           
         </div>
@@ -476,7 +493,7 @@
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#创建CA"><span class="nav-number">1.</span> <span class="nav-text">创建CA</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#签发证书"><span class="nav-number">2.</span> <span class="nav-text">签发证书</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#吊销证书"><span class="nav-number">3.</span> <span class="nav-text">吊销证书</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-准备工作"><span class="nav-number">1.</span> <span class="nav-text">1. 准备工作</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-创建CA"><span class="nav-number">2.</span> <span class="nav-text">2. 创建CA</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-签发证书"><span class="nav-number">3.</span> <span class="nav-text">3. 签发证书</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-吊销证书"><span class="nav-number">4.</span> <span class="nav-text">4. 吊销证书</span></a></li></ol></div>
             
           </div>
         </section>
@@ -509,7 +526,7 @@
 <div class="theme-info">
   主题 -
   <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
-    NexT.Pisces
+    NexT.Mist
   </a>
 </div>
 
@@ -562,13 +579,6 @@
 
   
   
-
-
-  <script type="text/javascript" src="/js/src/affix.js?v=0.5.0"></script>
-
-  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=0.5.0"></script>
-
-
 
   
   <script type="text/javascript" src="/js/src/scrollspy.js?v=0.5.0"></script>
