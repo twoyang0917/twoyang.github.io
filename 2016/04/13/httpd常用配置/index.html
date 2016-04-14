@@ -65,7 +65,7 @@
 <meta property="og:site_name" content="TwOyAng'blog">
 <meta property="og:description" content="前言httpd的配置项是非常丰富的，本文仅是对常用配置列出个大致的目录，并就CentOS-6与CentOS-7之间存在的一些差异作比较说明。需更详细的介绍请参照官方文档，也可以本地安装一个当前版本的文档站点，便于随时翻阅。1[root@bbs ~]# yum install -y httpd-manual
 启动httpd服务后，便可访问本地文档站点了http://localhost/manual/">
-<meta property="og:updated_time" content="2016-04-13T14:50:47.112Z">
+<meta property="og:updated_time" content="2016-04-14T13:59:26.564Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="httpd常用配置">
 <meta name="twitter:description" content="前言httpd的配置项是非常丰富的，本文仅是对常用配置列出个大致的目录，并就CentOS-6与CentOS-7之间存在的一些差异作比较说明。需更详细的介绍请参照官方文档，也可以本地安装一个当前版本的文档站点，便于随时翻阅。1[root@bbs ~]# yum install -y httpd-manual
@@ -334,7 +334,7 @@
 </li>
 </ul>
 <p>而在<code>CentOS-7</code>中换成了如下的方式配置<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># 所有都允许</span><br><span class="line">Require all granted</span><br><span class="line"># 仅排除某网段</span><br><span class="line">Require ip 172.16 denied</span><br></pre></td></tr></table></figure></p>
-<h2 id="虚拟主机"><a href="#虚拟主机" class="headerlink" title="虚拟主机"></a>虚拟主机</h2><p><strong>注意：<code>Main Server</code>和<code>VirtualHost</code>是不要同时使用的，所以如果要使用<code>VirtualHost</code>要将<code>Main Server</code>的<code>DoucmentRoot</code>注释掉。</strong></p>
+<h2 id="虚拟主机"><a href="#虚拟主机" class="headerlink" title="虚拟主机"></a>虚拟主机</h2><p><strong>注意：<code>Main Server</code>和<code>VirtualHost</code>一般不要同时使用的，所以如果要使用<code>VirtualHost</code>需将<code>Main Server</code>的<code>DoucmentRoot</code>注释掉。</strong></p>
 <ul>
 <li><p>基于<code>port</code>的虚拟主机</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&lt;VirtualHost 172.16.100.6:80&gt;</span><br><span class="line">	ServerName www.a.com</span><br><span class="line">	DocumentRoot &quot;/www/a.com/htdocs&quot;</span><br><span class="line">&lt;/VirtualHost&gt;</span><br><span class="line">&lt;VirtualHost 172.16.100.6:8080&gt;</span><br><span class="line">	ServerName www.b.net</span><br><span class="line">	DocumentRoot &quot;/www/b.net/htdocs&quot;</span><br><span class="line">&lt;/VirtualHost&gt;</span><br></pre></td></tr></table></figure>
@@ -347,7 +347,22 @@
 </li>
 </ul>
 <p>这是<code>CentOS-6</code>中的配置基于<code>FQDN</code>的虚拟主机的方法，<code>CentOS-7</code>配置基于<code>FQDN</code>的虚拟主机无需指定<code>NameVirtualHost</code>。</p>
-<h2 id="状态页面"><a href="#状态页面" class="headerlink" title="状态页面"></a>状态页面</h2><p>动态实时显现服务器运行状态的页面，是管理员调优的依据，应该做访问控制。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">LoadModule  status_module  modules/mod_status.so</span><br><span class="line">&lt;Location /server-status&gt;</span><br><span class="line">	SetHandler server-status</span><br><span class="line">	Order allow,deny</span><br><span class="line">	Allow from 172.16.0.0/24</span><br><span class="line">&lt;/Location&gt;</span><br></pre></td></tr></table></figure></p>
+<h2 id="状态页面"><a href="#状态页面" class="headerlink" title="状态页面"></a>状态页面</h2><p>服务器当前运行状态的页面，是管理员调优的依据，应该做访问控制。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">LoadModule  status_module  modules/mod_status.so</span><br><span class="line">&lt;Location /server-status&gt;</span><br><span class="line">	SetHandler server-status</span><br><span class="line">	Order allow,deny</span><br><span class="line">	Allow from 172.16.0.0/24</span><br><span class="line">&lt;/Location&gt;</span><br></pre></td></tr></table></figure></p>
+<h2 id="用户与组"><a href="#用户与组" class="headerlink" title="用户与组"></a>用户与组</h2><p>指定以哪个用户和哪个组身份运行<code>httpd</code>服务进程，主进程作为调度进程需要监听<code>80</code>或<code>443</code>等特权端口，必须以<code>root</code>身份运行，不受此配置影响。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">User apache</span><br><span class="line">Group apache</span><br></pre></td></tr></table></figure></p>
+<h2 id="数据压缩"><a href="#数据压缩" class="headerlink" title="数据压缩"></a>数据压缩</h2><p>对客户端请求的资源进行压缩后传输可有效降低带宽占用，但会占用额外的<code>CPU</code>资源。如果对图片、音频、视频等请求资源进行压缩收益很小，因为它们已经有较高压缩比率，所以一般只会选择文本类型的请求资源进行压缩传输。另外在一些较老版本的浏览器上并不支持数据压缩，不过现在这么老的浏览器也是很难见到了。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">SetOutputFilter DEFLATE</span><br><span class="line"></span><br><span class="line"># mod_deflate configuration</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># Restrict compression to these MIME types</span><br><span class="line">AddOutputFilterByType DEFLATE text/plain </span><br><span class="line">AddOutputFilterByType DEFLATE text/html</span><br><span class="line">AddOutputFilterByType DEFLATE application/xhtml+xml</span><br><span class="line">AddOutputFilterByType DEFLATE text/xml</span><br><span class="line">AddOutputFilterByType DEFLATE application/xml</span><br><span class="line">AddOutputFilterByType DEFLATE application/x-javascript</span><br><span class="line">AddOutputFilterByType DEFLATE text/javascript</span><br><span class="line">AddOutputFilterByType DEFLATE text/css</span><br><span class="line"></span><br><span class="line"># Level of compression (Highest 9 - Lowest 1)</span><br><span class="line">DeflateCompressionLevel 9</span><br><span class="line"> </span><br><span class="line"># Netscape 4.x has some problems.</span><br><span class="line">BrowserMatch ^Mozilla/4  gzip-only-text/html</span><br><span class="line"> </span><br><span class="line"># Netscape 4.06-4.08 have some more problems</span><br><span class="line">BrowserMatch  ^Mozilla/4\.0[678]  no-gzip</span><br><span class="line"> </span><br><span class="line"># MSIE masquerades as Netscape, but it is fine</span><br><span class="line">BrowserMatch \bMSI[E]  !no-gzip !gzip-only-text/html</span><br></pre></td></tr></table></figure>
+<h2 id="https（http-over-ssl）"><a href="#https（http-over-ssl）" class="headerlink" title="https（http over ssl）"></a>https（http over ssl）</h2><p><strong>注意：<code>SSL</code>会话是基于<code>IP</code>地址创建；所以单<code>IP</code>的主机上，仅可以使用一个<code>https</code>虚拟主机。</strong></p>
+<p><code>http</code>协议本身在传输过程中，数据包是明文的，因此缺乏安全性，可以通过<code>ssl</code>协议解决此问题。配置<code>http over ssl</code>步骤如下：</p>
+<ul>
+<li><p>为服务器创建私钥，并向<code>CA</code>申请数字证书。如需面向互联网用户提供服务，<code>CA</code>必须是互联网具有公信力的证书颁发机构，如<code>VeriSign</code>；如果只是测试或者内部网络使用，可以自建私有<code>CA</code>，参照之前的文章《使用OpenSSL创建私有CA》。</p>
+</li>
+<li><p>安装<code>ssl</code>模块</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@bbs ~]# yum install -y mod_ssl</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>修改配置文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@www ~]# vim /etc/httpd/conf.d/ssl.conf</span><br><span class="line">DocumentRoot	&quot;/web/https/htdocs/&quot;</span><br><span class="line">ServerName		www.twoyang.net</span><br><span class="line">SSLCertificateFile	/etc/httpd/ssl/httpd.crt</span><br><span class="line">SSLCertificateKeyFile /etc/httpd/ssl/httpd.key</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
 
       
     </div>
@@ -391,6 +406,25 @@
 
 
     <div class="post-spread">
+      
+        <div class="ds-share flat" data-thread-key="2016/04/13/httpd常用配置/"
+     data-title="httpd常用配置"
+     data-content=""
+     data-url="http://www.twoyang.net/2016/04/13/httpd常用配置/">
+  <div class="ds-share-inline">
+    <ul  class="ds-share-icons-16">
+
+      <li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
+      <li><a class="ds-weibo" href="javascript:void(0);" data-service="weibo">微博</a></li>
+      <li><a class="ds-qzone" href="javascript:void(0);" data-service="qzone">QQ空间</a></li>
+      <li><a class="ds-qqt" href="javascript:void(0);" data-service="qqt">腾讯微博</a></li>
+      <li><a class="ds-wechat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+
+    </ul>
+    <div class="ds-share-icons-more">
+    </div>
+  </div>
+</div>
       
     </div>
   </div>
@@ -514,7 +548,7 @@
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#配置项"><span class="nav-number">2.</span> <span class="nav-text">配置项</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#监听地址"><span class="nav-number">2.1.</span> <span class="nav-text">监听地址</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#持久连接"><span class="nav-number">2.2.</span> <span class="nav-text">持久连接</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MPM（多处理模块）"><span class="nav-number">2.3.</span> <span class="nav-text">MPM（多处理模块）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DSO（模块热插拔）"><span class="nav-number">2.4.</span> <span class="nav-text">DSO（模块热插拔）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#站点文档路径"><span class="nav-number">2.5.</span> <span class="nav-text">站点文档路径</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#站点主页面"><span class="nav-number">2.6.</span> <span class="nav-text">站点主页面</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#路径别名"><span class="nav-number">2.7.</span> <span class="nav-text">路径别名</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#默认字符集"><span class="nav-number">2.8.</span> <span class="nav-text">默认字符集</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#日志设定"><span class="nav-number">2.9.</span> <span class="nav-text">日志设定</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#站点访问控制"><span class="nav-number">2.10.</span> <span class="nav-text">站点访问控制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#虚拟主机"><span class="nav-number">2.11.</span> <span class="nav-text">虚拟主机</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#状态页面"><span class="nav-number">2.12.</span> <span class="nav-text">状态页面</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#配置项"><span class="nav-number">2.</span> <span class="nav-text">配置项</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#监听地址"><span class="nav-number">2.1.</span> <span class="nav-text">监听地址</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#持久连接"><span class="nav-number">2.2.</span> <span class="nav-text">持久连接</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MPM（多处理模块）"><span class="nav-number">2.3.</span> <span class="nav-text">MPM（多处理模块）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DSO（模块热插拔）"><span class="nav-number">2.4.</span> <span class="nav-text">DSO（模块热插拔）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#站点文档路径"><span class="nav-number">2.5.</span> <span class="nav-text">站点文档路径</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#站点主页面"><span class="nav-number">2.6.</span> <span class="nav-text">站点主页面</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#路径别名"><span class="nav-number">2.7.</span> <span class="nav-text">路径别名</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#默认字符集"><span class="nav-number">2.8.</span> <span class="nav-text">默认字符集</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#日志设定"><span class="nav-number">2.9.</span> <span class="nav-text">日志设定</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#站点访问控制"><span class="nav-number">2.10.</span> <span class="nav-text">站点访问控制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#虚拟主机"><span class="nav-number">2.11.</span> <span class="nav-text">虚拟主机</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#状态页面"><span class="nav-number">2.12.</span> <span class="nav-text">状态页面</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#用户与组"><span class="nav-number">2.13.</span> <span class="nav-text">用户与组</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据压缩"><span class="nav-number">2.14.</span> <span class="nav-text">数据压缩</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#https（http-over-ssl）"><span class="nav-number">2.15.</span> <span class="nav-text">https（http over ssl）</span></a></li></ol></li></ol></div>
             
           </div>
         </section>
