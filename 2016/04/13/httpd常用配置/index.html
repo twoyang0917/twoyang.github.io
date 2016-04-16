@@ -65,7 +65,7 @@
 <meta property="og:site_name" content="TwOyAng'blog">
 <meta property="og:description" content="前言httpd的配置项是非常丰富的，本文仅是对常用配置列出个大致的目录，并就CentOS-6与CentOS-7之间存在的一些差异作比较说明。需更详细的介绍请参照官方文档，也可以本地安装一个当前版本的文档站点，便于随时翻阅。1[root@bbs ~]# yum install -y httpd-manual
 启动httpd服务后，便可访问本地文档站点了http://localhost/manual/">
-<meta property="og:updated_time" content="2016-04-14T13:59:26.564Z">
+<meta property="og:updated_time" content="2016-04-16T13:47:36.882Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="httpd常用配置">
 <meta name="twitter:description" content="前言httpd的配置项是非常丰富的，本文仅是对常用配置列出个大致的目录，并就CentOS-6与CentOS-7之间存在的一些差异作比较说明。需更详细的介绍请参照官方文档，也可以本地安装一个当前版本的文档站点，便于随时翻阅。1[root@bbs ~]# yum install -y httpd-manual
@@ -293,6 +293,7 @@
       
         <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p><code>httpd</code>的配置项是非常丰富的，本文仅是对常用配置列出个大致的目录，并就<code>CentOS-6</code>与<code>CentOS-7</code>之间存在的一些差异作比较说明。需更详细的介绍请参照<a href="http://httpd.apache.org/docs/" target="_blank" rel="external">官方文档</a>，也可以本地安装一个当前版本的文档站点，便于随时翻阅。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@bbs ~]# yum install -y httpd-manual</span><br></pre></td></tr></table></figure></p>
 <p>启动<code>httpd</code>服务后，便可访问本地文档站点了<code>http://localhost/manual/</code>。</p>
+<a id="more"></a>
 <h1 id="配置项"><a href="#配置项" class="headerlink" title="配置项"></a>配置项</h1><h2 id="监听地址"><a href="#监听地址" class="headerlink" title="监听地址"></a>监听地址</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Listen 80</span><br><span class="line">Listen 0.0.0.0:80</span><br><span class="line">Listen 192.0.2.1:80</span><br><span class="line">Listen 192.170.2.1:8443 https</span><br></pre></td></tr></table></figure>
 <h2 id="持久连接"><a href="#持久连接" class="headerlink" title="持久连接"></a>持久连接</h2><p>在<code>CentOS-6</code>中该配置项在主配置文件<code>/etc/httpd/conf/httpd.conf</code>中。而在<code>CentOS-7</code>中是按照文件<code>/usr/share/doc/httpd-2.4.6/httpd-default.conf</code>中的配置作为默认配置来工作的，但<code>httpd</code>启动时并不加载此配置文件，如果需要修改该配置项使之生效，要将此配置文件复制或链接到<code>/etc/httpd/conf.d</code>目录下再修改其中的配置。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">KeepAlive Off</span><br><span class="line">MaxKeepAliveRequests 100</span><br><span class="line">KeepAliveTimeout 15</span><br></pre></td></tr></table></figure></p>
 <p>至于怎么修改合适，需要根据实际情况来修改，涉及到服务器调优，可以参照这篇博文<a href="http://www.cnblogs.com/fnng/archive/2012/11/25/2787755.html" target="_blank" rel="external">Apache中KeepAlive 配置</a>。另外<code>CentOS-7</code>的连接超时时间支持毫秒级（<code>ms</code>）。</p>
