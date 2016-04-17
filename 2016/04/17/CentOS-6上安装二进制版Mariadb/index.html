@@ -1,0 +1,656 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
+
+
+
+
+  <link href="//fonts.googleapis.com/css?family=Lato:300,400,700,400italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=0.5.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="mariadb," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=0.5.0" />
+
+
+
+
+
+
+<meta name="description" content="简介mariadb官方网站上提供了三种不同形式的程序包：源码包版、程序包管理器版、和二进制版，如下图所示。二进制版是由官方编译好的绿色版，相比源码包版安装更简单，比起程序包管理器版又多一点自由度，算是二者的折中方案。另外要注意它依赖于glibc，需要注意glibc的版本，官方的解释是这样的。1234Note: Some binary tarballs are marked &amp;apos;(GLIBC">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CentOS-6上安装二进制版Mariadb">
+<meta property="og:url" content="http://www.twoyang.net/2016/04/17/CentOS-6上安装二进制版Mariadb/index.html">
+<meta property="og:site_name" content="TwOyAng'blog">
+<meta property="og:description" content="简介mariadb官方网站上提供了三种不同形式的程序包：源码包版、程序包管理器版、和二进制版，如下图所示。二进制版是由官方编译好的绿色版，相比源码包版安装更简单，比起程序包管理器版又多一点自由度，算是二者的折中方案。另外要注意它依赖于glibc，需要注意glibc的版本，官方的解释是这样的。1234Note: Some binary tarballs are marked &amp;apos;(GLIBC">
+<meta property="og:image" content="http://7xltax.com1.z0.glb.clouddn.com/QQ%E6%88%AA%E5%9B%BE20160417211740.png">
+<meta property="og:updated_time" content="2016-04-17T15:39:51.099Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="CentOS-6上安装二进制版Mariadb">
+<meta name="twitter:description" content="简介mariadb官方网站上提供了三种不同形式的程序包：源码包版、程序包管理器版、和二进制版，如下图所示。二进制版是由官方编译好的绿色版，相比源码包版安装更简单，比起程序包管理器版又多一点自由度，算是二者的折中方案。另外要注意它依赖于glibc，需要注意glibc的版本，官方的解释是这样的。1234Note: Some binary tarballs are marked &amp;apos;(GLIBC">
+<meta name="twitter:image" content="http://7xltax.com1.z0.glb.clouddn.com/QQ%E6%88%AA%E5%9B%BE20160417211740.png">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+  <title> CentOS-6上安装二进制版Mariadb | TwOyAng'blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=55583792";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">TwOyAng'blog</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-th fa-fw"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                CentOS-6上安装二进制版Mariadb
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-04-17T23:35:45+08:00" content="2016-04-17">
+              2016-04-17
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Server/" itemprop="url" rel="index">
+                    <span itemprop="name">Server</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/04/17/CentOS-6上安装二进制版Mariadb/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/04/17/CentOS-6上安装二进制版Mariadb/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p><a href="https://downloads.mariadb.org/mariadb" target="_blank" rel="external"><code>mariadb</code>官方网站</a>上提供了三种不同形式的程序包：源码包版、程序包管理器版、和二进制版，如下图所示。二进制版是由官方编译好的绿色版，相比源码包版安装更简单，比起程序包管理器版又多一点自由度，算是二者的折中方案。另外要注意它依赖于<code>glibc</code>，需要注意<code>glibc</code>的版本，官方的解释是这样的。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Note: Some binary tarballs are marked &apos;(GLIBC_2.14)&apos; or &apos;(requires GLIBC_2.14+)&apos;. </span><br><span class="line">These binaries are built the same as the others, but on a newer build host, and they </span><br><span class="line">require GLIBC 2.14 or higher. Use the other binaries for machines with older versions </span><br><span class="line">of GLIBC installed. Run dd --version to see which version is running on your distribution.</span><br></pre></td></tr></table></figure></p>
+<p>所以首先确定<code>glibc</code>版本<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@bbs ~]<span class="comment"># rpm -q glibc</span></span><br><span class="line">glibc-2.12-1.166.el6.x86_64</span><br></pre></td></tr></table></figure></p>
+<a id="more"></a>
+<p>可以看到<code>CentOS-6</code>上安装的是<code>glibc-2.12</code>版，所以需要下载的是<code>mariadb-5.5.48-linux-x86_64.tar.gz</code>的（<code>32</code>位请下载<code>i686</code>版本的）。</p>
+<p><img src="http://7xltax.com1.z0.glb.clouddn.com/QQ%E6%88%AA%E5%9B%BE20160417211740.png" alt="mariadb"></p>
+<p>为避免安全设置影响，关闭<code>iptables</code>和<code>SELinux</code>。</p>
+<h1 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建系统用户mysql</span></span><br><span class="line">[root@bbs ~]<span class="comment"># useradd -r mysql</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 解压至目录/usr/local/</span></span><br><span class="line">[root@bbs ~]<span class="comment"># tar -xf mariadb-5.5.48-linux-x86_64.tar.gz -C /usr/local/</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建软链接mysql</span></span><br><span class="line">[root@bbs ~]<span class="comment"># cd /usr/local/</span></span><br><span class="line">[root@bbs <span class="built_in">local</span>]<span class="comment"># ln -sv mariadb-5.5.48-linux-x86_64/ mysql</span></span><br><span class="line">`mysql<span class="string">' -&gt; `mariadb-5.5.48-linux-x86_64/'</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 目录结构如下</span></span><br><span class="line">[root@bbs <span class="built_in">local</span>]<span class="comment"># cd mysql/</span></span><br><span class="line">[root@bbs mysql]<span class="comment"># ls</span></span><br><span class="line">bin             data               INSTALL-BINARY  mysql-test  share</span><br><span class="line">COPYING         EXCEPTIONS-CLIENT  lib             README      sql-bench</span><br><span class="line">COPYING.LESSER  include            man             scripts     support-files</span><br><span class="line"></span><br><span class="line"><span class="comment"># 修改目录属主和属组</span></span><br><span class="line">[root@bbs mysql]<span class="comment"># chown -R root:mysql .</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建数据库目录。如不单独创建并指定则默认使用当前目录下的data目录作为数据库目录。</span></span><br><span class="line">[root@bbs mysql]<span class="comment"># mkdir -pv /data/mysql</span></span><br><span class="line">mkdir: created directory `/data<span class="string">'</span><br><span class="line">mkdir: created directory `/data/mysql'</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 修改数据库目录的属主和属组为mysql</span></span><br><span class="line">[root@bbs mysql]<span class="comment"># chown -R mysql:mysql /data/mysql</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装数据库</span></span><br><span class="line">[root@bbs mysql]<span class="comment"># scripts/mysql_install_db --user=mysql --datadir=/data/mysql</span></span><br></pre></td></tr></table></figure>
+<h1 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 将bin目录路径导入PATH环境变量</span></span><br><span class="line">[root@bbs mysql]<span class="comment"># vim /etc/profile.d/mysql.sh</span></span><br><span class="line"><span class="built_in">export</span> PATH=/usr/<span class="built_in">local</span>/mysql/bin:<span class="variable">$PATH</span></span><br><span class="line"><span class="comment"># 立即生效</span></span><br><span class="line">[root@bbs mysql]<span class="comment"># exec bash</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 将lib路径导入系统动态库</span></span><br><span class="line">[root@bbs mysql]<span class="comment"># vim /etc/ld.so.conf.d/mysql-x86_64.conf</span></span><br><span class="line">/usr/<span class="built_in">local</span>/mysql/lib</span><br><span class="line"><span class="comment"># 立即生效</span></span><br><span class="line">[root@bbs mysql]<span class="comment"># ldconfig</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建头文件符号连接</span></span><br><span class="line">[root@bbs mysql]<span class="comment"># cd /usr/local/include/</span></span><br><span class="line">[root@bbs include]<span class="comment"># ln -s ../mysql/include/mysql/ mysql</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 将man路径导入系统man手册</span></span><br><span class="line">[root@bbs include]<span class="comment"># vim /etc/man.config</span></span><br><span class="line">MANPATH /usr/<span class="built_in">local</span>/mysql/man</span><br><span class="line"></span><br><span class="line"><span class="comment"># 拷贝服务启动脚本至/etc/init.d目录</span></span><br><span class="line">[root@bbs include]<span class="comment"># cd /usr/local/mysql/</span></span><br><span class="line">[root@bbs mysql]<span class="comment"># cp support-files/mysql.server /etc/init.d/mysqld</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 复制模板配置文件至/etc目录</span></span><br><span class="line">[root@bbs mysql]<span class="comment"># cp support-files/my-large.cnf /etc/my.cnf</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 修改配置文件</span></span><br><span class="line">[root@bbs mysql]<span class="comment"># vim /etc/my.cnf</span></span><br></pre></td></tr></table></figure>
+<p>配置文件为<code>ini</code>风格，以下配置项需要说明</p>
+<ul>
+<li><p>字符集<br><code>mysqld</code>为服务端，<code>mysql</code>为本地<code>cli</code>命令行工具，<code>client</code>为客户端连接工具包括远程连接工具等。均需要将字符集统一设置为<code>utf-8</code>，特殊场景根据实际情况修改为其他字符集。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[client]</span><br><span class="line">default-character-set=utf8</span><br><span class="line">[mysql]</span><br><span class="line">default-character-set=utf8</span><br><span class="line">[mysqld]</span><br><span class="line">character-set-server=utf8</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>字符排序</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[mysqld]</span><br><span class="line">collation-server=utf8_general_ci</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>数据库目录</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[mysqld]</span><br><span class="line">datadir=/data/mysql</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>存储引擎</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[mysqld]</span><br><span class="line"><span class="comment"># 默认使用innodb存储引擎</span></span><br><span class="line">default-storage-engine=InnoDB</span><br><span class="line"><span class="comment"># 每张表都使用独立表空间</span></span><br><span class="line">innodb-file-per-table=TRUE</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>关闭域名反解</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">skip-name-resolve=TRUE</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>配置完成后应该是这个样子<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">[client]</span><br><span class="line">port		= 3306</span><br><span class="line">socket		= /tmp/mysql.sock</span><br><span class="line">default-character-set=utf8</span><br><span class="line"></span><br><span class="line">[mysqld]</span><br><span class="line">datadir=/data/mysql</span><br><span class="line">port		= 3306</span><br><span class="line">socket		= /tmp/mysql.sock</span><br><span class="line">skip-external-locking</span><br><span class="line">key_buffer_size = 256M</span><br><span class="line">max_allowed_packet = 1M</span><br><span class="line">table_open_cache = 256</span><br><span class="line">sort_buffer_size = 1M</span><br><span class="line"><span class="built_in">read</span>_buffer_size = 1M</span><br><span class="line"><span class="built_in">read</span>_rnd_buffer_size = 4M</span><br><span class="line">myisam_sort_buffer_size = 64M</span><br><span class="line">thread_cache_size = 8</span><br><span class="line">query_cache_size= 16M</span><br><span class="line">thread_concurrency = 8</span><br><span class="line">character-set-server=utf8</span><br><span class="line">collation-server=utf8_general_ci</span><br><span class="line">default-storage-engine=InnoDB</span><br><span class="line">innodb-file-per-table=TRUE</span><br><span class="line">skip-name-resolve=TRUE</span><br><span class="line"><span class="built_in">log</span>-bin=mysql-bin</span><br><span class="line">binlog_format=mixed</span><br><span class="line">server-id	= 1</span><br><span class="line"></span><br><span class="line">[mysqldump]</span><br><span class="line">quick</span><br><span class="line">max_allowed_packet = 16M</span><br><span class="line"></span><br><span class="line">[mysql]</span><br><span class="line">no-auto-rehash</span><br><span class="line">default-character-set=utf8</span><br><span class="line"></span><br><span class="line">[myisamchk]</span><br><span class="line">key_buffer_size = 128M</span><br><span class="line">sort_buffer_size = 128M</span><br><span class="line"><span class="built_in">read</span>_buffer = 2M</span><br><span class="line">write_buffer = 2M</span><br><span class="line"></span><br><span class="line">[mysqlhotcopy]</span><br><span class="line">interactive-timeout</span><br></pre></td></tr></table></figure></p>
+<p>启动服务<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@bbs mysql]<span class="comment"># /etc/init.d/mysqld start</span></span><br><span class="line">Starting MySQL..                                           [  OK  ]</span><br></pre></td></tr></table></figure></p>
+<p>开机自启动<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@bbs mysql]<span class="comment"># chkconfig --add mysqld</span></span><br><span class="line">[root@bbs mysql]<span class="comment"># chkconfig mysqld on</span></span><br></pre></td></tr></table></figure></p>
+<p>安全设置<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line">[root@bbs mysql]<span class="comment"># bin/mysql_secure_installation </span></span><br><span class="line">bin/mysql_secure_installation: line 379: find_mysql_client: <span class="built_in">command</span> not found</span><br><span class="line"></span><br><span class="line">NOTE: RUNNING ALL PARTS OF THIS SCRIPT IS RECOMMENDED FOR ALL MariaDB</span><br><span class="line">      SERVERS IN PRODUCTION USE!  PLEASE READ EACH STEP CAREFULLY!</span><br><span class="line"></span><br><span class="line">In order to <span class="built_in">log</span> into MariaDB to secure it, we<span class="string">'ll need the current</span><br><span class="line">password for the root user.  If you'</span>ve just installed MariaDB, and</span><br><span class="line">you haven<span class="string">'t set the root password yet, the password will be blank,</span><br><span class="line">so you should just press enter here.</span><br><span class="line"></span><br><span class="line"># 初始root密码为空，直接回车。</span><br><span class="line">Enter current password for root (enter for none): </span><br><span class="line">OK, successfully used password, moving on...</span><br><span class="line"></span><br><span class="line">Setting the root password ensures that nobody can log into the MariaDB</span><br><span class="line">root user without the proper authorisation.</span><br><span class="line"></span><br><span class="line"># 设置root密码</span><br><span class="line">Set root password? [Y/n] y</span><br><span class="line">New password: </span><br><span class="line">Re-enter new password: </span><br><span class="line">Password updated successfully!</span><br><span class="line">Reloading privilege tables..</span><br><span class="line"> ... Success!</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">By default, a MariaDB installation has an anonymous user, allowing anyone</span><br><span class="line">to log into MariaDB without having to have a user account created for</span><br><span class="line">them.  This is intended only for testing, and to make the installation</span><br><span class="line">go a bit smoother.  You should remove them before moving into a</span><br><span class="line">production environment.</span><br><span class="line"></span><br><span class="line"># 删除匿名用户</span><br><span class="line">Remove anonymous users? [Y/n] y</span><br><span class="line"> ... Success!</span><br><span class="line"></span><br><span class="line">Normally, root should only be allowed to connect from '</span>localhost<span class="string">'.  This</span><br><span class="line">ensures that someone cannot guess at the root password from the network.</span><br><span class="line"></span><br><span class="line"># 不允许root远程登录</span><br><span class="line">Disallow root login remotely? [Y/n] y</span><br><span class="line"> ... Success!</span><br><span class="line"></span><br><span class="line">By default, MariaDB comes with a database named '</span><span class="built_in">test</span><span class="string">' that anyone can</span><br><span class="line">access.  This is also intended only for testing, and should be removed</span><br><span class="line">before moving into a production environment.</span><br><span class="line"></span><br><span class="line"># 删除test数据库以及访问它的权限设置</span><br><span class="line">Remove test database and access to it? [Y/n] y</span><br><span class="line"> - Dropping test database...</span><br><span class="line"> ... Success!</span><br><span class="line"> - Removing privileges on test database...</span><br><span class="line"> ... Success!</span><br><span class="line"></span><br><span class="line">Reloading the privilege tables will ensure that all changes made so far</span><br><span class="line">will take effect immediately.</span><br><span class="line"></span><br><span class="line"># 重载权限列表</span><br><span class="line">Reload privilege tables now? [Y/n] y</span><br><span class="line"> ... Success!</span><br><span class="line"></span><br><span class="line">Cleaning up...</span><br><span class="line"></span><br><span class="line">All done!  If you'</span>ve completed all of the above steps, your MariaDB</span><br><span class="line">installation should now be secure.</span><br><span class="line"></span><br><span class="line">Thanks <span class="keyword">for</span> using MariaDB!</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/mariadb/" rel="tag">#mariadb</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/04/13/httpd常用配置/" rel="next" title="httpd常用配置">
+                <i class="fa fa-chevron-left"></i> httpd常用配置
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <div class="ds-share flat" data-thread-key="2016/04/17/CentOS-6上安装二进制版Mariadb/"
+     data-title="CentOS-6上安装二进制版Mariadb"
+     data-content=""
+     data-url="http://www.twoyang.net/2016/04/17/CentOS-6上安装二进制版Mariadb/">
+  <div class="ds-share-inline">
+    <ul  class="ds-share-icons-16">
+
+      <li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
+      <li><a class="ds-weibo" href="javascript:void(0);" data-service="weibo">微博</a></li>
+      <li><a class="ds-qzone" href="javascript:void(0);" data-service="qzone">QQ空间</a></li>
+      <li><a class="ds-qqt" href="javascript:void(0);" data-service="qqt">腾讯微博</a></li>
+      <li><a class="ds-wechat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+
+    </ul>
+    <div class="ds-share-icons-more">
+    </div>
+  </div>
+</div>
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/04/17/CentOS-6上安装二进制版Mariadb/"
+           data-title="CentOS-6上安装二进制版Mariadb" data-url="http://www.twoyang.net/2016/04/17/CentOS-6上安装二进制版Mariadb/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xltax.com1.z0.glb.clouddn.com/twoyang.jpg"
+               alt="twoyang" />
+          <p class="site-author-name" itemprop="name">twoyang</p>
+          <p class="site-description motion-element" itemprop="description">The quieter you become.The more you are able to hear.</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">4</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        <div class="links-of-blogroll motion-element">
+          
+            <div class="links-of-blogroll-title">友情链接</div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.magedu.com/" target="_blank">马哥教育</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="https://shadowsocks.be/9.html" target="_blank">科学上网</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.isetsuna.com/hexo/introduction/" target="_blank">Hexo博客系列</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://mrchen.org/" target="_blank">Mrchen</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.chen-hao.com.cn/" target="_blank">chen-hao</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://geass.link/wp/" target="_blank">Lei Jin's blog</a>
+                </li>
+              
+            </ul>
+          
+        </div>
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#安装"><span class="nav-number">2.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#配置"><span class="nav-number">3.</span> <span class="nav-text">配置</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">twoyang</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+
+  
+
+
+
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=0.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=0.5.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=0.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=0.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=0.5.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"twoyang"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+  
+
+
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>
