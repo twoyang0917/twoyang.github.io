@@ -60,7 +60,7 @@
 <meta name="description" content="The quieter you become.The more you are able to hear.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="TwOyAng'blog">
-<meta property="og:url" content="http://www.twoyang.net/tags/mariadb/index.html">
+<meta property="og:url" content="http://www.twoyang.net/page/2/index.html">
 <meta property="og:site_name" content="TwOyAng'blog">
 <meta property="og:description" content="The quieter you become.The more you are able to hear.">
 <meta name="twitter:card" content="summary">
@@ -83,7 +83,7 @@
   };
 </script>
 
-  <title> 标签: mariadb | TwOyAng'blog </title>
+  <title> TwOyAng'blog </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -113,7 +113,9 @@
     
   
 
-  <div class="container one-collumn sidebar-position-left  ">
+  <div class="container one-collumn sidebar-position-left 
+   page-home 
+ ">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -200,47 +202,262 @@
         <div class="content-wrap">
           <div id="content" class="content">
             
-
-  <div id="posts" class="posts-collapse">
-    <div class="collection-title">
-      <h2 >
-        mariadb
-        <small>标签</small>
-      </h2>
-    </div>
-
+  <section id="posts" class="posts-expand">
     
       
 
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
+  
+  
 
-      <h1 class="post-title">
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
         
-            <a class="post-title-link" href="/2016/04/17/CentOS-6上安装二进制版Mariadb/" itemprop="url">
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
               
-                <span itemprop="name">CentOS-6上安装二进制版Mariadb</span>
+                
+                <a class="post-title-link" href="/2016/04/12/DNS域名解析服务器/" itemprop="url">
+                  DNS域名解析服务器
+                </a>
               
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-04-12T19:31:23+08:00" content="2016-04-12">
+              2016-04-12
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Server/" itemprop="url" rel="index">
+                    <span itemprop="name">Server</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/04/12/DNS域名解析服务器/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/04/12/DNS域名解析服务器/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h1 id="实验环境"><a href="#实验环境" class="headerlink" title="实验环境"></a>实验环境</h1><p>准备三台虚拟机，均可以通过网关<code>172.18.71.1</code>连接互联网，其中<code>HostC</code>仅作为测试机使用。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">HostA: CentOS-6.7-x86_64 eth0:172.18.71.101/24 eth1:192.168.71.101/24 gw：172.18.71.1/24</span><br><span class="line">HostB: CentOS-7.2-x86_64 eno16777736:172.18.71.102/24 gw：172.18.71.1/24</span><br><span class="line">HostC: CentOS-7.2-x86_64 eth0:172.18.71.103/24 gw：172.18.71.1/24</span><br></pre></td></tr></table></figure></p>
+<p>确保<code>iptables</code>与<code>SELinux</code>均处于关闭状态。</p>
+<p>安装<code>bind</code><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@ns1 ~]<span class="comment"># yum install -y bind bind-libs bind-utils</span></span><br></pre></td></tr></table></figure></p>
+<p>修改主配置文件<code>/etc/named.conf</code>，注释掉仅允许本机查询请求和<code>dnssec</code>（可能影响实验结果）。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">options &#123;</span><br><span class="line">	...</span><br><span class="line">	//allow-query     &#123; localhost; &#125;;</span><br><span class="line">	...</span><br><span class="line"></span><br><span class="line">	//dnssec-enable yes;</span><br><span class="line">	//dnssec-validation yes;</span><br><span class="line">	//dnssec-lookaside auto;</span><br><span class="line">	...</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>一般来说，多节点协同工作首先就是要校准时间，使之时间同步。联网状态下可使用<code>ntpdate</code>命令统一找授时中心校准，不能联网可使用<code>date</code>命令手动校准。</p>
+<p>在此状态下，给各个虚拟机都做个快照，以便做完一个实验能够快速还原至原始状态。<br>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2016/04/12/DNS域名解析服务器/#more" rel="contents">
+              阅读全文 &raquo;
             </a>
+          </div>
         
-      </h1>
+      
+    </div>
 
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2016-04-17T23:35:45+08:00"
-              content="2016-04-17" >
-          04-17
-        </time>
-      </div>
+    <div>
+      
+    </div>
 
-    </header>
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
   </article>
 
 
     
-  </div>
+      
 
   
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/04/11/使用OpenSSL创建私有CA/" itemprop="url">
+                  使用OpenSSL创建私有CA
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-04-11T22:46:33+08:00" content="2016-04-11">
+              2016-04-11
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Server/" itemprop="url" rel="index">
+                    <span itemprop="name">Server</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/04/11/使用OpenSSL创建私有CA/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/04/11/使用OpenSSL创建私有CA/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h1 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h1><ul>
+<li>首先确认安装了<code>openssl</code>和<code>openssl-libs</code><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># rpm -qa | grep openssl</span></span><br><span class="line">openssl-libs-1.0.1e-42.el7.x86_64</span><br><span class="line">openssl-1.0.1e-42.el7.x86_64</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>配置文件<code>/etc/pki/tls/openssl.cnf</code>是<code>ini</code>风格的，其中比较常用的配置就是<code>CA</code>自身的配置和<code>req</code>发证请求相关的配置。配置文件中各配置项的作用描述得很详细了，没必要逐项解释，需要说明的是：</p>
+<ul>
+<li><p><code>CA</code>自身的配置主要就是<code>CA</code>的工作目录与文件的结构和命名，因此在后面创建<code>CA</code>时，不存在的目录和文件需要手动创建，且命名需要如配置文件中匹配。</p>
+</li>
+<li><p><code>req</code>发证请求配置主要是在需要在<code>CA</code>发证的各客户端上去配置的。主要是配置一些默认信息，免得每次都需要填写相同的信息。</p>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2016/04/11/使用OpenSSL创建私有CA/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+  </section>
+
+  
+  <nav class="pagination">
+    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span>
+  </nav>
+
 
 
           </div>

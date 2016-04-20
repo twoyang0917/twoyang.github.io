@@ -1,0 +1,681 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
+
+
+
+
+  <link href="//fonts.googleapis.com/css?family=Lato:300,400,700,400italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=0.5.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="lamp,xcache," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=0.5.0" />
+
+
+
+
+
+
+<meta name="description" content="需求12345CentOS-7平台上搭建LAMP，其中php作为httpd的一个module工作；(1) 三者分离于两台主机；(2) 一个虚拟主机用于提供phpMyAdmin；另一个虚拟主机用于提供wordpress；(3) 安装xcache，为php提供加速；(4) 为phpMyAdmin提供https虚拟主机；
+解析
+由于httpd是cpu密集型应用，php是io密集型应用，而mariadb既">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LAMP--CentOS-7平台双机module模型">
+<meta property="og:url" content="http://www.twoyang.net/2016/04/20/LAMP-CentOS-7平台双机module模型/index.html">
+<meta property="og:site_name" content="TwOyAng'blog">
+<meta property="og:description" content="需求12345CentOS-7平台上搭建LAMP，其中php作为httpd的一个module工作；(1) 三者分离于两台主机；(2) 一个虚拟主机用于提供phpMyAdmin；另一个虚拟主机用于提供wordpress；(3) 安装xcache，为php提供加速；(4) 为phpMyAdmin提供https虚拟主机；
+解析
+由于httpd是cpu密集型应用，php是io密集型应用，而mariadb既">
+<meta property="og:image" content="http://7xltax.com1.z0.glb.clouddn.com/QQ%E5%9B%BE%E7%89%8720160420221948.png">
+<meta property="og:updated_time" content="2016-04-20T14:21:37.947Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="LAMP--CentOS-7平台双机module模型">
+<meta name="twitter:description" content="需求12345CentOS-7平台上搭建LAMP，其中php作为httpd的一个module工作；(1) 三者分离于两台主机；(2) 一个虚拟主机用于提供phpMyAdmin；另一个虚拟主机用于提供wordpress；(3) 安装xcache，为php提供加速；(4) 为phpMyAdmin提供https虚拟主机；
+解析
+由于httpd是cpu密集型应用，php是io密集型应用，而mariadb既">
+<meta name="twitter:image" content="http://7xltax.com1.z0.glb.clouddn.com/QQ%E5%9B%BE%E7%89%8720160420221948.png">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+  <title> LAMP--CentOS-7平台双机module模型 | TwOyAng'blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=55583792";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">TwOyAng'blog</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-th fa-fw"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                LAMP--CentOS-7平台双机module模型
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-04-20T10:31:56+08:00" content="2016-04-20">
+              2016-04-20
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Server/" itemprop="url" rel="index">
+                    <span itemprop="name">Server</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/04/20/LAMP-CentOS-7平台双机module模型/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/04/20/LAMP-CentOS-7平台双机module模型/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="需求"><a href="#需求" class="headerlink" title="需求"></a>需求</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">CentOS-7平台上搭建LAMP，其中php作为httpd的一个module工作；</span><br><span class="line">(1) 三者分离于两台主机；</span><br><span class="line">(2) 一个虚拟主机用于提供phpMyAdmin；另一个虚拟主机用于提供wordpress；</span><br><span class="line">(3) 安装xcache，为php提供加速；</span><br><span class="line">(4) 为phpMyAdmin提供https虚拟主机；</span><br></pre></td></tr></table></figure>
+<h1 id="解析"><a href="#解析" class="headerlink" title="解析"></a>解析</h1><ul>
+<li>由于<code>httpd</code>是<code>cpu</code>密集型应用，<code>php</code>是<code>io</code>密集型应用，而<code>mariadb</code>既是<code>cpu</code>密集型又是<code>io</code>密集型。所以将<code>httpd+php</code>部署在一台主机上，<code>mariadb</code>部署在另一台主机上。</li>
+<li>由于<code>CentOS-7</code>平台提供了以上各应用的<code>rpm</code>安装包，且均包含了各应用的新特性，所以各应用程序可以直接使用<code>yum</code>源安装，而无需通过编译源码来安装。</li>
+<li><code>xcache</code>为<code>EPEL</code>源中提供的应用程序，因此需要配置启用<code>EPEL</code>源。</li>
+<li>因为需要为<code>phpMyAdmin</code>提供<code>https</code>虚拟主机，而<code>ssl</code>协议是基于<code>IP</code>地址的，所以部署<code>httpd+php</code>的主机必须为两个虚拟主机分别提供<code>IP</code>地址。</li>
+</ul>
+<a id="more"></a>
+<h1 id="规划准备"><a href="#规划准备" class="headerlink" title="规划准备"></a>规划准备</h1><ul>
+<li>准备两台<code>CentOS-7</code>主机，均为最小化安装。为避免安全设置影响实验结果，将<code>iptables</code>和<code>SELinux</code>均设置为关闭状态。</li>
+<li><code>HostA</code>作为前端<code>Web</code>服务器需要配置两个<code>IP</code>地址: <code>172.18.71.201</code>, <code>172.18.71.203</code>。<code>172.18.71.201</code>对应虚拟主机<code>www.twoyang.com</code>，<code>172.18.71.203</code>对应虚拟主机<code>www.twoyang.net</code>。</li>
+<li><code>HostB</code>作为后端<code>DB</code>服务器，<code>IP</code>地址为: <code>172.18.71.202</code>。</li>
+<li>需要配置<code>DNS</code>服务，或者修改主机<code>hosts</code>文件来实现名称解析。</li>
+<li>两台主机均需要配置好<code>yum</code>源，除发行版<code>base</code>源外还需要<code>EPEL</code>源。<br><em>配置名称解析和<code>yum</code>源不在本文介绍范围内，请参考其他资料。各程序安装包不提供，请自行下载。</em></li>
+</ul>
+<p>如图所示：<br><img src="http://7xltax.com1.z0.glb.clouddn.com/QQ%E5%9B%BE%E7%89%8720160420221948.png" alt="CentOS-7-module"></p>
+<h1 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h1><p>配置时一般习惯按照从后端到前端的顺序来进行，便于测试验证前一步配置，思路上也比较清晰，容易梳理。所以首先配置后端<code>DB</code>服务器<code>HostB</code>，然后配置前端<code>Web</code>服务器<code>HostA</code>。</p>
+<h2 id="HostB"><a href="#HostB" class="headerlink" title="HostB"></a>HostB</h2><p>安装<code>mariadb</code><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># yum instal -y mariadb-server</span></span><br></pre></td></tr></table></figure></p>
+<p>在默认配置基础上增加一些配置，包括设置默认字符集、默认字符排序、默认存储引擎、独立表空间、不做域名反解。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># vim /etc/my.cnf.d/client.cnf</span></span><br><span class="line">[client]</span><br><span class="line">default-character-set=utf8</span><br><span class="line">[root@localhost ~]<span class="comment"># vim /etc/my.cnf.d/mysql-clients.cnf</span></span><br><span class="line">[mysql]</span><br><span class="line">default-character-set=utf8</span><br><span class="line">[root@localhost ~]<span class="comment"># vim /etc/my.cnf.d/server.cnf</span></span><br><span class="line">[mysqld]</span><br><span class="line">character-set-server=utf8</span><br><span class="line">collation-server=utf8_general_ci</span><br><span class="line">default-storage-engine=InnoDB</span><br><span class="line">innodb-file-per-table=TRUE</span><br><span class="line">skip-name-resolve=TRUE</span><br></pre></td></tr></table></figure></p>
+<p>启动<code>mariadb</code><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># systemctl start mariadb</span></span><br></pre></td></tr></table></figure></p>
+<p>初始化安全设置，主要这是设置<code>root</code>用户口令，删除匿名用户，不允许<code>root</code>远程登录，删除<code>test</code>数据库和访问<code>test</code>数据库的相关权限设置，重载权限表。<br><strong>注：这里如果设置允许<code>root</code>远程登录，后面也还是要再次显式授权才可以。</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># mysql_secure_installation</span></span><br><span class="line">Set root password? [Y/n] y</span><br><span class="line">New password:</span><br><span class="line">Re-enter new password:</span><br><span class="line">Remove anonymous users? [Y/n] y</span><br><span class="line"> ... Success!</span><br><span class="line"> Disallow root login remotely? [Y/n] y</span><br><span class="line">  ... skipping.</span><br><span class="line">  Remove <span class="built_in">test</span> database and access to it? [Y/n] y</span><br><span class="line"> - Dropping <span class="built_in">test</span> database...</span><br><span class="line"> ... Success!</span><br><span class="line"> - Removing privileges on <span class="built_in">test</span> database...</span><br><span class="line"> ... Success!</span><br><span class="line"> Reload privilege tables now? [Y/n] y</span><br><span class="line"> ... Success!</span><br></pre></td></tr></table></figure></p>
+<p>登录<code>mariadb</code>，做以下设置。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># mysql -u root -p</span></span><br><span class="line"><span class="comment"># 授权root可从172.18.71.0/24网段内的主机登录操作所有数据库。</span></span><br><span class="line">MariaDB [(none)]&gt; grant all privileges on *.* to <span class="string">'root'</span>@<span class="string">'172.18.71.%'</span> identified by <span class="string">'magedu'</span>;</span><br><span class="line"><span class="comment"># 给wordpress创建数据wpdb。</span></span><br><span class="line">MariaDB [(none)]&gt; create database wpdb;</span><br><span class="line"><span class="comment"># 给wordpress创建用户wp。</span></span><br><span class="line">MariaDB [(none)]&gt; create user <span class="string">'wp'</span>@<span class="string">'172.18.71.%'</span> identified by <span class="string">'magedu'</span>;</span><br><span class="line"><span class="comment"># 授权wp可从172.18.71.0/24网段内的主机登录操作wpdb数据库。</span></span><br><span class="line">MariaDB [(none)]&gt; grant all privileges on wpdb.* to <span class="string">'wp'</span>@<span class="string">'172.18.71.%'</span> identified by <span class="string">'magedu'</span>;</span><br><span class="line"><span class="comment"># 重载权限表</span></span><br><span class="line">MariaDB [(none)]&gt; flush privileges;</span><br><span class="line"><span class="comment"># 退出</span></span><br><span class="line">MariaDB [(none)]&gt; \q</span><br></pre></td></tr></table></figure></p>
+<p>这样<code>HostB</code>就配置完成了，再来配置<code>HostA</code>。</p>
+<h2 id="HostA"><a href="#HostA" class="headerlink" title="HostA"></a>HostA</h2><p>正式配置<code>HostA</code>之前，应首先验证以下<code>HostB</code>的配置，即测试一下能否从<code>HostA</code>上连接<code>HostB</code>的数据库。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装mariadb的客户端</span></span><br><span class="line">[root@localhost ~]<span class="comment"># yum install -y mariadb</span></span><br><span class="line"><span class="comment"># 测试连接HostB数据库</span></span><br><span class="line">[root@localhost ~]<span class="comment"># mysql -u root -h 172.18.71.202 -p</span></span><br></pre></td></tr></table></figure></p>
+<p>安装应用<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># yum instal -y httpd mod_ssl php php-mbstring php-mysql</span></span><br></pre></td></tr></table></figure></p>
+<p>修改<code>httpd</code>的主配置文件<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># vim /etc/httpd/conf/httpd.conf</span></span><br><span class="line"><span class="comment"># 设置服务器名，其实这项不设置也可以，但是启动服务时会有警告。</span></span><br><span class="line">ServerName www.twoyang.net</span><br><span class="line"><span class="comment"># 由于准备使用虚拟主机，需要把MainServer的DocumentRoot关掉。</span></span><br><span class="line"><span class="comment">#DocumentRoot "/var/www/html"</span></span><br><span class="line"><span class="comment"># 另外需要增加php类型的主页和MIME</span></span><br><span class="line">&lt;IfModule dir_module&gt;</span><br><span class="line">    DirectoryIndex index.php index.html</span><br><span class="line">&lt;/IfModule&gt;</span><br><span class="line">&lt;IfModule mime_module&gt;</span><br><span class="line">    AddType application/x-httpd-php .php</span><br><span class="line">&lt;/IfModule&gt;</span><br></pre></td></tr></table></figure></p>
+<p>移除欢迎页面配置文件<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># mv /etc/httpd/conf.d/welcome.conf&#123;,.bak&#125;</span></span><br></pre></td></tr></table></figure></p>
+<p>因为<code>phpMyAdmin</code>需要提供<code>https</code>服务，所以要放置在<code>ssl</code>的配置文件中。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># vim /etc/httpd/conf.d/ssl.conf</span></span><br><span class="line">&lt;VirtualHost 172.18.71.201:443&gt;</span><br><span class="line">	ServerName www.twoyang.com:443</span><br><span class="line">	DocumentRoot <span class="string">"/htdocs/www.twoyang.com/pma"</span></span><br><span class="line">	&lt;Directory <span class="string">"/htdocs/www.twoyang.com/pma"</span>&gt;</span><br><span class="line">		Options FollowSymLinks</span><br><span class="line">		AllowOverride None</span><br><span class="line">		Require all granted</span><br><span class="line">	&lt;/Directory&gt;</span><br><span class="line">	SSLCertificateFile /etc/httpd/ssl/httpd.crt</span><br><span class="line">	SSLCertificateKeyFile /etc/httpd/ssl/httpd.key</span><br><span class="line">&lt;/VirtualHost&gt;</span><br></pre></td></tr></table></figure></p>
+<p>新建虚拟主机配置文件<code>/etc/httpd/conf.d/vhosts.conf</code><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># vim /etc/httpd/conf.d/vhosts.conf</span></span><br><span class="line">&lt;VirtualHost 172.18.71.203:80&gt;</span><br><span class="line">	ServerName www.twoyang.net</span><br><span class="line">	DocumentRoot <span class="string">"/htdocs/www.twoyang.net/wp"</span></span><br><span class="line">	&lt;Directory <span class="string">"/htdocs/www.twoyang.net/wp"</span>&gt;</span><br><span class="line">		Options FollowSymLinks</span><br><span class="line">		AllowOverride None</span><br><span class="line">		Require all granted</span><br><span class="line">	&lt;/Directory&gt;</span><br><span class="line">&lt;/VirtualHost&gt;</span><br></pre></td></tr></table></figure></p>
+<p>建立虚拟主机<code>DocumentRoot</code>对应的目录。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># mkdir -pv /htdocs/www.twoyang.&#123;com,net&#125;</span></span><br><span class="line">mkdir: created directory ‘/htdocs’</span><br><span class="line">mkdir: created directory ‘/htdocs/www.twoyang.com’</span><br><span class="line">mkdir: created directory ‘/htdocs/www.twoyang.net’</span><br></pre></td></tr></table></figure></p>
+<p>将<code>phpMyAdmin</code>安装包放置在虚拟主机<code>www.twoyang.com</code>的<code>DocumentRoot</code>目录下，并修改配置文件。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># cd /htdocs/www.twoyang.com</span></span><br><span class="line">[root@localhost www.twoyang.com]<span class="comment"># unzip phpMyAdmin-4.4.14.1-all-languages.zip</span></span><br><span class="line">[root@localhost www.twoyang.com]<span class="comment"># ln -sv phpMyAdmin-4.4.14.1-all-languages pma</span></span><br><span class="line">‘pma’ -&gt; ‘phpMyAdmin-4.4.14.1-all-languages’</span><br><span class="line">[root@localhost www.twoyang.com]<span class="comment"># cd pma</span></span><br><span class="line">[root@localhost pma]<span class="comment"># cp config.sample.inc.php config.inc.php</span></span><br><span class="line">[root@localhost pma]<span class="comment"># openssl rand -base64 20</span></span><br><span class="line">dw1wrv68+0/X0e2oeSHGoNIvNwY=</span><br><span class="line">[root@localhost pma]<span class="comment"># vim config.inc.php</span></span><br><span class="line"><span class="variable">$cfg</span>[<span class="string">'blowfish_secret'</span>] = <span class="string">'dw1wrv68+0/X0e2oeSHGoNIvNwY'</span>; /* YOU MUST FILL IN THIS FOR COOKIE AUTH! */</span><br><span class="line"><span class="variable">$cfg</span>[<span class="string">'Servers'</span>][<span class="variable">$i</span>][<span class="string">'host'</span>] = <span class="string">'172.18.71.202'</span>;</span><br></pre></td></tr></table></figure></p>
+<p>将<code>wordpress</code>安装包放置在虚拟主机<code>www.twoyang.net</code>的<code>DocumentRoot</code>目录下，并修改配置文件。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># cd /htdocs/www.twoyang.net</span></span><br><span class="line">[root@localhost www.twoyang.net]<span class="comment"># unzip wordpress-4.3.1-zh_CN.zip</span></span><br><span class="line">[root@localhost www.twoyang.net]<span class="comment"># ln -sv wordpress wp</span></span><br><span class="line">‘wp’ -&gt; ‘wordpress’</span><br><span class="line">[root@localhost www.twoyang.net]<span class="comment"># cd wp</span></span><br><span class="line">[root@localhost wp]<span class="comment"># cp wp-config-sample.php wp-config.php</span></span><br><span class="line">[root@localhost wp]<span class="comment"># vim wp-config.php</span></span><br><span class="line"></span><br><span class="line">/** WordPress数据库的名称 */</span><br><span class="line">define(<span class="string">'DB_NAME'</span>, <span class="string">'wpdb'</span>);</span><br><span class="line"></span><br><span class="line">/** MySQL数据库用户名 */</span><br><span class="line">define(<span class="string">'DB_USER'</span>, <span class="string">'wp'</span>);</span><br><span class="line"></span><br><span class="line">/** MySQL数据库密码 */</span><br><span class="line">define(<span class="string">'DB_PASSWORD'</span>, <span class="string">'magedu'</span>);</span><br><span class="line"></span><br><span class="line">/** MySQL主机 */</span><br><span class="line">define(<span class="string">'DB_HOST'</span>, <span class="string">'172.18.71.202'</span>);</span><br></pre></td></tr></table></figure></p>
+<p>还需要给<code>phpMyAdmin</code>虚拟主机提供本机的私钥和<code>CA</code>签名过的证书。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># mkdir /etc/httpd/ssl</span></span><br><span class="line">[root@localhost ~]<span class="comment"># cd /etc/httpd/ssl</span></span><br><span class="line"><span class="comment"># 创建本机私钥httpd.key</span></span><br><span class="line">[root@localhost ssl]<span class="comment"># (umask 077; openssl genrsa -out httpd.key 2048)</span></span><br><span class="line"><span class="comment"># 创建发证请求文件httpd.csr</span></span><br><span class="line">[root@localhost ssl]<span class="comment"># openssl req -new -key httpd.key -out httpd.csr</span></span><br></pre></td></tr></table></figure></p>
+<p><code>HostA</code>通过可靠渠道交给<code>CA</code>，<code>CA</code>签完名后将证书文件<code>httpd.crt</code>返回给<code>HostA</code>，然后放置在<code>/etc/httpd/ssl</code>目录下。<br><em><code>CA</code>的搭建和工作过程不在本文介绍范围内，请参考其他资料。</em></p>
+<p>启动<code>httpd</code>服务，修改一下<code>/htdocs</code>目录的属主和属组，以免出现权限问题。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># chown -R apache:apache /htdocs</span></span><br></pre></td></tr></table></figure></p>
+<p>这时便可以启动<code>httpd</code>服务，测试访问<code>phpMyAdmin</code>和<code>wordpress</code>了。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># systemctl start httpd</span></span><br></pre></td></tr></table></figure></p>
+<h2 id="xcache"><a href="#xcache" class="headerlink" title="xcache"></a>xcache</h2><p>但是这个时候还是没有安装<code>xcache</code>的，可以用<code>ab</code>测试一下并发访问时服务器响应情况。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># ab -n 1000 -c 100 https://www.twoyang.com/</span></span><br><span class="line">This is ApacheBench, Version 2.3 &lt;<span class="variable">$Revision</span>: 1430300 $&gt;</span><br><span class="line">Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/</span><br><span class="line">Licensed to The Apache Software Foundation, http://www.apache.org/</span><br><span class="line"></span><br><span class="line">Benchmarking www.twoyang.com (be patient)</span><br><span class="line">Completed 100 requests</span><br><span class="line">Completed 200 requests</span><br><span class="line">Completed 300 requests</span><br><span class="line">Completed 400 requests</span><br><span class="line">Completed 500 requests</span><br><span class="line">Completed 600 requests</span><br><span class="line">Completed 700 requests</span><br><span class="line">Completed 800 requests</span><br><span class="line">Completed 900 requests</span><br><span class="line">Completed 1000 requests</span><br><span class="line">Finished 1000 requests</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Server Software:        Apache/2.4.6</span><br><span class="line">Server Hostname:        www.twoyang.com</span><br><span class="line">Server Port:            80</span><br><span class="line"></span><br><span class="line">Document Path:          /</span><br><span class="line">Document Length:        9257 bytes</span><br><span class="line"></span><br><span class="line">Concurrency Level:      100</span><br><span class="line">Time taken <span class="keyword">for</span> tests:   35.654 seconds</span><br><span class="line">Complete requests:      1000</span><br><span class="line">Failed requests:        0</span><br><span class="line">Write errors:           0</span><br><span class="line">Total transferred:      10624000 bytes</span><br><span class="line">HTML transferred:       9257000 bytes</span><br><span class="line">Requests per second:    28.05 [<span class="comment">#/sec] (mean)</span></span><br><span class="line">Time per request:       3565.443 [ms] (mean)</span><br><span class="line">Time per request:       35.654 [ms] (mean, across all concurrent requests)</span><br><span class="line">Transfer rate:          290.99 [Kbytes/sec] received</span><br><span class="line"></span><br><span class="line">Connection Times (ms)</span><br><span class="line">              min  mean[+/-sd] median   max</span><br><span class="line">Connect:        0    1   2.7      1      12</span><br><span class="line">Processing:    80 3458 619.3   3430    5957</span><br><span class="line">Waiting:       62 3238 599.4   3168    5547</span><br><span class="line">Total:         81 3460 619.0   3435    5958</span><br><span class="line"></span><br><span class="line">Percentage of the requests served within a certain time (ms)</span><br><span class="line">  50%   3435</span><br><span class="line">  66%   3626</span><br><span class="line">  75%   3796</span><br><span class="line">  80%   3931</span><br><span class="line">  90%   4291</span><br><span class="line">  95%   4553</span><br><span class="line">  98%   4891</span><br><span class="line">  99%   5150</span><br><span class="line"> 100%   5958 (longest request)</span><br></pre></td></tr></table></figure></p>
+<p>注意参数<code>Requests per second</code>，大概是每秒处理<code>28.05</code>个请求。</p>
+<p>这时在<code>HostA</code>上安装<code>xcache</code><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># yum install -y php-xcache</span></span><br></pre></td></tr></table></figure></p>
+<p>修改<code>xcache</code>配置文件，打开<code>xcache.cacher</code>开关。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># vim /etc/php.d/xcache.ini</span></span><br><span class="line">xcache.cacher = On</span><br></pre></td></tr></table></figure></p>
+<p>重启服务<br><strong>注意因为此时<code>php</code>是作为<code>httpd</code>的模块来工作的，因此需要重启<code>httpd</code>服务。</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># systemctl restart httpd</span></span><br><span class="line">[root@localhost ~]<span class="comment"># php -m | grep XCache</span></span><br><span class="line">XCache</span><br><span class="line">XCache Cacher</span><br><span class="line">XCache Coverager</span><br><span class="line">XCache Optimizer</span><br><span class="line">XCache</span><br><span class="line">XCache Cacher</span><br><span class="line">XCache Coverager</span><br><span class="line">XCache Optimizer</span><br></pre></td></tr></table></figure></p>
+<p>再次使用<code>ab</code>测试<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># ab -n 1000 -c 100 https://www.twoyang.com/</span></span><br><span class="line">This is ApacheBench, Version 2.3 &lt;<span class="variable">$Revision</span>: 1430300 $&gt;</span><br><span class="line">Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/</span><br><span class="line">Licensed to The Apache Software Foundation, http://www.apache.org/</span><br><span class="line"></span><br><span class="line">Benchmarking www.twoyang.com (be patient)</span><br><span class="line">Completed 100 requests</span><br><span class="line">Completed 200 requests</span><br><span class="line">Completed 300 requests</span><br><span class="line">Completed 400 requests</span><br><span class="line">Completed 500 requests</span><br><span class="line">Completed 600 requests</span><br><span class="line">Completed 700 requests</span><br><span class="line">Completed 800 requests</span><br><span class="line">Completed 900 requests</span><br><span class="line">Completed 1000 requests</span><br><span class="line">Finished 1000 requests</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Server Software:        Apache/2.4.6</span><br><span class="line">Server Hostname:        www.twoyang.com</span><br><span class="line">Server Port:            80</span><br><span class="line"></span><br><span class="line">Document Path:          /</span><br><span class="line">Document Length:        9257 bytes</span><br><span class="line"></span><br><span class="line">Concurrency Level:      100</span><br><span class="line">Time taken <span class="keyword">for</span> tests:   7.799 seconds</span><br><span class="line">Complete requests:      1000</span><br><span class="line">Failed requests:        0</span><br><span class="line">Write errors:           0</span><br><span class="line">Total transferred:      10624000 bytes</span><br><span class="line">HTML transferred:       9257000 bytes</span><br><span class="line">Requests per second:    128.22 [<span class="comment">#/sec] (mean)</span></span><br><span class="line">Time per request:       779.891 [ms] (mean)</span><br><span class="line">Time per request:       7.799 [ms] (mean, across all concurrent requests)</span><br><span class="line">Transfer rate:          1330.31 [Kbytes/sec] received</span><br><span class="line"></span><br><span class="line">Connection Times (ms)</span><br><span class="line">              min  mean[+/-sd] median   max</span><br><span class="line">Connect:        0    2   3.6      1      20</span><br><span class="line">Processing:    39  754 188.2    762    1502</span><br><span class="line">Waiting:       17  721 173.7    733    1464</span><br><span class="line">Total:         41  757 185.6    764    1503</span><br><span class="line"></span><br><span class="line">Percentage of the requests served within a certain time (ms)</span><br><span class="line">  50%    764</span><br><span class="line">  66%    797</span><br><span class="line">  75%    826</span><br><span class="line">  80%    846</span><br><span class="line">  90%    922</span><br><span class="line">  95%   1041</span><br><span class="line">  98%   1190</span><br><span class="line">  99%   1297</span><br><span class="line"> 100%   1503 (longest request)</span><br></pre></td></tr></table></figure></p>
+<p>注意参数<code>Requests per second</code>，大概是每秒处理<code>128.22</code>个请求。约是没启用<code>xcache</code>之前的<code>4</code>倍左右，这与官方描述能提速<code>3~5</code>倍相符。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/lamp/" rel="tag">#lamp</a>
+          
+            <a href="/tags/xcache/" rel="tag">#xcache</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/04/17/CentOS-6上安装二进制版Mariadb/" rel="next" title="CentOS-6上安装二进制版Mariadb">
+                <i class="fa fa-chevron-left"></i> CentOS-6上安装二进制版Mariadb
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/04/20/LAMP-CentOS-7平台三机FastCGI模型/" rel="prev" title="LAMP--CentOS-7平台三机FastCGI模型">
+                LAMP--CentOS-7平台三机FastCGI模型 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <div class="ds-share flat" data-thread-key="2016/04/20/LAMP-CentOS-7平台双机module模型/"
+     data-title="LAMP--CentOS-7平台双机module模型"
+     data-content=""
+     data-url="http://www.twoyang.net/2016/04/20/LAMP-CentOS-7平台双机module模型/">
+  <div class="ds-share-inline">
+    <ul  class="ds-share-icons-16">
+
+      <li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
+      <li><a class="ds-weibo" href="javascript:void(0);" data-service="weibo">微博</a></li>
+      <li><a class="ds-qzone" href="javascript:void(0);" data-service="qzone">QQ空间</a></li>
+      <li><a class="ds-qqt" href="javascript:void(0);" data-service="qqt">腾讯微博</a></li>
+      <li><a class="ds-wechat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+
+    </ul>
+    <div class="ds-share-icons-more">
+    </div>
+  </div>
+</div>
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/04/20/LAMP-CentOS-7平台双机module模型/"
+           data-title="LAMP--CentOS-7平台双机module模型" data-url="http://www.twoyang.net/2016/04/20/LAMP-CentOS-7平台双机module模型/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xltax.com1.z0.glb.clouddn.com/twoyang.jpg"
+               alt="twoyang" />
+          <p class="site-author-name" itemprop="name">twoyang</p>
+          <p class="site-description motion-element" itemprop="description">The quieter you become.The more you are able to hear.</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">7</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        <div class="links-of-blogroll motion-element">
+          
+            <div class="links-of-blogroll-title">友情链接</div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.magedu.com/" target="_blank">马哥教育</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="https://shadowsocks.be/9.html" target="_blank">科学上网</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.isetsuna.com/hexo/introduction/" target="_blank">Hexo博客系列</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://mrchen.org/" target="_blank">Mrchen</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.chen-hao.com.cn/" target="_blank">chen-hao</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://geass.link/wp/" target="_blank">Lei Jin's blog</a>
+                </li>
+              
+            </ul>
+          
+        </div>
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#需求"><span class="nav-number">1.</span> <span class="nav-text">需求</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#解析"><span class="nav-number">2.</span> <span class="nav-text">解析</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#规划准备"><span class="nav-number">3.</span> <span class="nav-text">规划准备</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#配置"><span class="nav-number">4.</span> <span class="nav-text">配置</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#HostB"><span class="nav-number">4.1.</span> <span class="nav-text">HostB</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HostA"><span class="nav-number">4.2.</span> <span class="nav-text">HostA</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#xcache"><span class="nav-number">4.3.</span> <span class="nav-text">xcache</span></a></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">twoyang</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+
+  
+
+
+
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=0.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=0.5.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=0.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=0.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=0.5.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"twoyang"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+  
+
+
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>
