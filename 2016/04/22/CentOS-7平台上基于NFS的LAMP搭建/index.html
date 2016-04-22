@@ -1,0 +1,654 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
+
+
+
+
+  <link href="//fonts.googleapis.com/css?family=Lato:300,400,700,400italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=0.5.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="nfs,lamp," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=0.5.0" />
+
+
+
+
+
+
+<meta name="description" content="规划准备两台机器均为CentOS-7-x86_64最小化安装，均关闭iptables和SELinux。其中一台HostA作为NFS服务器，提供后端数据库mariadb的存储和前端页面代码文件的存储，另外一台HostB作为LAMP应用平台。
+1234567HostAIP地址：172.18.71.130FQDN：1478a474.twoyang.comHostBIP地址：172.18.71.202FQ">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CentOS-7平台上基于NFS的LAMP搭建">
+<meta property="og:url" content="http://www.twoyang.net/2016/04/22/CentOS-7平台上基于NFS的LAMP搭建/index.html">
+<meta property="og:site_name" content="TwOyAng'blog">
+<meta property="og:description" content="规划准备两台机器均为CentOS-7-x86_64最小化安装，均关闭iptables和SELinux。其中一台HostA作为NFS服务器，提供后端数据库mariadb的存储和前端页面代码文件的存储，另外一台HostB作为LAMP应用平台。
+1234567HostAIP地址：172.18.71.130FQDN：1478a474.twoyang.comHostBIP地址：172.18.71.202FQ">
+<meta property="og:updated_time" content="2016-04-22T14:51:49.888Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="CentOS-7平台上基于NFS的LAMP搭建">
+<meta name="twitter:description" content="规划准备两台机器均为CentOS-7-x86_64最小化安装，均关闭iptables和SELinux。其中一台HostA作为NFS服务器，提供后端数据库mariadb的存储和前端页面代码文件的存储，另外一台HostB作为LAMP应用平台。
+1234567HostAIP地址：172.18.71.130FQDN：1478a474.twoyang.comHostBIP地址：172.18.71.202FQ">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+  <title> CentOS-7平台上基于NFS的LAMP搭建 | TwOyAng'blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=55583792";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">TwOyAng'blog</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-th fa-fw"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                CentOS-7平台上基于NFS的LAMP搭建
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-04-22T20:46:06+08:00" content="2016-04-22">
+              2016-04-22
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Server/" itemprop="url" rel="index">
+                    <span itemprop="name">Server</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/04/22/CentOS-7平台上基于NFS的LAMP搭建/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/04/22/CentOS-7平台上基于NFS的LAMP搭建/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="规划准备"><a href="#规划准备" class="headerlink" title="规划准备"></a>规划准备</h1><p>两台机器均为<code>CentOS-7-x86_64</code>最小化安装，均关闭<code>iptables</code>和<code>SELinux</code>。其中一台<code>HostA</code>作为<code>NFS</code>服务器，提供后端数据库<code>mariadb</code>的存储和前端页面代码文件的存储，另外一台<code>HostB</code>作为<code>LAMP</code>应用平台。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">HostA</span><br><span class="line">IP地址：172.18.71.130</span><br><span class="line">FQDN：1478a474.twoyang.com</span><br><span class="line"></span><br><span class="line">HostB</span><br><span class="line">IP地址：172.18.71.202</span><br><span class="line">FQDN：ef352be0.twoyang.com</span><br></pre></td></tr></table></figure>
+<a id="more"></a>
+<h1 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h1><p>首先需要说明一个基本原理，那就是像<code>vsftpd</code>、<code>NFS</code>、<code>samba</code>这种文件服务器，它们的客户端在使用时最终都必须映射为它们的一个本地用户来操作。因为对于操作系统来说，离开用户实体谈权限都是耍流氓。</p>
+<p>对于<code>NFS</code>来说，它的这个映射功能最简陋，基本上就是依靠<code>uid</code>和<code>gid</code>来自动完成映射。<code>anonuid</code>和<code>anongid</code>机制其实也就是不自动映射了，而是手动指定映射为哪个用户和哪个组。</p>
+<p>比如某个客户端上使用的是<code>fedora</code>用户来操作<code>NFS</code>服务器上的文件资源，它的<code>uid</code>和<code>gid</code>都是<code>1001</code>，但是在<code>NFS</code>服务器上<code>1001</code>对应的用户是<code>ubuntu</code>。如果是自动映射导出，那么这个客户端就会被当作<code>NFS</code>服务器上的<code>ubuntu</code>用户，根据<code>ubuntu</code>用户的权限来确定它是否能够操作<code>NFS</code>服务器上的文件资源。</p>
+<p>可以想到所有的<code>linux</code>主机上<code>root</code>用户的<code>uid</code>和<code>gid</code>基本都是<code>0</code>，那么客户端的<code>root</code>映射到服务器自然也是<code>root</code>，那这个权限太大了，意味着客户端可以为所欲为。<code>NFS</code>考虑到了这一点，默认是<code>root_squash</code>模式工作的，即<code>root</code>权限是被压缩的。这个权限压缩本质上，其实是当客户端以<code>root</code>身份来操作时，将其映射为<code>nfsnobody</code>用户而不是<code>root</code>。同理还可以设置为<code>all_squash</code>工作模式，即压缩所有用户权限。</p>
+<p>不过即使有这样的安全措施，也可以预见到，如果压缩所有用户权限就缺少了灵活性，而仅压缩<code>root</code>可能会存在其他的错位映射情况，从而造成安全隐患。不过好在<code>NFS</code>一般也仅在内部可信网络中用一用。</p>
+<h1 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h1><p>为防止出现以上描述的用户错位映射情况，直接通过在创建用户时指定<code>uid</code>和<code>gid</code>的方式，使客户端和服务器端用户的<code>uid</code>和<code>gid</code>一致。因为需要来回切换配置，因此看起来可能有点乱，多包涵。</p>
+<p>首先在<code>HostB</code>上安装<code>LAMP</code>各组件和<code>NFS</code>（需要其客户端客户端工具）<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@ef352be0 ~]<span class="comment"># yum install -y httpd php php-mysql php-mbstring mariadb-server nfs-utils</span></span><br></pre></td></tr></table></figure></p>
+<p><code>httpd</code>和<code>mariadb-server</code>在安装时会分别创建用户<code>apache</code>和<code>mysql</code>。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@ef352be0 ~]<span class="comment"># id apache</span></span><br><span class="line">uid=48(apache) gid=48(apache) groups=48(apache)</span><br><span class="line">[root@ef352be0 ~]<span class="comment"># id mysql</span></span><br><span class="line">uid=27(mysql) gid=27(mysql) groups=27(mysql)</span><br></pre></td></tr></table></figure></p>
+<p>在<code>HostA</code>上分别创建<code>uid</code>和<code>gid</code>一致的这两个用户。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@1478a474 ~]<span class="comment"># groupadd -g 27 -r mysql</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># useradd -u 27 -g 27 -r mysql</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># groupadd -g 48 -r apache</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># useradd -u 48 -g 48 -r apache</span></span><br></pre></td></tr></table></figure></p>
+<p>在<code>HostA</code>上安装<code>NFS</code><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@1478a474 ~]<span class="comment"># yum install -y nfs-utils</span></span><br></pre></td></tr></table></figure></p>
+<p>在<code>HostA</code>上导出<code>/mariadb/data/</code>目录<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@1478a474 ~]<span class="comment"># mkdir -p /mariadb/data/</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># chown -R mysql:mysql /mariadb/data/</span></span><br><span class="line"><span class="comment"># HostB在使用此导出目录作为数据库存储目录初次初始化时必须使用root权限，因此不能压缩root权限。</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># echo "/mariadb/data/ 172.18.71.202(rw,no_root_squash,async)" &gt; /etc/exports.d/mariadb.exports</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># systemctl start rpcbind</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># systemctl start nfs</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># systemctl enable rpcbind</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># systemctl enable nfs-server</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># showmount -e 127.0.0.1</span></span><br></pre></td></tr></table></figure></p>
+<p>在<code>HostB</code>上挂载<code>HostA</code>导出的<code>/mariadb/data/</code>目录<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@ef352be0 ~]<span class="comment"># showmount -e 172.18.71.130</span></span><br><span class="line">[root@ef352be0 ~]<span class="comment"># mkdir -p /mariadb/data/</span></span><br><span class="line">[root@ef352be0 ~]<span class="comment"># mount -t nfs 172.18.71.130:/mariadb/data /mariadb/data</span></span><br></pre></td></tr></table></figure></p>
+<p>在<code>HostB</code>上使用此<code>NFS</code>导出目录初始化数据库<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mysql_install_db --user=mysql --datadir=/mariadb/data</span><br><span class="line">[root@ef352be0 ~]<span class="comment"># ls /mariadb/data/</span></span><br><span class="line">aria_log.00000001  aria_<span class="built_in">log</span>_control  ibdata1  ib_logfile0  ib_logfile1  mysql  performance_schema</span><br></pre></td></tr></table></figure></p>
+<p>初始化数据库完成后可以在<code>HostA</code>上去掉导出选项<code>no_root_squash</code>，重新导出。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@1478a474 ~]# echo &quot;/mariadb/data/ 172.18.71.202(rw,async)&quot; &gt; /etc/exports.d/mariadb.exports</span><br><span class="line">[root@1478a474 ~]# exportfs -u 172.18.71.202:/mariadb/data</span><br><span class="line">[root@1478a474 ~]# exportfs -r</span><br><span class="line">[root@1478a474 ~]# showmount -e 127.0.0.1</span><br></pre></td></tr></table></figure></p>
+<p>在<code>HostB</code>上重新挂载<code>HostA</code>导出的<code>/mariadb/data/</code>目录<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@ef352be0 ~]# mount -t nfs -o remount 172.18.71.130:/mariadb/data /mariadb/data</span><br></pre></td></tr></table></figure></p>
+<p>在<code>HostB</code>上修改<code>mariadb</code>配置文件<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">sed -i <span class="string">'/\[client\]/a\default-character-set=utf8'</span> /etc/my.cnf.d/client.cnf</span><br><span class="line">sed -i <span class="string">'/\[mysql\]/a\default-character-set=utf8'</span> /etc/my.cnf.d/mysql-clients.cnf</span><br><span class="line">sed -i <span class="string">'/\[mysqld\]/a\character-set-server=utf8'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[mysqld\]/a\collation-server=utf8_general_ci'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[mysqld\]/a\default-storage-engine=InnoDB'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[mysqld\]/a\innodb-file-per-table=TRUE'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[mysqld\]/a\skip-name-resolve=TRUE'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[mysqld\]/a\datadir=/mariadb/data'</span> /etc/my.cnf.d/server.cnf</span><br></pre></td></tr></table></figure></p>
+<p>在<code>HostB</code>上启<code>mariadb</code>，做安全初始化，创建<code>wpdb</code>数据库，并授权。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@ef352be0 ~]<span class="comment"># systemctl start mariadb</span></span><br><span class="line">[root@ef352be0 ~]<span class="comment"># mysql_secure_installation</span></span><br><span class="line">[root@ef352be0 ~]<span class="comment"># mysql -u root -p</span></span><br><span class="line">[root@ef352be0 ~]<span class="comment"># MariaDB [(none)]&gt; create database wpdb;</span></span><br><span class="line">[root@ef352be0 ~]<span class="comment"># MariaDB [(none)]&gt; grant all privileges on wpdb.* to 'wp'@'localhost' identified by 'magedu';</span></span><br><span class="line">[root@ef352be0 ~]<span class="comment"># MariaDB [(none)]&gt; grant all privileges on wpdb.* to 'wp'@'127.0.0.1' identified by 'magedu';</span></span><br><span class="line">[root@ef352be0 ~]<span class="comment"># MariaDB [(none)]&gt; flush privileges;</span></span><br><span class="line">[root@ef352be0 ~]<span class="comment"># MariaDB [(none)]&gt; \q</span></span><br><span class="line">[root@ef352be0 ~]<span class="comment"># ls /mariadb/data/</span></span><br><span class="line">aria_log.00000001  aria_<span class="built_in">log</span>_control  ibdata1  ib_logfile0  ib_logfile1  mysql  performance_schema  wpdb</span><br></pre></td></tr></table></figure></p>
+<p>在<code>HostA</code>上导出<code>/web/htdocs/</code>目录<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@1478a474 ~]<span class="comment"># mkdir -p /web/htdocs/</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># cd /web/htdocs/</span></span><br><span class="line"><span class="comment"># 我这里是有这么一个ftp服务器，上面有wordpress。</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># lftpget ftp://172.18.0.1/pub/Sources/sources/httpd/wordpress-4.3.1-zh_CN.zip</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># unzip wordpress-4.3.1-zh_CN.zip</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># ln -sv wordpress wp</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># chown -R apache:apache /web/htdocs/</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># echo "/web/htdocs/ 172.18.71.202(rw,async)" &gt; /etc/exports.d/httpd.exports</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># exportfs -r</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># showmount -e 127.0.0.1</span></span><br></pre></td></tr></table></figure></p>
+<p>在<code>HostB</code>上挂载<code>HostA</code>导出的<code>/web/htdocs/</code>目录<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@ef352be0 ~]<span class="comment"># showmount -e 172.18.71.130</span></span><br><span class="line">[root@ef352be0 ~]<span class="comment"># mkdir -p /web/htdocs/</span></span><br><span class="line">[root@ef352be0 ~]<span class="comment"># mount -t nfs 172.18.71.130:/web/htdocs/ /web/htdocs/</span></span><br></pre></td></tr></table></figure></p>
+<p>配置<code>HostB</code>上的<code>httpd</code>服务<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">[root@ef352be0 ~]<span class="comment"># mv /etc/httpd/conf.d/welcome.conf&#123;,.bak&#125;</span></span><br><span class="line">[root@ef352be0 ~]<span class="comment"># sed -i 's@^#ServerName .*@ServerName www.twoyang.net@' /etc/httpd/conf/httpd.conf</span></span><br><span class="line">[root@ef352be0 ~]<span class="comment"># sed -i 's@^DocumentRoot \(.*\)@#DocumentRoot \1@' /etc/httpd/conf/httpd.conf</span></span><br><span class="line">[root@ef352be0 ~]<span class="comment"># cat &lt;&lt; EOF &gt; /etc/httpd/conf.d/vhosts.conf</span></span><br><span class="line">&lt;VirtualHost 172.18.71.202:80&gt;</span><br><span class="line">    DocumentRoot <span class="string">"/web/htdocs/wp"</span></span><br><span class="line">    ServerName www.twoyang.net</span><br><span class="line">    &lt;Directory <span class="string">"/web/htdocs/wp"</span>&gt;</span><br><span class="line">        Options FollowSymLinks</span><br><span class="line">        AllowOverride none</span><br><span class="line">        Require all granted</span><br><span class="line">    &lt;/Directory&gt;</span><br><span class="line">&lt;/VirtualHost&gt;</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure></p>
+<p>启动<code>HostB</code>上的<code>httpd</code>服务便可测试验证<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@ef352be0 ~]<span class="comment"># systemctl start httpd</span></span><br></pre></td></tr></table></figure></p>
+<p>以上</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/nfs/" rel="tag">#nfs</a>
+          
+            <a href="/tags/lamp/" rel="tag">#lamp</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/04/22/CentOS-7平台上搭建vsftpd服务器/" rel="next" title="CentOS-7平台上搭建vsftpd服务器">
+                <i class="fa fa-chevron-left"></i> CentOS-7平台上搭建vsftpd服务器
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <div class="ds-share flat" data-thread-key="2016/04/22/CentOS-7平台上基于NFS的LAMP搭建/"
+     data-title="CentOS-7平台上基于NFS的LAMP搭建"
+     data-content=""
+     data-url="http://www.twoyang.net/2016/04/22/CentOS-7平台上基于NFS的LAMP搭建/">
+  <div class="ds-share-inline">
+    <ul  class="ds-share-icons-16">
+
+      <li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
+      <li><a class="ds-weibo" href="javascript:void(0);" data-service="weibo">微博</a></li>
+      <li><a class="ds-qzone" href="javascript:void(0);" data-service="qzone">QQ空间</a></li>
+      <li><a class="ds-qqt" href="javascript:void(0);" data-service="qqt">腾讯微博</a></li>
+      <li><a class="ds-wechat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+
+    </ul>
+    <div class="ds-share-icons-more">
+    </div>
+  </div>
+</div>
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/04/22/CentOS-7平台上基于NFS的LAMP搭建/"
+           data-title="CentOS-7平台上基于NFS的LAMP搭建" data-url="http://www.twoyang.net/2016/04/22/CentOS-7平台上基于NFS的LAMP搭建/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xltax.com1.z0.glb.clouddn.com/twoyang.jpg"
+               alt="twoyang" />
+          <p class="site-author-name" itemprop="name">twoyang</p>
+          <p class="site-description motion-element" itemprop="description">The quieter you become.The more you are able to hear.</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">9</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">10</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        <div class="links-of-blogroll motion-element">
+          
+            <div class="links-of-blogroll-title">友情链接</div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.magedu.com/" target="_blank">马哥教育</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="https://shadowsocks.be/9.html" target="_blank">科学上网</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.isetsuna.com/hexo/introduction/" target="_blank">Hexo博客系列</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://mrchen.org/" target="_blank">Mrchen</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.chen-hao.com.cn/" target="_blank">chen-hao</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://geass.link/wp/" target="_blank">Lei Jin's blog</a>
+                </li>
+              
+            </ul>
+          
+        </div>
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#规划准备"><span class="nav-number">1.</span> <span class="nav-text">规划准备</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#说明"><span class="nav-number">2.</span> <span class="nav-text">说明</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#配置"><span class="nav-number">3.</span> <span class="nav-text">配置</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">twoyang</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+
+  
+
+
+
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=0.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=0.5.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=0.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=0.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=0.5.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"twoyang"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+  
+
+
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>
