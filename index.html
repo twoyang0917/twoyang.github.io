@@ -225,6 +225,124 @@
             
               
                 
+                <a class="post-title-link" href="/2016/04/22/CentOS-7平台上搭建vsftpd服务器/" itemprop="url">
+                  CentOS-7平台上搭建vsftpd服务器
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-04-22T15:31:05+08:00" content="2016-04-22">
+              2016-04-22
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Server/" itemprop="url" rel="index">
+                    <span itemprop="name">Server</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/04/22/CentOS-7平台上搭建vsftpd服务器/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/04/22/CentOS-7平台上搭建vsftpd服务器/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h1 id="实验环境"><a href="#实验环境" class="headerlink" title="实验环境"></a>实验环境</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">平台：CentOS-7-x86_64</span><br><span class="line">IP地址：172.18.71.130</span><br><span class="line">FQDN：1478a474.twoyang.com</span><br><span class="line">备注：iptables与SELinux均处于关闭状态</span><br></pre></td></tr></table></figure>
+<h1 id="最简应用"><a href="#最简应用" class="headerlink" title="最简应用"></a>最简应用</h1><p>安装并启动<code>vsftpd</code>服务<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@1478a474 ~]<span class="comment"># yum install -y vsftpd</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># systemctl start vsftpd</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># ss -tnlp | grep 21</span></span><br><span class="line">LISTEN     0      32          :::21                      :::*                   users:((<span class="string">"vsftpd"</span>,pid=2344,fd=3))</span><br></pre></td></tr></table></figure></p>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2016/04/22/CentOS-7平台上搭建vsftpd服务器/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2016/04/20/LAMP-CentOS-6平台双机FastCGI模型/" itemprop="url">
                   LAMP--CentOS-6平台双机FastCGI模型
                 </a>
@@ -697,124 +815,6 @@
 
 
     
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/04/13/httpd常用配置/" itemprop="url">
-                  httpd常用配置
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-04-13T21:13:07+08:00" content="2016-04-13">
-              2016-04-13
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Server/" itemprop="url" rel="index">
-                    <span itemprop="name">Server</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2016/04/13/httpd常用配置/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/04/13/httpd常用配置/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p><code>httpd</code>的配置项是非常丰富的，本文仅是对常用配置列出个大致的目录，并就<code>CentOS-6</code>与<code>CentOS-7</code>之间存在的一些差异作比较说明。需更详细的介绍请参照<a href="http://httpd.apache.org/docs/">官方文档</a>，也可以本地安装一个当前版本的文档站点，便于随时翻阅。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@bbs ~]<span class="comment"># yum install -y httpd-manual</span></span><br></pre></td></tr></table></figure></p>
-<p>启动<code>httpd</code>服务后，便可访问本地文档站点了<code>http://localhost/manual/</code>。</p>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2016/04/13/httpd常用配置/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -860,7 +860,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">7</span>
+              <span class="site-state-item-count">8</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -877,7 +877,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-count">9</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

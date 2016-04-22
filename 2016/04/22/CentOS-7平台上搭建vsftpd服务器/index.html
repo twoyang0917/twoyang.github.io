@@ -1,0 +1,678 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
+
+
+
+
+  <link href="//fonts.googleapis.com/css?family=Lato:300,400,700,400italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=0.5.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="mariadb,vsftpd,pam," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=0.5.0" />
+
+
+
+
+
+
+<meta name="description" content="实验环境1234平台：CentOS-7-x86_64IP地址：172.18.71.130FQDN：1478a474.twoyang.com备注：iptables与SELinux均处于关闭状态
+最简应用安装并启动vsftpd服务1234[root@1478a474 ~]# yum install -y vsftpd[root@1478a474 ~]# systemctl start vsftpd[r">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CentOS-7平台上搭建vsftpd服务器">
+<meta property="og:url" content="http://www.twoyang.net/2016/04/22/CentOS-7平台上搭建vsftpd服务器/index.html">
+<meta property="og:site_name" content="TwOyAng'blog">
+<meta property="og:description" content="实验环境1234平台：CentOS-7-x86_64IP地址：172.18.71.130FQDN：1478a474.twoyang.com备注：iptables与SELinux均处于关闭状态
+最简应用安装并启动vsftpd服务1234[root@1478a474 ~]# yum install -y vsftpd[root@1478a474 ~]# systemctl start vsftpd[r">
+<meta property="og:updated_time" content="2016-04-22T10:31:17.291Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="CentOS-7平台上搭建vsftpd服务器">
+<meta name="twitter:description" content="实验环境1234平台：CentOS-7-x86_64IP地址：172.18.71.130FQDN：1478a474.twoyang.com备注：iptables与SELinux均处于关闭状态
+最简应用安装并启动vsftpd服务1234[root@1478a474 ~]# yum install -y vsftpd[root@1478a474 ~]# systemctl start vsftpd[r">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+  <title> CentOS-7平台上搭建vsftpd服务器 | TwOyAng'blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=55583792";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">TwOyAng'blog</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-th fa-fw"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                CentOS-7平台上搭建vsftpd服务器
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-04-22T15:31:05+08:00" content="2016-04-22">
+              2016-04-22
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Server/" itemprop="url" rel="index">
+                    <span itemprop="name">Server</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/04/22/CentOS-7平台上搭建vsftpd服务器/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/04/22/CentOS-7平台上搭建vsftpd服务器/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="实验环境"><a href="#实验环境" class="headerlink" title="实验环境"></a>实验环境</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">平台：CentOS-7-x86_64</span><br><span class="line">IP地址：172.18.71.130</span><br><span class="line">FQDN：1478a474.twoyang.com</span><br><span class="line">备注：iptables与SELinux均处于关闭状态</span><br></pre></td></tr></table></figure>
+<h1 id="最简应用"><a href="#最简应用" class="headerlink" title="最简应用"></a>最简应用</h1><p>安装并启动<code>vsftpd</code>服务<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@1478a474 ~]<span class="comment"># yum install -y vsftpd</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># systemctl start vsftpd</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># ss -tnlp | grep 21</span></span><br><span class="line">LISTEN     0      32          :::21                      :::*                   users:((<span class="string">"vsftpd"</span>,pid=2344,fd=3))</span><br></pre></td></tr></table></figure></p>
+<a id="more"></a>
+<p>此时便可以正常工作了，安装一个<code>ftp</code>客户端程序就可以连接到服务器上来了。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@1478a474 ~]<span class="comment"># yum install -y lftp</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># lftp 172.18.71.130</span></span><br><span class="line">lftp 172.18.71.130:~&gt; ls</span><br><span class="line">drwxr-xr-x    2 0        0               6 Nov 20 19:22 pub</span><br></pre></td></tr></table></figure></p>
+<p>只不过此时连接时并没有指定用户，默认使用的是匿名用户，只能做读操作（浏览和下载），不能做写操作（上传，新建目录，删除和重命名）。另外默认的目录<code>/var/ftp</code>也是空的，除了一个空的<code>pub</code>目录并没有任何东西可供下载的。</p>
+<p>先拷贝一个文件过去，让其他人有读权限。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@1478a474 ~]<span class="comment"># cp ~/anaconda-ks.cfg /var/ftp/pub/ks.cfg</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># chmod go+r /var/ftp/pub/ks.cfg</span></span><br></pre></td></tr></table></figure></p>
+<p>可以看到可以下载，而并不能上传。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">lftp 172.18.71.130:~&gt; <span class="built_in">cd</span> pub</span><br><span class="line"><span class="built_in">cd</span> ok, cwd=/pub</span><br><span class="line">lftp 172.18.71.130:/pub&gt; get ks.cfg</span><br><span class="line">1845 bytes transferred</span><br><span class="line">lftp 172.18.71.130:/pub&gt; lcd /etc</span><br><span class="line">lcd ok, <span class="built_in">local</span> cwd=/etc</span><br><span class="line">lftp 172.18.71.130:/pub&gt; put fstab</span><br><span class="line">put: Access failed: 550 Permission denied. (fstab)</span><br></pre></td></tr></table></figure></p>
+<p>这就是<code>ftp</code>的最简应用了–文件下载站，其实大部分场景下<code>ftp</code>就是干这个事情的。</p>
+<h1 id="用户"><a href="#用户" class="headerlink" title="用户"></a>用户</h1><p>对于每一个连接到<code>ftp</code>服务器的客户端来说，在操作服务器时实际上都会映射为服务器上的一个本地用户来操作服务器的文件系统。而因为默认使用了<code>chroot</code>功能，客户端登录时会被禁锢在所映射的<code>ftp</code>服务器本地用户的家目录中。</p>
+<p>对于匿名用户来说是映射为了一个特定的叫做<code>ftp</code>的用户。这个用户的默认<code>shell</code>是<code>/sbin/nologin</code>，所以不能登录；家目录是<code>/var/ftp</code>，所以匿名用户登录会被禁锢在<code>/var/ftp</code>目录中。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@1478a474 ~]<span class="comment"># grep ftp /etc/passwd</span></span><br><span class="line">ftp:x:14:50:FTP User:/var/ftp:/sbin/nologin</span><br></pre></td></tr></table></figure></p>
+<p>对于<code>ftp</code>服务器上的本地用户来说，有一些是加入黑名单中不允许被映射的，比如说<code>root</code>。这里指定<code>root</code>能登录只是一个假象，实际上你输入任何口令都可以登录，但是当你需要操作（包括浏览）服务器上的资源时，它就会检查你的身份和权限。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@1478a474 ~]<span class="comment"># lftp 172.18.71.130 -u root</span></span><br><span class="line">Password:</span><br><span class="line">lftp root@172.18.71.130:~&gt; ls</span><br><span class="line">ls: Login failed: 530 Permission denied.</span><br></pre></td></tr></table></figure></p>
+<p>这个不允许作为<code>ftp</code>用户登录的本地用户黑名单是在<code>/etc/vsftpd/ftpusers</code>文件中定义的。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">[root@1478a474 ~]<span class="comment"># cat /etc/vsftpd/ftpusers</span></span><br><span class="line"><span class="comment"># Users that are not allowed to login via ftp</span></span><br><span class="line">root</span><br><span class="line">bin</span><br><span class="line">daemon</span><br><span class="line">adm</span><br><span class="line">lp</span><br><span class="line">sync</span><br><span class="line">shutdown</span><br><span class="line">halt</span><br><span class="line">mail</span><br><span class="line">news</span><br><span class="line">uucp</span><br><span class="line">operator</span><br><span class="line">games</span><br><span class="line">nobody</span><br></pre></td></tr></table></figure></p>
+<p>同时默认还有一个本地用户名单在<code>/etc/vsftpd/user_list</code>文件中定义，可以看到它基本与上面的名单是重复的。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">[root@1478a474 ~]<span class="comment"># cat /etc/vsftpd/user_list </span></span><br><span class="line"><span class="comment"># vsftpd userlist</span></span><br><span class="line"><span class="comment"># If userlist_deny=NO, only allow users in this file</span></span><br><span class="line"><span class="comment"># If userlist_deny=YES (default), never allow users in this file, and</span></span><br><span class="line"><span class="comment"># do not even prompt for a password.</span></span><br><span class="line"><span class="comment"># Note that the default vsftpd pam config also checks /etc/vsftpd/ftpusers</span></span><br><span class="line"><span class="comment"># for users that are denied.</span></span><br><span class="line">root</span><br><span class="line">bin</span><br><span class="line">daemon</span><br><span class="line">adm</span><br><span class="line">lp</span><br><span class="line">sync</span><br><span class="line">shutdown</span><br><span class="line">halt</span><br><span class="line">mail</span><br><span class="line">news</span><br><span class="line">uucp</span><br><span class="line">operator</span><br><span class="line">games</span><br><span class="line">nobody</span><br></pre></td></tr></table></figure></p>
+<p>默认它也是作为黑名单存在，不过如果设置了<code>userlist_deny=NO</code>，它就变成了白名单了，即仅白名单中的本地用户可以作为<code>ftp</code>用户登录。另外不论是作为白名单还是黑名单都需要需要设置<code>userlist_enable=YES</code>，否则不会检查此名单。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">[root@1478a474 ~]<span class="comment"># man vsftpd.conf</span></span><br><span class="line"></span><br><span class="line">    userlist_deny</span><br><span class="line">        This option is examined <span class="keyword">if</span> userlist_<span class="built_in">enable</span> is activated. If you <span class="built_in">set</span> this setting to</span><br><span class="line">        NO, <span class="keyword">then</span> users will be denied login unless they are explicitly listed <span class="keyword">in</span>  the  file</span><br><span class="line">        specified  by userlist_file.  When login is denied, the denial is issued before the</span><br><span class="line">        user is asked <span class="keyword">for</span> a password.</span><br><span class="line"></span><br><span class="line">        Default: YES</span><br><span class="line"></span><br><span class="line">    userlist_<span class="built_in">enable</span></span><br><span class="line">        If enabled, vsftpd will load a list  of  usernames,  from  the  filename  given  by</span><br><span class="line">        userlist_file.   If  a user tries to <span class="built_in">log</span> <span class="keyword">in</span> using a name <span class="keyword">in</span> this file, they will be</span><br><span class="line">        denied before they are asked <span class="keyword">for</span> a password.  This  may  be  useful  <span class="keyword">in</span>  preventing</span><br><span class="line">        cleartext passwords being transmitted. See also userlist_deny.</span><br><span class="line"></span><br><span class="line">        Default: NO</span><br><span class="line"></span><br><span class="line">    userlist_file</span><br><span class="line">        This  option  is  the  name  of  the file loaded when the userlist_<span class="built_in">enable</span> option is</span><br><span class="line">        active.</span><br><span class="line"></span><br><span class="line">        Default: /etc/vsftpd/user_list</span><br></pre></td></tr></table></figure>
+<p>不过即使将<code>/etc/vsftpd/user_list</code>作为白名单使用，仍然需要接受<code>/etc/vsftpd/ftpusers</code>黑名单的检查。因为<code>ftpusers</code>是由<code>pam</code>机制实现的，而<code>user_list</code>是<code>vsftpd</code>服务自身实现的。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@1478a474 ~]<span class="comment"># grep pam /etc/vsftpd/vsftpd.conf</span></span><br><span class="line">pam_service_name=vsftpd</span><br><span class="line">[root@1478a474 ~]<span class="comment"># grep ftpusers /etc/pam.d/vsftpd</span></span><br><span class="line">auth       required	pam_listfile.so item=user sense=deny file=/etc/vsftpd/ftpusers onerr=succeed</span><br></pre></td></tr></table></figure></p>
+<p>如果准备使用服务器本地用户作为<code>ftp</code>用户来区分用户权限的话，还是使用白名单方式比较安全。白名单是只允许名单中本地用户登录，因此只需要放行可信用户即可，风险可控；如果是黑名单就意味着只限制名单中的本地用户不可以登录，因此可能存在漏网之鱼。</p>
+<p><strong>但是使用服务器本地用户作为<code>ftp</code>用户的机制根本就不应该使用。因为<code>ftp</code>协议没有加密措施，用户名和口令都是明文传输的，一旦被人获取，可直接登录服务器系统，所以前面这句话请无视。</strong></p>
+<h1 id="基于pam的虚拟用户机制"><a href="#基于pam的虚拟用户机制" class="headerlink" title="基于pam的虚拟用户机制"></a>基于pam的虚拟用户机制</h1><p>需要考虑安全的场景下，匿名用户不可能给予很大的权限，直接映射本地用户的方式又存在极大的安全风险，那么如何满足需要区分用户权限的需求呢。这就需要用到基于<code>pam</code>的虚拟用户机制了，这种场景下使用<code>pam</code>作为用户认证模块，认证通过的用户通过加载不同的配置文件来区分权限。</p>
+<p><code>pam</code>认证时，后端的用户认证信息存储方式可以是文本也可以是数据库。数据库也有很多种:<code>ldap</code>, <code>mariadb（mysql）</code>, <code>postgresql</code>等等，这里以<code>mariadb</code>为例。</p>
+<p>安装<code>mariadb</code><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@1478a474 ~]<span class="comment"># yum install -y mariadb-server</span></span><br></pre></td></tr></table></figure></p>
+<p>修改配置文件<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">sed -i <span class="string">'/\[client\]/a\default-character-set=utf8'</span> /etc/my.cnf.d/client.cnf</span><br><span class="line">sed -i <span class="string">'/\[mysql\]/a\default-character-set=utf8'</span> /etc/my.cnf.d/mysql-clients.cnf</span><br><span class="line">sed -i <span class="string">'/\[mysqld\]/a\character-set-server=utf8'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[mysqld\]/a\collation-server=utf8_general_ci'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[mysqld\]/a\default-storage-engine=InnoDB'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[mysqld\]/a\innodb-file-per-table=TRUE'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[mysqld\]/a\skip-name-resolve=TRUE'</span> /etc/my.cnf.d/server.cnf</span><br></pre></td></tr></table></figure></p>
+<p>启动<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@1478a474 ~]<span class="comment"># systemctl start mariadb</span></span><br></pre></td></tr></table></figure></p>
+<p>安全初始化<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@1478a474 ~]<span class="comment"># mysql_secure_installation</span></span><br></pre></td></tr></table></figure></p>
+<p>创建<code>vsftpd</code>的虚拟用户<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line">[root@1478a474 ~]<span class="comment"># mysql -u root -p</span></span><br><span class="line">Enter password:</span><br><span class="line">Welcome to the MariaDB monitor.  Commands end with ; or \g.</span><br><span class="line">Your MariaDB connection id is 10</span><br><span class="line">Server version: 5.5.44-MariaDB MariaDB Server</span><br><span class="line"></span><br><span class="line">Copyright (c) 2000, 2015, Oracle, MariaDB Corporation Ab and others.</span><br><span class="line"></span><br><span class="line">Type <span class="string">'help;'</span> or <span class="string">'\h'</span> <span class="keyword">for</span> help. Type <span class="string">'\c'</span> to clear the current input statement.</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建数据库vsftpd</span></span><br><span class="line">MariaDB [(none)]&gt; create database vsftpd;</span><br><span class="line">Query OK, 1 row affected (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 切换数据库至vsftpd</span></span><br><span class="line">MariaDB [(none)]&gt; use vsftpd;</span><br><span class="line">Database changed</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建虚拟用户表</span></span><br><span class="line">MariaDB [vsftpd]&gt; create table virtual_user (</span><br><span class="line">    -&gt; id int unsigned not null auto_increment primary key,</span><br><span class="line">    -&gt; username varchar(128) not null,</span><br><span class="line">    -&gt; passwd binary(64) not null)</span><br><span class="line">    -&gt; ;</span><br><span class="line">Query OK, 0 rows affected (0.01 sec)</span><br><span class="line"></span><br><span class="line">MariaDB [vsftpd]&gt; desc virtual_user;</span><br><span class="line">+----------+------------------+------+-----+---------+----------------+</span><br><span class="line">| Field    | Type             | Null | Key | Default | Extra          |</span><br><span class="line">+----------+------------------+------+-----+---------+----------------+</span><br><span class="line">| id       | int(10) unsigned | NO   | PRI | NULL    | auto_increment |</span><br><span class="line">| username | varchar(128)     | NO   |     | NULL    |                |</span><br><span class="line">| passwd   | binary(64)       | NO   |     | NULL    |                |</span><br><span class="line">+----------+------------------+------+-----+---------+----------------+</span><br><span class="line">3 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建fedora作为虚拟用户</span></span><br><span class="line">MariaDB [vsftpd]&gt; insert into virtual_user(username, passwd) values (<span class="string">'fedora'</span>, password(<span class="string">'magedu'</span>));</span><br><span class="line">Query OK, 1 row affected (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建ubuntu作为虚拟用户</span></span><br><span class="line">MariaDB [vsftpd]&gt; insert into virtual_user(username, passwd) values (<span class="string">'ubuntu'</span>, password(<span class="string">'magedu'</span>));</span><br><span class="line">Query OK, 1 row affected (0.00 sec)</span><br><span class="line"></span><br><span class="line">MariaDB [vsftpd]&gt; select * from virtual_user;</span><br><span class="line">+----+----------+------------------------------------------------------------------+</span><br><span class="line">| id | username | passwd                                                           |</span><br><span class="line">+----+----------+------------------------------------------------------------------+</span><br><span class="line">|  1 | fedora   | *6B8CCC83799A26CD19D7AD9AEEADBCD30D8A8664                        |</span><br><span class="line">|  2 | ubuntu   | *6B8CCC83799A26CD19D7AD9AEEADBCD30D8A8664                        |</span><br><span class="line">+----+----------+------------------------------------------------------------------+</span><br><span class="line">2 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建'vsftpd'@'localhost'用户并授予查询vsftpd.virtual_user的权限</span></span><br><span class="line">MariaDB [vsftpd]&gt; grant select on vsftpd.virtual_user to <span class="string">'vsftpd'</span>@<span class="string">'localhost'</span> identified by <span class="string">'magedu'</span>;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建'vsftpd'@'127.0.0.1'用户并授予查询vsftpd.virtual_user的权限</span></span><br><span class="line">MariaDB [vsftpd]&gt; grant select on vsftpd.virtual_user to <span class="string">'vsftpd'</span>@<span class="string">'127.0.0.1'</span> identified by <span class="string">'magedu'</span>;</span><br><span class="line">Query OK, 0 rows affected (0.01 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 重载权限表</span></span><br><span class="line">MariaDB [vsftpd]&gt; flush privileges;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line">MariaDB [vsftpd]&gt; \q</span><br><span class="line">Bye</span><br></pre></td></tr></table></figure></p>
+<p>可以检查确认一下服务上是没有这两个本地用户的。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@1478a474 ~]<span class="comment"># id fedora</span></span><br><span class="line">id: fedora: no such user</span><br><span class="line">[root@1478a474 ~]<span class="comment"># id ubuntu</span></span><br><span class="line">id: ubuntu: no such user</span><br></pre></td></tr></table></figure></p>
+<p><code>CentOS-7</code>上并没有提供<code>pam</code>使用<code>mariadb（mysql）</code>作为后端存储的库文件，所以需要编译安装<code>pam_mysql</code>库。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[root@1478a474 ~]<span class="comment"># yum groupinstall -y "Development Tools" "Server Platform Development"</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># yum -y install pam-devel openssl-devel mariadb-devel</span></span><br><span class="line"></span><br><span class="line">[root@1478a474 ~]<span class="comment"># tar -xf pam_mysql-0.7RC1.tar.gz</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># cd pam_mysql-0.7RC1/</span></span><br><span class="line">[root@1478a474 pam_mysql-0.7RC1]<span class="comment"># ./configure --with-mysql=/usr \</span></span><br><span class="line">--with-openssl=/usr \</span><br><span class="line">--with-pam=/usr \</span><br><span class="line">--with-pam-mods-dir=/lib64/security</span><br><span class="line">[root@1478a474 pam_mysql-0.7RC1]<span class="comment"># make &amp;&amp; make install</span></span><br><span class="line">[root@1478a474 pam_mysql-0.7RC1]<span class="comment"># ls /lib64/security/ | grep pam_mysql.so</span></span><br><span class="line">pam_mysql.so</span><br></pre></td></tr></table></figure></p>
+<p>前面也看到了，<code>vsftpd</code>默认使用<code>pam</code>做了黑名单检查，使用的配置文件是<code>/etc/pam.d/vsftpd</code>，现在想要使用它来做虚拟用户认证，就需要修改此配置文件。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@1478a474 ~]<span class="comment"># cp /etc/pam.d/vsftpd&#123;,.bak&#125;</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># cat &lt;&lt; EOF &gt; /etc/pam.d/vsftpd</span></span><br><span class="line">auth required pam_mysql.so user=vsftpd passwd=magedu host=localhost db=vsftpd table=virtual_user usercolumn=username passwdcolumn=passwd crypt=2</span><br><span class="line">account required pam_mysql.so user=vsftpd passwd=magedu host=localhost db=vsftpd table=virtual_user usercolumn=username passwdcolumn=passwd crypt=2</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure></p>
+<p>这个语法也挺好懂，就不解释了，主要有个<code>crypt=2</code>需要说明以下，这个在<code>pam_mysql</code>源码包的<code>README</code>文件中有解释。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">[root@1478a474 ~]<span class="comment"># less ~/pam_mysql-0.7RC1/README</span></span><br><span class="line">crypt (plain)</span><br><span class="line"></span><br><span class="line">    The method to encrypt the user<span class="string">'s password:</span><br><span class="line"></span><br><span class="line">       0 (or "plain") = No encryption.  Passwords stored in plaintext.</span><br><span class="line">                        HIGHLY DISCOURAGED.</span><br><span class="line"></span><br><span class="line">       1 (or "Y")     = Use crypt(3) function.</span><br><span class="line"></span><br><span class="line">       2 (or "mysql") = Use MySQL PASSWORD() function. It is possible</span><br><span class="line">                        that the encryption function used by PAM-MySQL</span><br><span class="line">                        is different from that of the MySQL server, as</span><br><span class="line">                        PAM-MySQL uses the function defined in MySQL'</span>s</span><br><span class="line">                        C-client API instead of using PASSWORD() SQL <span class="keyword">function</span></span><br><span class="line">                        <span class="keyword">in</span> the query.</span><br><span class="line"></span><br><span class="line">       3 (or <span class="string">"md5"</span>)   = Use plain hex MD5.</span><br><span class="line"></span><br><span class="line">       4 (or <span class="string">"sha1"</span>)  = Use plain hex SHA1.</span><br></pre></td></tr></table></figure></p>
+<p>前面说到基本原理是使用<code>pam</code>作为用户认证模块，认证通过的用户通过加载不同的配置文件来区分权限，这个工作是<code>vsftpd</code>来完成的。但是当需要去操作服务器文件系统上的文件时仍需要映射为服务器上的某本地用户。</p>
+<p>这里单独创建一个用于虚拟用户映射的服务器本地用户，但其不能直接登录操作系统，家目录为<code>/ftproot</code>。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@1478a474 ~]<span class="comment"># useradd -s /usr/sbin/nologin -d /ftproot vuser</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># ls -dl /ftproot/</span></span><br><span class="line">drwx------ 2 vuser vuser 59 Apr 22 11:50 /ftproot/</span><br></pre></td></tr></table></figure></p>
+<p>然后需要修改<code>vsftpd</code>的配置文件，明确告诉<code>vsftpd</code>将虚拟用户映射为本地用户<code>vuser</code>。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@1478a474 ~]# echo &quot;guest_enable=YES&quot; &gt;&gt; /etc/vsftpd/vsftpd.conf</span><br><span class="line">[root@1478a474 ~]# echo &quot;guest_username=vuser&quot; &gt;&gt; /etc/vsftpd/vsftpd.conf</span><br></pre></td></tr></table></figure></p>
+<p>这两个配置项的含义描述如下<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[root@1478a474 ~]<span class="comment"># man vsftpd.conf</span></span><br><span class="line"></span><br><span class="line">guest_<span class="built_in">enable</span></span><br><span class="line">    If enabled, all non-anonymous logins are classed as <span class="string">"guest"</span> logins. A  guest  login</span><br><span class="line">    is remapped to the user specified <span class="keyword">in</span> the guest_username setting.</span><br><span class="line"></span><br><span class="line">    Default: NO</span><br><span class="line"></span><br><span class="line">guest_username</span><br><span class="line">    See  the boolean setting guest_<span class="built_in">enable</span> <span class="keyword">for</span> a description of what constitutes a guest</span><br><span class="line">    login. This setting is the real username <span class="built_in">which</span> guest users are mapped to.</span><br><span class="line"></span><br><span class="line">    Default: ftp</span><br></pre></td></tr></table></figure></p>
+<p>此时重启<code>vsftpd</code>服务<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@1478a474 ~]<span class="comment"># systemctl restart vsftpd</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># ss -tnlp | grep 21</span></span><br><span class="line">LISTEN     0      32          :::21                      :::*                   users:((<span class="string">"vsftpd"</span>,pid=47554,fd=3))</span><br></pre></td></tr></table></figure></p>
+<p>尝试使用虚拟用户<code>fedora</code>操作资源，得到一个报错信息，意思是当映射用户<code>vuser</code>的家目录具有写权限时无法做<code>chroot</code>禁锢操作。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@1478a474 ~]<span class="comment"># lftp 172.18.71.130 -u fedora</span></span><br><span class="line">Password:</span><br><span class="line">lftp fedora@172.18.71.130:~&gt; ls</span><br><span class="line">ls: Login failed: 500 OOPS: vsftpd: refusing to run with writable root inside chroot()</span><br></pre></td></tr></table></figure></p>
+<p>去掉<code>vuser</code>的家目录的写权限<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@1478a474 ~]<span class="comment"># chmod u-w /ftproot/</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># ls -dl /ftproot/</span></span><br><span class="line">dr-x------ 2 vuser vuser 59 Apr 22 11:50 /ftproot/</span><br></pre></td></tr></table></figure></p>
+<p>再来尝试上传，得到一个报错<code>Permission denied</code>，这个权限限制是<code>vsftpd</code>来控制的。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">lftp fedora@172.18.71.130:/&gt; lcd /etc</span><br><span class="line">lcd ok, <span class="built_in">local</span> cwd=/etc</span><br><span class="line">lftp fedora@172.18.71.130:/&gt; put issue</span><br><span class="line">put: Access failed: 550 Permission denied. (issue)</span><br></pre></td></tr></table></figure></p>
+<p>此权限是配置文件中的<code>anon_upload_enable</code>配置项来定义的，描述如下。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@1478a474 ~]<span class="comment"># man vsftpd.conf</span></span><br><span class="line"></span><br><span class="line">anon_upload_<span class="built_in">enable</span></span><br><span class="line">    If <span class="built_in">set</span> to YES, anonymous users will be permitted to upload files under certain con‐</span><br><span class="line">    ditions.  For  this  to  work,  the  option write_<span class="built_in">enable</span> must be activated, and the</span><br><span class="line">    anonymous ftp user must have write permission on  desired  upload  locations.  This</span><br><span class="line">    setting is also required <span class="keyword">for</span> virtual users to upload; by default, virtual users are</span><br><span class="line">    treated with anonymous (i.e. maximally restricted) privilege.</span><br><span class="line"></span><br><span class="line">    Default: NO</span><br></pre></td></tr></table></figure></p>
+<p>修改此配置项的设置<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@1478a474 ~]<span class="comment"># sed -n 's@^#anon_upload_enable.*@anon_upload_enable=YES@p' /etc/vsftpd/vsftpd.conf</span></span><br></pre></td></tr></table></figure></p>
+<p>重启<code>vsftpd</code>服务<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@1478a474 ~]<span class="comment"># systemctl restart vsftpd</span></span><br></pre></td></tr></table></figure></p>
+<p>再来尝试上传，仍然得到一个报错，不过这次是<code>Could not create file</code>，这个权限限制不再是<code>vsftpd</code>来控制了，而是映射的本地用户<code>vuser</code>在操作文件系统时的权限限制。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">lftp fedora@172.18.71.130:/&gt; lcd /etc</span><br><span class="line">lcd ok, <span class="built_in">local</span> cwd=/etc</span><br><span class="line">lftp fedora@172.18.71.130:/&gt; put issue</span><br><span class="line">put: Access failed: 553 Could not create file. (issue)</span><br></pre></td></tr></table></figure></p>
+<p>因为刚才去掉了<code>vuser</code>的家目录的写权限，所以目录不可写了。这是不是陷入了两难？加上写权限无法chroot，不加写权限，不能上传。其实很好解决，在其家目录创建子目录，给子目录写权限即可。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@1478a474 /]<span class="comment"># mkdir /ftproot/pub</span></span><br><span class="line">[root@1478a474 /]<span class="comment"># ls -dl /ftproot/pub/</span></span><br><span class="line">drwxr-xr-x 2 root root 6 Apr 22 12:25 /ftproot/pub/</span><br><span class="line">[root@1478a474 /]<span class="comment"># chown vuser:vuser /ftproot/pub/</span></span><br><span class="line">[root@1478a474 /]<span class="comment"># ls -dl /ftproot/pub/</span></span><br><span class="line">drwxr-xr-x 2 vuser vuser 6 Apr 22 12:25 /ftproot/pub/</span><br></pre></td></tr></table></figure></p>
+<p>此时再来尝试上传，便没有问题了。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">lftp fedora@172.18.71.130:/pub&gt; put issue</span><br><span class="line">23 bytes transferred</span><br></pre></td></tr></table></figure></p>
+<p>但是对于<code>ubuntu</code>来说，也可以上传了。因为它加载的配置权限也是<code>/etc/vsftpd/vsftpd.conf</code>中的<code>anon_upload_enable=YES</code>，又都映射的是服务器本地用户<code>vuser</code>。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@1478a474 ~]<span class="comment"># lftp 172.18.71.130 -u ubuntu</span></span><br><span class="line">Password:</span><br><span class="line">lftp ubuntu@172.18.71.130:/&gt; <span class="built_in">cd</span> pub/</span><br><span class="line"><span class="built_in">cd</span> ok, cwd=/pub</span><br><span class="line">lftp ubuntu@172.18.71.130:/pub&gt; put /etc/resolv.conf</span><br><span class="line">247 bytes transferred</span><br></pre></td></tr></table></figure></p>
+<p>如果想要区分开权限，应该让他们加载不同的配置文件，配置方法如下。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">[root@1478a474 ~]<span class="comment"># echo "user_config_dir=/etc/vsftpd/vusers/" &gt;&gt; /etc/vsftpd/vsftpd.conf</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># mkdir /etc/vsftpd/vusers</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># cat &lt;&lt; EOF &gt; /etc/vsftpd/vusers/fedora</span></span><br><span class="line">anonymous_<span class="built_in">enable</span>=YES</span><br><span class="line"><span class="built_in">local</span>_<span class="built_in">enable</span>=YES</span><br><span class="line">write_<span class="built_in">enable</span>=YES</span><br><span class="line">anon_upload_<span class="built_in">enable</span>=YES</span><br><span class="line">EOF</span><br><span class="line">[root@1478a474 ~]<span class="comment"># cat &lt;&lt; EOF &gt; /etc/vsftpd/vusers/ubuntu</span></span><br><span class="line">anonymous_<span class="built_in">enable</span>=YES</span><br><span class="line"><span class="built_in">local</span>_<span class="built_in">enable</span>=YES</span><br><span class="line">write_<span class="built_in">enable</span>=YES</span><br><span class="line">anon_upload_<span class="built_in">enable</span>=NO</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure></p>
+<p>再次重启<code>vsftpd</code>服务<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@1478a474 /]<span class="comment"># systemctl restart vsftpd</span></span><br></pre></td></tr></table></figure></p>
+<p>分别测试以不同用户身份上传<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[root@1478a474 ~]<span class="comment"># lftp 172.18.71.130 -u fedora</span></span><br><span class="line">Password:</span><br><span class="line">lftp fedora@172.18.71.130:~&gt; <span class="built_in">cd</span> pub</span><br><span class="line"><span class="built_in">cd</span> ok, cwd=/pub</span><br><span class="line">lftp fedora@172.18.71.130:/pub&gt; put /etc/redhat-release</span><br><span class="line">38 bytes transferred</span><br><span class="line"></span><br><span class="line">[root@1478a474 ~]<span class="comment"># lftp 172.18.71.130 -u ubuntu</span></span><br><span class="line">Password:</span><br><span class="line">lftp ubuntu@172.18.71.130:~&gt; <span class="built_in">cd</span> pub</span><br><span class="line"><span class="built_in">cd</span> ok, cwd=/pub</span><br><span class="line">lftp ubuntu@172.18.71.130:/pub&gt; put /etc/grub2.cfg</span><br><span class="line">put: Access failed: 550 Permission denied. (grub2.cfg)</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/mariadb/" rel="tag">#mariadb</a>
+          
+            <a href="/tags/vsftpd/" rel="tag">#vsftpd</a>
+          
+            <a href="/tags/pam/" rel="tag">#pam</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/04/20/LAMP-CentOS-6平台双机FastCGI模型/" rel="next" title="LAMP--CentOS-6平台双机FastCGI模型">
+                <i class="fa fa-chevron-left"></i> LAMP--CentOS-6平台双机FastCGI模型
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <div class="ds-share flat" data-thread-key="2016/04/22/CentOS-7平台上搭建vsftpd服务器/"
+     data-title="CentOS-7平台上搭建vsftpd服务器"
+     data-content=""
+     data-url="http://www.twoyang.net/2016/04/22/CentOS-7平台上搭建vsftpd服务器/">
+  <div class="ds-share-inline">
+    <ul  class="ds-share-icons-16">
+
+      <li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
+      <li><a class="ds-weibo" href="javascript:void(0);" data-service="weibo">微博</a></li>
+      <li><a class="ds-qzone" href="javascript:void(0);" data-service="qzone">QQ空间</a></li>
+      <li><a class="ds-qqt" href="javascript:void(0);" data-service="qqt">腾讯微博</a></li>
+      <li><a class="ds-wechat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+
+    </ul>
+    <div class="ds-share-icons-more">
+    </div>
+  </div>
+</div>
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/04/22/CentOS-7平台上搭建vsftpd服务器/"
+           data-title="CentOS-7平台上搭建vsftpd服务器" data-url="http://www.twoyang.net/2016/04/22/CentOS-7平台上搭建vsftpd服务器/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xltax.com1.z0.glb.clouddn.com/twoyang.jpg"
+               alt="twoyang" />
+          <p class="site-author-name" itemprop="name">twoyang</p>
+          <p class="site-description motion-element" itemprop="description">The quieter you become.The more you are able to hear.</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">8</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">9</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        <div class="links-of-blogroll motion-element">
+          
+            <div class="links-of-blogroll-title">友情链接</div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.magedu.com/" target="_blank">马哥教育</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="https://shadowsocks.be/9.html" target="_blank">科学上网</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.isetsuna.com/hexo/introduction/" target="_blank">Hexo博客系列</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://mrchen.org/" target="_blank">Mrchen</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.chen-hao.com.cn/" target="_blank">chen-hao</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://geass.link/wp/" target="_blank">Lei Jin's blog</a>
+                </li>
+              
+            </ul>
+          
+        </div>
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#实验环境"><span class="nav-number">1.</span> <span class="nav-text">实验环境</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#最简应用"><span class="nav-number">2.</span> <span class="nav-text">最简应用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#用户"><span class="nav-number">3.</span> <span class="nav-text">用户</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#基于pam的虚拟用户机制"><span class="nav-number">4.</span> <span class="nav-text">基于pam的虚拟用户机制</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">twoyang</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+
+  
+
+
+
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=0.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=0.5.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=0.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=0.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=0.5.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"twoyang"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+  
+
+
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>
