@@ -1,0 +1,636 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
+
+
+
+
+  <link href="//fonts.googleapis.com/css?family=Lato:300,400,700,400italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=0.5.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="iptables," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=0.5.0" />
+
+
+
+
+
+
+<meta name="description" content="说明iptables/netfilter虽然只是Linux的一个基本组件，但是它基本涉及到了Linux全领域的知识，想要玩的溜，仅仅知道它是怎么工作的是远远不够的，还需要知道网络结构，协议报文封装格式，常见服务的监听端口和工作原理等等。要想深入浅出将其说明白恐怕需要单独开个文档类的项目，因此本文不打算介绍iptables/netfilter详细的工作流程，而是简单介绍一下实际使用时的基本应用。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iptables基本应用">
+<meta property="og:url" content="http://www.twoyang.net/2016/05/07/iptables基本应用/index.html">
+<meta property="og:site_name" content="TwOyAng'blog">
+<meta property="og:description" content="说明iptables/netfilter虽然只是Linux的一个基本组件，但是它基本涉及到了Linux全领域的知识，想要玩的溜，仅仅知道它是怎么工作的是远远不够的，还需要知道网络结构，协议报文封装格式，常见服务的监听端口和工作原理等等。要想深入浅出将其说明白恐怕需要单独开个文档类的项目，因此本文不打算介绍iptables/netfilter详细的工作流程，而是简单介绍一下实际使用时的基本应用。">
+<meta property="og:updated_time" content="2016-05-07T08:33:10.860Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="iptables基本应用">
+<meta name="twitter:description" content="说明iptables/netfilter虽然只是Linux的一个基本组件，但是它基本涉及到了Linux全领域的知识，想要玩的溜，仅仅知道它是怎么工作的是远远不够的，还需要知道网络结构，协议报文封装格式，常见服务的监听端口和工作原理等等。要想深入浅出将其说明白恐怕需要单独开个文档类的项目，因此本文不打算介绍iptables/netfilter详细的工作流程，而是简单介绍一下实际使用时的基本应用。">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+  <title> iptables基本应用 | TwOyAng'blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=55583792";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">TwOyAng'blog</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-th fa-fw"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                iptables基本应用
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-05-07T10:17:39+08:00" content="2016-05-07">
+              2016-05-07
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Security/" itemprop="url" rel="index">
+                    <span itemprop="name">Security</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/05/07/iptables基本应用/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/07/iptables基本应用/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h1><p><code>iptables/netfilter</code>虽然只是<code>Linux</code>的一个基本组件，但是它基本涉及到了<code>Linux</code>全领域的知识，想要玩的溜，仅仅知道它是怎么工作的是远远不够的，还需要知道网络结构，协议报文封装格式，常见服务的监听端口和工作原理等等。要想深入浅出将其说明白恐怕需要单独开个文档类的项目，因此本文不打算介绍<code>iptables/netfilter</code>详细的工作流程，而是简单介绍一下实际使用时的基本应用。</p>
+<a id="more"></a>
+<h1 id="基本应用"><a href="#基本应用" class="headerlink" title="基本应用"></a>基本应用</h1><h2 id="远程配置"><a href="#远程配置" class="headerlink" title="远程配置"></a>远程配置</h2><p>通常我们都会通过<code>ssh</code>服务远程连接到服务器上去配置，但是如果不小心将<code>ssh</code>连接的数据报文给阻挡了，远程连接就会失效而无法进行配置，此时除了直接登录物理机器去修改配置没有其它的办法。<br>因此可以使用定时任务这个小技巧，即在配置之前设置一个定时任务，过一段时间清除掉所有规则，这样万一出现了上述情况，只需要耐心等待一段时间就可以了。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"># 1小时后清除所有规则，并将默认策略均设为ACCEPT。</span><br><span class="line">at now +1hours &lt;&lt; EOF</span><br><span class="line">iptables -F</span><br><span class="line">iptables -P INPUT ACCEPT</span><br><span class="line">iptables -P OUTPUT ACCEPT</span><br><span class="line">iptables -P FORWARD ACCEPT</span><br><span class="line">EOF</span><br><span class="line"># 查看当前定时任务编号</span><br><span class="line">[root@791a92c9 ~]# atq</span><br><span class="line">1	Thu Apr 21 04:07:00 2016 a root</span><br><span class="line"># 清除指定编号的定时任务</span><br><span class="line">[root@791a92c9 ~]# atrm 1</span><br></pre></td></tr></table></figure>
+<p>在开始远程配置<code>iptables</code>时，首先要放行<code>INPUT</code>和<code>OUTPUT</code>链上的<code>ssh</code>数据报文(如果<code>sshd</code>使用默认端口的话，就是到本机<code>22</code>号端口和从本机<code>22</code>号端口出去的报文)，保证远程连接能正常工作之后，才可以将默认策略改为<code>DROP</code>。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">iptables -A INPUT -d 172.18.71.101 -p tcp --dport 22 -j ACCEPT</span><br><span class="line">iptables -A OUTPUT -s 172.18.71.101 -p tcp --sport 22 -j ACCEPT</span><br><span class="line">iptables -P INPUT DROP</span><br><span class="line">iptables -P OUTPUT DROP</span><br></pre></td></tr></table></figure></p>
+<h2 id="万金油"><a href="#万金油" class="headerlink" title="万金油"></a>万金油</h2><p>因为连接追踪模块的存在，内核可以判断出数据报文是新的连接请求，还是已建立的连接。这样我们只需要在第一次接受到连接请求进行严格检查即可以过滤掉非法请求了，而对于已建立的连接直接放行就可以。因为对于繁忙的服务器来说，处理的大部分的数据报文还是这些已建立连接的，直接放行已建立连接的数据报文可以大大降低资源损耗。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"># 在INPUT和OUTPUT链上直接放行状态为RELATED,ESTABLISHED的数据报文。</span><br><span class="line">iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT</span><br><span class="line">iptables -A OUTPUT -m state --state RELATED,ESTABLISHED -j ACCEPT</span><br><span class="line"># 严格检查新的连接请求，仅开放服务器提供服务的端口。</span><br><span class="line">iptables -A INPUT -d 172.18.71.201/32 -p tcp -m tcp -m multiport --dports 22,80 -m state --state NEW -j ACCEPT</span><br><span class="line"># 默认策略均为DROP</span><br><span class="line">iptables -P INPUT DROP</span><br><span class="line">iptables -P FORWARD DROP</span><br><span class="line">iptables -P OUTPUT DROP</span><br><span class="line"># 当使用到state模块时，连接追踪模块会自动加载</span><br><span class="line">[root@791a92c9 ~]# lsmod | grep nf_conntrack</span><br><span class="line">nf_conntrack_ipv4      14862  3 </span><br><span class="line">nf_defrag_ipv4         12729  1 nf_conntrack_ipv4</span><br><span class="line">nf_conntrack          105745  2 xt_conntrack,nf_conntrack_ipv4</span><br></pre></td></tr></table></figure>
+<h2 id="本地回环"><a href="#本地回环" class="headerlink" title="本地回环"></a>本地回环</h2><p>有时候规则设置好了，发现对外服务端口都打开了，从外面访问都正常，但是本机访问反而被阻挡了。这是因为本机进程在进行通信时往往都是走的本地回环接口<code>lo</code>，它的接口地址是<code>127.0.0.1</code>。本地的回环地址通信是可信的，不应该被阻挡。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">iptables -A INPUT  -i lo -j ACCEPT</span><br><span class="line">iptables -A OUTPUT -o lo -j ACCEPT</span><br></pre></td></tr></table></figure>
+<h2 id="ping"><a href="#ping" class="headerlink" title="ping"></a>ping</h2><p>一般来说服务器应该禁<code>ping</code>，这样可以不被一些基于<code>icmp</code>工作的扫描工具或者是快速扫描模式扫到，减少成为靶子的危险，但从服务器<code>ping</code>出去不应该禁止。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># ping出去时，echo-request报文是从OUTPUT链出去，应放行。</span><br><span class="line">iptables -A OUTPUT -p icmp --icmp-type echo-request -j ACCEPT</span><br><span class="line"># echo-reply报文是从INPUT链进来，应放行。</span><br><span class="line">iptables -A INPUT -p icmp --icmp-type echo-reply -j ACCEPT</span><br></pre></td></tr></table></figure></p>
+<p>完成以上配置后，使用<code>iptables -S</code>查看可以发现。<code>echo-request</code>自动转换为了<code>8</code>，<code>echo-reply</code>自动转换为了<code>0</code>，这个是<code>icmp</code>的类型码（可搜索<code>icmp type code</code>了解详细）<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@791a92c9 ~]# iptables -S</span><br><span class="line">...</span><br><span class="line">-A INPUT -p icmp -m icmp --icmp-type 0 -j ACCEPT</span><br><span class="line">-A OUTPUT -m state --state RELATED,ESTABLISHED -j ACCEPT</span><br><span class="line">-A OUTPUT -p icmp -m icmp --icmp-type 8 -j ACCEPT</span><br></pre></td></tr></table></figure></p>
+<h2 id="安全设置"><a href="#安全设置" class="headerlink" title="安全设置"></a>安全设置</h2><p><a href="http://drops.wooyun.org/tips/1424" target="_blank" rel="external">《Iptables入门教程》</a>，这里给出的连接是<code>wooyun</code>上的一篇文章，其中最后一章介绍了使用<code>iptables</code>抵抗常见攻击的方法，很实用。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/iptables/" rel="tag">#iptables</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/04/22/CentOS-7平台上基于NFS的LAMP搭建/" rel="next" title="CentOS-7平台上基于NFS的LAMP搭建">
+                <i class="fa fa-chevron-left"></i> CentOS-7平台上基于NFS的LAMP搭建
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <div class="ds-share flat" data-thread-key="2016/05/07/iptables基本应用/"
+     data-title="iptables基本应用"
+     data-content=""
+     data-url="http://www.twoyang.net/2016/05/07/iptables基本应用/">
+  <div class="ds-share-inline">
+    <ul  class="ds-share-icons-16">
+
+      <li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
+      <li><a class="ds-weibo" href="javascript:void(0);" data-service="weibo">微博</a></li>
+      <li><a class="ds-qzone" href="javascript:void(0);" data-service="qzone">QQ空间</a></li>
+      <li><a class="ds-qqt" href="javascript:void(0);" data-service="qqt">腾讯微博</a></li>
+      <li><a class="ds-wechat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+
+    </ul>
+    <div class="ds-share-icons-more">
+    </div>
+  </div>
+</div>
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/05/07/iptables基本应用/"
+           data-title="iptables基本应用" data-url="http://www.twoyang.net/2016/05/07/iptables基本应用/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xltax.com1.z0.glb.clouddn.com/twoyang.jpg"
+               alt="twoyang" />
+          <p class="site-author-name" itemprop="name">twoyang</p>
+          <p class="site-description motion-element" itemprop="description">The quieter you become.The more you are able to hear.</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">10</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">11</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        <div class="links-of-blogroll motion-element">
+          
+            <div class="links-of-blogroll-title">友情链接</div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.magedu.com/" target="_blank">马哥教育</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="https://shadowsocks.be/9.html" target="_blank">科学上网</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.isetsuna.com/hexo/introduction/" target="_blank">Hexo博客系列</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://mrchen.org/" target="_blank">Mrchen</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.chen-hao.com.cn/" target="_blank">chen-hao</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://geass.link/wp/" target="_blank">Lei Jin's blog</a>
+                </li>
+              
+            </ul>
+          
+        </div>
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#说明"><span class="nav-number">1.</span> <span class="nav-text">说明</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#基本应用"><span class="nav-number">2.</span> <span class="nav-text">基本应用</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#远程配置"><span class="nav-number">2.1.</span> <span class="nav-text">远程配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#万金油"><span class="nav-number">2.2.</span> <span class="nav-text">万金油</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#本地回环"><span class="nav-number">2.3.</span> <span class="nav-text">本地回环</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ping"><span class="nav-number">2.4.</span> <span class="nav-text">ping</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安全设置"><span class="nav-number">2.5.</span> <span class="nav-text">安全设置</span></a></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">twoyang</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+
+  
+
+
+
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=0.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=0.5.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=0.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=0.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=0.5.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"twoyang"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+  
+
+
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>
