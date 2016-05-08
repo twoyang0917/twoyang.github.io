@@ -60,7 +60,7 @@
 <meta name="description" content="The quieter you become.The more you are able to hear.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="TwOyAng'blog">
-<meta property="og:url" content="http://www.twoyang.net/archives/2016/05/index.html">
+<meta property="og:url" content="http://www.twoyang.net/page/3/index.html">
 <meta property="og:site_name" content="TwOyAng'blog">
 <meta property="og:description" content="The quieter you become.The more you are able to hear.">
 <meta name="twitter:card" content="summary">
@@ -83,7 +83,7 @@
   };
 </script>
 
-  <title> 归档 | TwOyAng'blog </title>
+  <title> TwOyAng'blog </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -113,7 +113,9 @@
     
   
 
-  <div class="container one-collumn sidebar-position-left  page-archive  ">
+  <div class="container one-collumn sidebar-position-left 
+   page-home 
+ ">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -200,103 +202,139 @@
         <div class="content-wrap">
           <div id="content" class="content">
             
+  <section id="posts" class="posts-expand">
+    
+      
 
-  <section id="posts" class="posts-collapse">
-    <span class="archive-move-on"></span>
+  
+  
 
-    <span class="archive-page-counter">
-      
-      
-      
-        
-      
-      嗯..! 目前共计 11 篇日志。 继续努力。
-    </span>
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
 
     
+      <header class="post-header">
 
-      
-      
-      
-
-      
         
-        <div class="collection-title">
-          <h2 class="archive-year motion-element" id="archive-year-2016">2016</h2>
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/04/11/使用OpenSSL创建私有CA/" itemprop="url">
+                  使用OpenSSL创建私有CA
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-04-11T22:46:33+08:00" content="2016-04-11">
+              2016-04-11
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Server/" itemprop="url" rel="index">
+                    <span itemprop="name">Server</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/04/11/使用OpenSSL创建私有CA/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/04/11/使用OpenSSL创建私有CA/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
         </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
       
       
 
       
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h1 class="post-title">
         
-            <a class="post-title-link" href="/2016/05/08/rsync-inotify实现数据同步/" itemprop="url">
-              
-                <span itemprop="name">rsync+inotify实现数据同步</span>
-              
+          <h1 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h1><ul>
+<li>首先确认安装了<code>openssl</code>和<code>openssl-libs</code><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># rpm -qa | grep openssl</span></span><br><span class="line">openssl-libs-1.0.1e-42.el7.x86_64</span><br><span class="line">openssl-1.0.1e-42.el7.x86_64</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>配置文件<code>/etc/pki/tls/openssl.cnf</code>是<code>ini</code>风格的，其中比较常用的配置就是<code>CA</code>自身的配置和<code>req</code>发证请求相关的配置。配置文件中各配置项的作用描述得很详细了，没必要逐项解释，需要说明的是：</p>
+<ul>
+<li><p><code>CA</code>自身的配置主要就是<code>CA</code>的工作目录与文件的结构和命名，因此在后面创建<code>CA</code>时，不存在的目录和文件需要手动创建，且命名需要如配置文件中匹配。</p>
+</li>
+<li><p><code>req</code>发证请求配置主要是在需要在<code>CA</code>发证的各客户端上去配置的。主要是配置一些默认信息，免得每次都需要填写相同的信息。</p>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2016/04/11/使用OpenSSL创建私有CA/#more" rel="contents">
+              阅读全文 &raquo;
             </a>
+          </div>
         
-      </h1>
+      
+    </div>
 
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2016-05-08T20:27:41+08:00"
-              content="2016-05-08" >
-          05-08
-        </time>
-      </div>
+    <div>
+      
+    </div>
 
-    </header>
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
   </article>
 
 
-
     
-
-      
-      
-      
-
-      
-      
-
-      
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h1 class="post-title">
-        
-            <a class="post-title-link" href="/2016/05/07/iptables基本应用/" itemprop="url">
-              
-                <span itemprop="name">iptables基本应用</span>
-              
-            </a>
-        
-      </h1>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2016-05-07T10:17:39+08:00"
-              content="2016-05-07" >
-          05-07
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
-    
-
   </section>
 
   
+  <nav class="pagination">
+    <a class="extend prev" rel="prev" href="/page/2/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span>
+  </nav>
 
 
 
@@ -482,12 +520,6 @@
   
 
   
-  
-    <script type="text/javascript" id="motion.page.archive">
-      $('.archive-year').velocity('transition.slideLeftIn');
-    </script>
-  
-
 
   
 

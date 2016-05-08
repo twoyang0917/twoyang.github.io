@@ -225,6 +225,129 @@
             
               
                 
+                <a class="post-title-link" href="/2016/04/20/LAMP-CentOS-7平台三机FastCGI模型/" itemprop="url">
+                  LAMP--CentOS-7平台三机FastCGI模型
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-04-20T13:27:02+08:00" content="2016-04-20">
+              2016-04-20
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Server/" itemprop="url" rel="index">
+                    <span itemprop="name">Server</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/04/20/LAMP-CentOS-7平台三机FastCGI模型/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/04/20/LAMP-CentOS-7平台三机FastCGI模型/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h1 id="需求"><a href="#需求" class="headerlink" title="需求"></a>需求</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">CentOS-7平台上搭建LAMP，其中php作为独立的服务工作；</span><br><span class="line">(1) 三者分离于三台主机；</span><br><span class="line">(2) 一个虚拟主机用于提供phpMyAdmin；另一个虚拟主机用于提供wordpress；</span><br><span class="line">(3) 安装xcache，为php提供加速；</span><br></pre></td></tr></table></figure>
+<h1 id="解析"><a href="#解析" class="headerlink" title="解析"></a>解析</h1><ul>
+<li>由于<code>CentOS-7</code>平台提供了以上各应用的<code>rpm</code>安装包，且均包含了各应用的新特性，所以各应用程序可以直接使用<code>yum</code>源安装，而无需通过编译源码来安装。</li>
+<li><code>xcache</code>为<code>EPEL</code>源中提供的应用程序，因此需要配置启用<code>EPEL</code>源。</li>
+<li>因为<code>php</code>要作为独立的服务单独运行于一台服务器上，因此不在是安装<code>php</code>，而是要安装<code>php-fpm</code>了。</li>
+<li><code>httpd</code>与<code>php</code>之间需要通过<code>FastCGI</code>协议来连接，<code>httpd</code>其实是作为作为反向代理来工作的，<code>httpd</code>中就需要加载<code>mod_proxy</code>和<code>mod_proxy_fcgi</code>模块了。</li>
+</ul>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2016/04/20/LAMP-CentOS-7平台三机FastCGI模型/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2016/04/20/LAMP-CentOS-7平台双机module模型/" itemprop="url">
                   LAMP--CentOS-7平台双机module模型
                 </a>
@@ -685,136 +808,11 @@
 
 
     
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/04/11/使用OpenSSL创建私有CA/" itemprop="url">
-                  使用OpenSSL创建私有CA
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-04-11T22:46:33+08:00" content="2016-04-11">
-              2016-04-11
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Server/" itemprop="url" rel="index">
-                    <span itemprop="name">Server</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2016/04/11/使用OpenSSL创建私有CA/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/04/11/使用OpenSSL创建私有CA/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h1 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h1><ul>
-<li>首先确认安装了<code>openssl</code>和<code>openssl-libs</code><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># rpm -qa | grep openssl</span></span><br><span class="line">openssl-libs-1.0.1e-42.el7.x86_64</span><br><span class="line">openssl-1.0.1e-42.el7.x86_64</span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-<p>配置文件<code>/etc/pki/tls/openssl.cnf</code>是<code>ini</code>风格的，其中比较常用的配置就是<code>CA</code>自身的配置和<code>req</code>发证请求相关的配置。配置文件中各配置项的作用描述得很详细了，没必要逐项解释，需要说明的是：</p>
-<ul>
-<li><p><code>CA</code>自身的配置主要就是<code>CA</code>的工作目录与文件的结构和命名，因此在后面创建<code>CA</code>时，不存在的目录和文件需要手动创建，且命名需要如配置文件中匹配。</p>
-</li>
-<li><p><code>req</code>发证请求配置主要是在需要在<code>CA</code>发证的各客户端上去配置的。主要是配置一些默认信息，免得每次都需要填写相同的信息。</p>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2016/04/11/使用OpenSSL创建私有CA/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span>
+    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/3/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -855,7 +853,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">10</span>
+              <span class="site-state-item-count">11</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -863,7 +861,7 @@
           
             <div class="site-state-item site-state-categories">
               <a href="/categories">
-                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-count">3</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -872,7 +870,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">11</span>
+                <span class="site-state-item-count">13</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
@@ -909,14 +907,6 @@
               
                 <li class="links-of-blogroll-item">
                   <a href="http://mrchen.org/" target="_blank">Mrchen</a>
-                </li>
-              
-                <li class="links-of-blogroll-item">
-                  <a href="http://www.chen-hao.com.cn/" target="_blank">chen-hao</a>
-                </li>
-              
-                <li class="links-of-blogroll-item">
-                  <a href="http://geass.link/wp/" target="_blank">Lei Jin's blog</a>
                 </li>
               
             </ul>

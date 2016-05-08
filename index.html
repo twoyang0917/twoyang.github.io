@@ -225,6 +225,124 @@
             
               
                 
+                <a class="post-title-link" href="/2016/05/08/rsync-inotify实现数据同步/" itemprop="url">
+                  rsync+inotify实现数据同步
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-05-08T20:27:41+08:00" content="2016-05-08">
+              2016-05-08
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Cluster/" itemprop="url" rel="index">
+                    <span itemprop="name">Cluster</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/05/08/rsync-inotify实现数据同步/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/08/rsync-inotify实现数据同步/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h1 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h1><p>在集群中实现数据共享一般有以下这么几种方式,<code>rsync+inotify</code>是其中独特的一种.它的原理是在集群节点之间进行数据同步,说白了就是主节点数据有更新就立即向其它节点复制差异部分的数据文件,以实现节点之间数据保持一致.不过这种方式效率极低,稍有实力的公司都不会采用这种方案.但是它的好处就在于便宜,我们做实验的时候还是可以用一用.<br><img src="http://7xltax.com1.z0.glb.clouddn.com/data_share.png" alt="data_share"></p>
+<p>本文仅记录实现过程,需要了解具体技术细节请参照<a href="http://www.178linux.com/6318">《rsync+inotify 实现数据实时同步》</a>.<br>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2016/05/08/rsync-inotify实现数据同步/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2016/05/07/iptables基本应用/" itemprop="url">
                   iptables基本应用
                 </a>
@@ -686,134 +804,11 @@
 
 
     
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/04/20/LAMP-CentOS-7平台三机FastCGI模型/" itemprop="url">
-                  LAMP--CentOS-7平台三机FastCGI模型
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-04-20T13:27:02+08:00" content="2016-04-20">
-              2016-04-20
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Server/" itemprop="url" rel="index">
-                    <span itemprop="name">Server</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2016/04/20/LAMP-CentOS-7平台三机FastCGI模型/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/04/20/LAMP-CentOS-7平台三机FastCGI模型/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h1 id="需求"><a href="#需求" class="headerlink" title="需求"></a>需求</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">CentOS-7平台上搭建LAMP，其中php作为独立的服务工作；</span><br><span class="line">(1) 三者分离于三台主机；</span><br><span class="line">(2) 一个虚拟主机用于提供phpMyAdmin；另一个虚拟主机用于提供wordpress；</span><br><span class="line">(3) 安装xcache，为php提供加速；</span><br></pre></td></tr></table></figure>
-<h1 id="解析"><a href="#解析" class="headerlink" title="解析"></a>解析</h1><ul>
-<li>由于<code>CentOS-7</code>平台提供了以上各应用的<code>rpm</code>安装包，且均包含了各应用的新特性，所以各应用程序可以直接使用<code>yum</code>源安装，而无需通过编译源码来安装。</li>
-<li><code>xcache</code>为<code>EPEL</code>源中提供的应用程序，因此需要配置启用<code>EPEL</code>源。</li>
-<li>因为<code>php</code>要作为独立的服务单独运行于一台服务器上，因此不在是安装<code>php</code>，而是要安装<code>php-fpm</code>了。</li>
-<li><code>httpd</code>与<code>php</code>之间需要通过<code>FastCGI</code>协议来连接，<code>httpd</code>其实是作为作为反向代理来工作的，<code>httpd</code>中就需要加载<code>mod_proxy</code>和<code>mod_proxy_fcgi</code>模块了。</li>
-</ul>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2016/04/20/LAMP-CentOS-7平台三机FastCGI模型/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -854,7 +849,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">10</span>
+              <span class="site-state-item-count">11</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -862,7 +857,7 @@
           
             <div class="site-state-item site-state-categories">
               <a href="/categories">
-                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-count">3</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -871,7 +866,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">11</span>
+                <span class="site-state-item-count">13</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
@@ -908,14 +903,6 @@
               
                 <li class="links-of-blogroll-item">
                   <a href="http://mrchen.org/" target="_blank">Mrchen</a>
-                </li>
-              
-                <li class="links-of-blogroll-item">
-                  <a href="http://www.chen-hao.com.cn/" target="_blank">chen-hao</a>
-                </li>
-              
-                <li class="links-of-blogroll-item">
-                  <a href="http://geass.link/wp/" target="_blank">Lei Jin's blog</a>
                 </li>
               
             </ul>

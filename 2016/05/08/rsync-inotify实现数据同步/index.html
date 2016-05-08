@@ -1,0 +1,646 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
+
+
+
+
+  <link href="//fonts.googleapis.com/css?family=Lato:300,400,700,400italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=0.5.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="rsync,inotify," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=0.5.0" />
+
+
+
+
+
+
+<meta name="description" content="说明在集群中实现数据共享一般有以下这么几种方式,rsync+inotify是其中独特的一种.它的原理是在集群节点之间进行数据同步,说白了就是主节点数据有更新就立即向其它节点复制差异部分的数据文件,以实现节点之间数据保持一致.不过这种方式效率极低,稍有实力的公司都不会采用这种方案.但是它的好处就在于便宜,我们做实验的时候还是可以用一用.
+本文仅记录实现过程,需要了解具体技术细节请参照《rsync+i">
+<meta property="og:type" content="article">
+<meta property="og:title" content="rsync+inotify实现数据同步">
+<meta property="og:url" content="http://www.twoyang.net/2016/05/08/rsync-inotify实现数据同步/index.html">
+<meta property="og:site_name" content="TwOyAng'blog">
+<meta property="og:description" content="说明在集群中实现数据共享一般有以下这么几种方式,rsync+inotify是其中独特的一种.它的原理是在集群节点之间进行数据同步,说白了就是主节点数据有更新就立即向其它节点复制差异部分的数据文件,以实现节点之间数据保持一致.不过这种方式效率极低,稍有实力的公司都不会采用这种方案.但是它的好处就在于便宜,我们做实验的时候还是可以用一用.
+本文仅记录实现过程,需要了解具体技术细节请参照《rsync+i">
+<meta property="og:image" content="http://7xltax.com1.z0.glb.clouddn.com/data_share.png">
+<meta property="og:updated_time" content="2016-05-08T14:51:07.812Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="rsync+inotify实现数据同步">
+<meta name="twitter:description" content="说明在集群中实现数据共享一般有以下这么几种方式,rsync+inotify是其中独特的一种.它的原理是在集群节点之间进行数据同步,说白了就是主节点数据有更新就立即向其它节点复制差异部分的数据文件,以实现节点之间数据保持一致.不过这种方式效率极低,稍有实力的公司都不会采用这种方案.但是它的好处就在于便宜,我们做实验的时候还是可以用一用.
+本文仅记录实现过程,需要了解具体技术细节请参照《rsync+i">
+<meta name="twitter:image" content="http://7xltax.com1.z0.glb.clouddn.com/data_share.png">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+  <title> rsync+inotify实现数据同步 | TwOyAng'blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=55583792";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">TwOyAng'blog</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-th fa-fw"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                rsync+inotify实现数据同步
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-05-08T20:27:41+08:00" content="2016-05-08">
+              2016-05-08
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Cluster/" itemprop="url" rel="index">
+                    <span itemprop="name">Cluster</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/05/08/rsync-inotify实现数据同步/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/08/rsync-inotify实现数据同步/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h1><p>在集群中实现数据共享一般有以下这么几种方式,<code>rsync+inotify</code>是其中独特的一种.它的原理是在集群节点之间进行数据同步,说白了就是主节点数据有更新就立即向其它节点复制差异部分的数据文件,以实现节点之间数据保持一致.不过这种方式效率极低,稍有实力的公司都不会采用这种方案.但是它的好处就在于便宜,我们做实验的时候还是可以用一用.<br><img src="http://7xltax.com1.z0.glb.clouddn.com/data_share.png" alt="data_share"></p>
+<p>本文仅记录实现过程,需要了解具体技术细节请参照<a href="http://www.178linux.com/6318" target="_blank" rel="external">《rsync+inotify 实现数据实时同步》</a>.<br><a id="more"></a></p>
+<h1 id="规划"><a href="#规划" class="headerlink" title="规划"></a>规划</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">HostA</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: 80e54d87.twoyang.com</span><br><span class="line">ipaddr: 172.18.71.101</span><br><span class="line"></span><br><span class="line">HostB</span><br><span class="line">OS: CentOS-6-x86_64</span><br><span class="line">hostname: 8a028eb8.twoyang.com</span><br><span class="line">ipaddr: 172.18.71.201</span><br></pre></td></tr></table></figure>
+<p>两台主机均为最小化安装,<code>iptalbes</code>和<code>SELinux</code>均处于关闭状态. <code>HostB</code>上监控数据变化,发生数据更新时向<code>HostA</code>同步数据.</p>
+<h1 id="配置HostA"><a href="#配置HostA" class="headerlink" title="配置HostA"></a>配置HostA</h1><p>默认<code>CentOS-7-x86_64</code>最小化安装是已经安装了<code>rsync</code>包的.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@80e54d87 ~]<span class="comment"># rpm -ql rsync </span></span><br><span class="line">/etc/rsyncd.conf</span><br><span class="line">/etc/sysconfig/rsyncd</span><br><span class="line">/usr/bin/rsync</span><br><span class="line">/usr/lib/systemd/system/rsyncd.service</span><br><span class="line">/usr/lib/systemd/system/rsyncd.socket</span><br><span class="line">...</span><br></pre></td></tr></table></figure></p>
+<p>配置文件是<code>/etc/rsyncd.conf</code>,所有配置项都是注释的,需要了解所有配置项的含义请阅读<code>man</code>文档`.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@80e54d87 ~]<span class="comment"># man rsyncd.conf</span></span><br></pre></td></tr></table></figure></p>
+<p>最终配置完成如下:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">[root@80e54d87 ~]<span class="comment"># cat /etc/rsyncd.conf</span></span><br><span class="line">uid = root   //rsync同步共享用户的身份（如在模块中定义则覆盖全局定义）</span><br><span class="line">gid = root  //rsync同步共享用户组的身份（如在模块中定义则覆盖全局定义）</span><br><span class="line">use chroot = no //不使用chroot</span><br><span class="line">port = 873    //定义监听端口默认873，使用873端口时此项可以省略</span><br><span class="line">max connections =200  //服务器最大并发数</span><br><span class="line">timeout = 300       //会话超时时长</span><br><span class="line">pid file = /var/run/rsyncd.pid  //pid文件存放路径</span><br><span class="line">lock file = /var/run/rsyncd.lock //lock文件存放路径，服务启动停止时会用到</span><br><span class="line"><span class="built_in">log</span> file = /var/<span class="built_in">log</span>/rsyncd.log  //日志文件存放路径</span><br><span class="line"><span class="built_in">log</span> format = %h %o %l %b      //日志记录格式</span><br><span class="line">ignore errors             //忽略错误信息</span><br><span class="line"><span class="built_in">read</span> only = <span class="literal">false</span>          //是否允许用户上传文件，默认为<span class="literal">true</span></span><br><span class="line">list = <span class="literal">false</span>             //是否允许用户列出文件,默认为<span class="literal">true</span></span><br><span class="line">write only = <span class="literal">false</span>         //是否允许下载,默认为<span class="literal">true</span></span><br><span class="line">hosts allow = 172.18.71.101/24  //允许哪些主机访问</span><br><span class="line">hosts deny = *           //拒绝哪些主机访问</span><br><span class="line">auth users = sync          //同步时认证所需的用户</span><br><span class="line">secrets file = /etc/rsyncd.passwd //认证时所需的密码文件</span><br><span class="line"></span><br><span class="line"><span class="comment">#Directory to be synced</span></span><br><span class="line">[data]   //模块名称，客户端需精确指定该模块名称</span><br><span class="line">path = /data //模块对应的目录路径</span><br></pre></td></tr></table></figure></p>
+<p>创建认证时的密码文件<code>/etc/rsyncd.passwd</code>(需要用户名和密码),明文存储,仅属主可读.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@80e54d87 ~]<span class="comment"># echo "sync:123456" &gt; /etc/rsyncd.passwd</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># chmod 600 /etc/rsyncd.passwd</span></span><br></pre></td></tr></table></figure></p>
+<p>创建模块对应的目录,并确保属主和属组与配置文件中定义的<code>uid</code>和<code>gid</code>一致.复制一个文件进去,以便后面做测试.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@80e54d87 ~]<span class="comment"># mkdir -p /data/</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># ls -dl /data/</span></span><br><span class="line">drwxr-xr-x 2 root root 6 May  9 05:18 /data/</span><br><span class="line">[root@80e54d87 ~]<span class="comment"># cp /var/log/messages /data/</span></span><br></pre></td></tr></table></figure></p>
+<p>启动服务,并检查进程和监听端口.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@80e54d87 ~]<span class="comment"># systemctl start rsyncd.service </span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># ps aux | grep rsync</span></span><br><span class="line">root      32742  0.0  0.1 114640  1156 ?        Ss   05:25   0:00 /usr/bin/rsync --daemon --no-detach</span><br><span class="line">root      32755  0.0  0.0 112644   948 pts/1    R+   05:25   0:00 grep --color=auto rsync</span><br><span class="line">[root@80e54d87 ~]<span class="comment"># ss -tnl | grep 873</span></span><br><span class="line">LISTEN     0      5            *:873                      *:*                  </span><br><span class="line">LISTEN     0      5           :::873                     :::*</span><br></pre></td></tr></table></figure></p>
+<h1 id="配置HostB"><a href="#配置HostB" class="headerlink" title="配置HostB"></a>配置HostB</h1><h2 id="rsync"><a href="#rsync" class="headerlink" title="rsync"></a>rsync</h2><p>创建认证时的密码文件<code>~/rsyncd.passwd</code>(仅需密码),明文存储,仅属主可读.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@8a028eb8 ~]<span class="comment"># echo "123456" &gt; rsyncd.passwd</span></span><br><span class="line">[root@8a028eb8 ~]<span class="comment"># chmod 600 rsyncd.passwd</span></span><br></pre></td></tr></table></figure></p>
+<p>测试查看<code>rsync</code>服务器上<code>data</code>模块中的文件<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@8a028eb8 ~]<span class="comment"># rsync --password-file=rsyncd.passwd sync@172.18.71.101::data</span></span><br><span class="line">drwxr-xr-x          21 2016/05/09 05:32:09 .</span><br><span class="line">-rw-------       66588 2016/05/09 05:32:09 messages</span><br></pre></td></tr></table></figure></p>
+<p>建立本地数据目录文件<code>/data</code>,将<code>/data</code>目录与<code>rsync</code>服务器上<code>data</code>模块中定义的目录<code>/data</code>作为数据同步目录,即这两个目录中的数据要时刻保持一致.</p>
+<p>首先测试下将<code>HostA</code>的<code>/data</code>目录中的数据取过来.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@8a028eb8 ~]<span class="comment"># rsync -avz --password-file=rsyncd.passwd sync@172.18.71.101::data /data/</span></span><br><span class="line">receiving incremental file list</span><br><span class="line">./</span><br><span class="line">messages</span><br><span class="line"></span><br><span class="line">sent 76 bytes  received 5201 bytes  10554.00 bytes/sec</span><br><span class="line">total size is 66588  speedup is 12.62</span><br></pre></td></tr></table></figure></p>
+<p>然后在本地创建几个文件使用<code>rsync</code>命令同步到<code>HostA</code>的<code>/data</code>目录中.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@8a028eb8 ~]<span class="comment"># cp /etc/&#123;fstab,redhat-release,issue&#125; /data/</span></span><br><span class="line">[root@8a028eb8 ~]<span class="comment"># rsync -avz --password-file=rsyncd.passwd /data/ sync@172.18.71.101::data</span></span><br><span class="line">sending incremental file list</span><br><span class="line">./</span><br><span class="line">fstab</span><br><span class="line">issue</span><br><span class="line">redhat-release</span><br><span class="line"></span><br><span class="line">sent 619 bytes  received 68 bytes  1374.00 bytes/sec</span><br><span class="line">total size is 67431  speedup is 98.15</span><br></pre></td></tr></table></figure></p>
+<p>此时要特别注意目录后面的<code>/</code>,如果少加了一个<code>/</code>,会将<code>data</code>目录本身而不是目录下的文件同步过去.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@8a028eb8 ~]<span class="comment"># rsync -avz --password-file=rsyncd.passwd /data sync@172.18.71.101::data</span></span><br><span class="line">sending incremental file list</span><br><span class="line">data/</span><br><span class="line">data/fstab</span><br><span class="line">data/issue</span><br><span class="line">data/messages</span><br><span class="line">data/redhat-release</span><br><span class="line"></span><br><span class="line">sent 5718 bytes  received 88 bytes  11612.00 bytes/sec</span><br><span class="line">total size is 67431  speedup is 11.61</span><br></pre></td></tr></table></figure></p>
+<p>这里一直说同步而不是复制,是因为<code>rsync</code>可以使远程目录和本地目录保持数据同步(即本地如果删除的文件远程也应该删除),而不仅仅是复制.但是出于谨慎考虑,这个删除远程目录中的本地目录中不存在文件的功能是需要显性加上<code>--delete</code>选项才能生效的.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[root@8a028eb8 ~]<span class="comment"># rm -f /data/fstab </span></span><br><span class="line">[root@8a028eb8 ~]<span class="comment"># rsync -avz --delete --password-file=rsyncd.passwd /data/ sync@172.18.71.101::data</span></span><br><span class="line">sending incremental file list</span><br><span class="line">./</span><br><span class="line">deleting data/redhat-release</span><br><span class="line">deleting data/messages</span><br><span class="line">deleting data/issue</span><br><span class="line">deleting data/fstab</span><br><span class="line">deleting data/</span><br><span class="line">deleting fstab</span><br><span class="line"></span><br><span class="line">sent 95 bytes  received 11 bytes  212.00 bytes/sec</span><br><span class="line">total size is 66662  speedup is 628.89</span><br></pre></td></tr></table></figure></p>
+<p>手动地同步两个节点上目录中数据文件是没有问题了,现在需要实现的是<code>HostB</code>上的数据一改变立刻同步<code>HostA</code>上的数据.这就需要用到<code>inotify</code>了.</p>
+<h2 id="inotify"><a href="#inotify" class="headerlink" title="inotify"></a>inotify</h2><p><code>inotify</code>是内核中功能,但是需要通过系统调用接口程序才能够使用,这个接口程序由<code>inotify-tools</code>提供,它主要提供了<code>inotifywait</code>和<code>inotifywatch</code>两个<code>cli</code>接口.<br><code>inotifywait</code>用于等待文件或者文件集上的一个特定事件,可以监控任何文件或者目录位置并且可以递归地监控整个目录树;<code>inotifywatch</code>用于收集被监控的文件系统统计数据,包括每个<code>inotify</code>事件发生多少次等信息.<br>具体使用方法参照<code>man</code>文档.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@8a028eb8 ~]<span class="comment"># yum install -y inotify-tools</span></span><br><span class="line">[root@8a028eb8 ~]<span class="comment"># rpm -ql inotify-tools</span></span><br><span class="line">/usr/bin/inotifywait</span><br><span class="line">/usr/bin/inotifywatch</span><br><span class="line">/usr/lib64/libinotifytools.so.0</span><br><span class="line">/usr/lib64/libinotifytools.so.0.4.1</span><br><span class="line">...</span><br></pre></td></tr></table></figure></p>
+<p>有这么几个和<code>inotify</code>相关的内核参数,可能根据实际需要调整.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@8a028eb8 ~]<span class="comment"># ls -l /proc/sys/fs/inotify/</span></span><br><span class="line">total 0</span><br><span class="line">-rw-r--r-- 1 root root 0 May  8 20:22 max_queued_events</span><br><span class="line">-rw-r--r-- 1 root root 0 May  8 20:22 max_user_instances</span><br><span class="line">-rw-r--r-- 1 root root 0 May  8 20:22 max_user_watches</span><br></pre></td></tr></table></figure></p>
+<p>实时监控数据目录文件,发生改变立刻调用<code>rsync</code>进行数据同步,脚本如下.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">[root@8a028eb8 ~]<span class="comment"># vim auto_rsync.sh </span></span><br><span class="line"><span class="meta">#!/bin/bash</span><br><span class="line"></span></span><br><span class="line">sync_user=<span class="string">"sync"</span></span><br><span class="line">sync_host=<span class="string">"172.18.71.101"</span></span><br><span class="line">sync_mod=<span class="string">"data"</span></span><br><span class="line">data_dir=<span class="string">"/data/"</span></span><br><span class="line"></span><br><span class="line">rsync_cmd=<span class="string">"rsync -vzrtopg --delete --progress --password-file=./rsyncd.passwd <span class="variable">$data_dir</span> <span class="variable">$sync_user</span>@<span class="variable">$sync_host</span>::<span class="variable">$sync_mod</span>"</span></span><br><span class="line"></span><br><span class="line">inotifywait -mrq <span class="variable">$data_dir</span> --timefmt <span class="string">'%d/%m/%y %H:%M'</span> --format <span class="string">'%T %w%f%e'</span> <span class="_">-e</span> modify,delete,create,attrib | <span class="keyword">while</span> <span class="built_in">read</span> files;</span><br><span class="line"><span class="keyword">do</span></span><br><span class="line">	<span class="variable">$rsync_cmd</span></span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure></p>
+<p>启动脚本,然后做修改<code>HostB</code>数据目录中的文件,观察变化.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">[root@8a028eb8 ~]<span class="comment"># bash auto_rsync.sh </span></span><br><span class="line">sending incremental file list</span><br><span class="line">./</span><br><span class="line"><span class="built_in">test</span></span><br><span class="line">           0 100%    0.00kB/s    0:00:00 (xfer<span class="comment">#1, to-check=0/5)</span></span><br><span class="line"></span><br><span class="line">sent 144 bytes  received 30 bytes  116.00 bytes/sec</span><br><span class="line">total size is 66662  speedup is 383.11</span><br><span class="line">sending incremental file list</span><br><span class="line">./</span><br><span class="line">deleting <span class="built_in">test</span></span><br><span class="line"></span><br><span class="line">sent 95 bytes  received 11 bytes  212.00 bytes/sec</span><br><span class="line">total size is 66662  speedup is 628.89</span><br></pre></td></tr></table></figure></p>
+<p>至此,实时数据同步完成.</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/rsync/" rel="tag">#rsync</a>
+          
+            <a href="/tags/inotify/" rel="tag">#inotify</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/05/07/iptables基本应用/" rel="next" title="iptables基本应用">
+                <i class="fa fa-chevron-left"></i> iptables基本应用
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <div class="ds-share flat" data-thread-key="2016/05/08/rsync-inotify实现数据同步/"
+     data-title="rsync+inotify实现数据同步"
+     data-content=""
+     data-url="http://www.twoyang.net/2016/05/08/rsync-inotify实现数据同步/">
+  <div class="ds-share-inline">
+    <ul  class="ds-share-icons-16">
+
+      <li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
+      <li><a class="ds-weibo" href="javascript:void(0);" data-service="weibo">微博</a></li>
+      <li><a class="ds-qzone" href="javascript:void(0);" data-service="qzone">QQ空间</a></li>
+      <li><a class="ds-qqt" href="javascript:void(0);" data-service="qqt">腾讯微博</a></li>
+      <li><a class="ds-wechat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+
+    </ul>
+    <div class="ds-share-icons-more">
+    </div>
+  </div>
+</div>
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/05/08/rsync-inotify实现数据同步/"
+           data-title="rsync+inotify实现数据同步" data-url="http://www.twoyang.net/2016/05/08/rsync-inotify实现数据同步/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xltax.com1.z0.glb.clouddn.com/twoyang.jpg"
+               alt="twoyang" />
+          <p class="site-author-name" itemprop="name">twoyang</p>
+          <p class="site-description motion-element" itemprop="description">The quieter you become.The more you are able to hear.</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">11</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">13</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        <div class="links-of-blogroll motion-element">
+          
+            <div class="links-of-blogroll-title">友情链接</div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.magedu.com/" target="_blank">马哥教育</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="https://shadowsocks.be/9.html" target="_blank">科学上网</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.isetsuna.com/hexo/introduction/" target="_blank">Hexo博客系列</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://mrchen.org/" target="_blank">Mrchen</a>
+                </li>
+              
+            </ul>
+          
+        </div>
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#说明"><span class="nav-number">1.</span> <span class="nav-text">说明</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#规划"><span class="nav-number">2.</span> <span class="nav-text">规划</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#配置HostA"><span class="nav-number">3.</span> <span class="nav-text">配置HostA</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#配置HostB"><span class="nav-number">4.</span> <span class="nav-text">配置HostB</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#rsync"><span class="nav-number">4.1.</span> <span class="nav-text">rsync</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#inotify"><span class="nav-number">4.2.</span> <span class="nav-text">inotify</span></a></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">twoyang</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+
+  
+
+
+
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=0.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=0.5.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=0.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=0.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=0.5.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"twoyang"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+  
+
+
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>
