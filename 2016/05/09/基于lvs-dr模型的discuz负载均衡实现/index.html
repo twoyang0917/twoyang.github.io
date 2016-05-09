@@ -1,0 +1,658 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
+
+
+
+
+  <link href="//fonts.googleapis.com/css?family=Lato:300,400,700,400italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=0.5.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="lvs," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=0.5.0" />
+
+
+
+
+
+
+<meta name="description" content="说明本文并不涉及lvs工作原理的介绍和论述,而仅是记录基于lvs-nat模型的负载均衡的实现过程.需要了解更多技术细节请参照博文《VS的工作模型和调度算法介绍》
+规划
+lvs-dr模型与之前的lvs-nat模型基本情况差不多,只是网络拓扑结构不同.
+
+四台主机需要初始化成如下状态.它们都是同一台宿主机上的虚拟机,均是最小化安装,iptables和SELinux均处于关闭状态.其中192.168.7">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于lvs-dr模型的discuz负载均衡实现">
+<meta property="og:url" content="http://www.twoyang.net/2016/05/09/基于lvs-dr模型的discuz负载均衡实现/index.html">
+<meta property="og:site_name" content="TwOyAng'blog">
+<meta property="og:description" content="说明本文并不涉及lvs工作原理的介绍和论述,而仅是记录基于lvs-nat模型的负载均衡的实现过程.需要了解更多技术细节请参照博文《VS的工作模型和调度算法介绍》
+规划
+lvs-dr模型与之前的lvs-nat模型基本情况差不多,只是网络拓扑结构不同.
+
+四台主机需要初始化成如下状态.它们都是同一台宿主机上的虚拟机,均是最小化安装,iptables和SELinux均处于关闭状态.其中192.168.7">
+<meta property="og:image" content="http://7xltax.com1.z0.glb.clouddn.com/lvs-dr.png">
+<meta property="og:updated_time" content="2016-05-09T15:46:41.535Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="基于lvs-dr模型的discuz负载均衡实现">
+<meta name="twitter:description" content="说明本文并不涉及lvs工作原理的介绍和论述,而仅是记录基于lvs-nat模型的负载均衡的实现过程.需要了解更多技术细节请参照博文《VS的工作模型和调度算法介绍》
+规划
+lvs-dr模型与之前的lvs-nat模型基本情况差不多,只是网络拓扑结构不同.
+
+四台主机需要初始化成如下状态.它们都是同一台宿主机上的虚拟机,均是最小化安装,iptables和SELinux均处于关闭状态.其中192.168.7">
+<meta name="twitter:image" content="http://7xltax.com1.z0.glb.clouddn.com/lvs-dr.png">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+  <title> 基于lvs-dr模型的discuz负载均衡实现 | TwOyAng'blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=55583792";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">TwOyAng'blog</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-th fa-fw"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                基于lvs-dr模型的discuz负载均衡实现
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-05-09T22:17:23+08:00" content="2016-05-09">
+              2016-05-09
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Cluster/" itemprop="url" rel="index">
+                    <span itemprop="name">Cluster</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/05/09/基于lvs-dr模型的discuz负载均衡实现/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/09/基于lvs-dr模型的discuz负载均衡实现/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h1><p>本文并不涉及<code>lvs</code>工作原理的介绍和论述,而仅是记录基于<code>lvs-nat</code>模型的负载均衡的实现过程.需要了解更多技术细节请参照博文<a href="http://www.178linux.com/14177" target="_blank" rel="external">《VS的工作模型和调度算法介绍》</a></p>
+<h1 id="规划"><a href="#规划" class="headerlink" title="规划"></a>规划</h1><ul>
+<li><code>lvs-dr</code>模型与之前的<code>lvs-nat</code>模型基本情况差不多,只是网络拓扑结构不同.</li>
+</ul>
+<p>四台主机需要初始化成如下状态.它们都是同一台宿主机上的虚拟机,均是最小化安装,<code>iptables</code>和<code>SELinux</code>均处于关闭状态.其中<code>192.168.71.0/24</code>网段是通过宿主机的<code>Host-Only</code>网卡连接起来的一个内部网络.<code>HostA</code>作为前端调度器,<code>HostA</code>的<code>eth1</code>口作为<code>192.168.71.0/24</code>内部网络的网关,<code>HostA</code>的<code>eth0</code>口上模拟配置向外提供服务公网地址.<code>HostB</code>和<code>HostC</code>作为两台<code>RS</code>提供真实的<code>web</code>服务,<code>HostD</code>作为<code>HostB</code>和<code>HostC</code>的后端共享存储提供<code>mariadb</code>和<code>NFS</code>.<br><a id="more"></a><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">HostA(VS)</span><br><span class="line">OS: CentOS-6-x86_64</span><br><span class="line">hostname: 8a028eb8.twoyang.com</span><br><span class="line">eth0:0: 172.18.71.111/16(VIP)</span><br><span class="line">eth0: 172.18.71.101/16(DIP)</span><br><span class="line">gateway: 172.18.0.1</span><br><span class="line"></span><br><span class="line">HostB(RS1)</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: 80e54d87.twoyang.com</span><br><span class="line">eno16777736: 172.18.71.101/16(RIP1)</span><br><span class="line">lo:0: 172.18.71.101/16(VIP)</span><br><span class="line">gateway: 172.18.0.1</span><br><span class="line"></span><br><span class="line">HostC(RS2)</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: b9cf468b.twoyang.com</span><br><span class="line">eno16777736: 172.18.71.102/16(RIP2)</span><br><span class="line">lo:0: 172.18.71.101/16(VIP)</span><br><span class="line">gateway: 172.18.0.1</span><br><span class="line"></span><br><span class="line">HostD(Storage)</span><br><span class="line">OS: CentOS-6-x86_64</span><br><span class="line">hostname: 34400575.twoyang.com</span><br><span class="line">eth0: 172.18.71.202/16</span><br><span class="line">gateway: 172.18.0.1</span><br></pre></td></tr></table></figure></p>
+<p>网络拓扑是如下图这样的结构.<br><img src="http://7xltax.com1.z0.glb.clouddn.com/lvs-dr.png" alt="lvs-nat"></p>
+<h1 id="时间同步"><a href="#时间同步" class="headerlink" title="时间同步"></a>时间同步</h1><p>多节点协作的集群服务,时间同步很重要.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ntpdate 172.18.0.1</span><br><span class="line">hwclock --systohc</span><br></pre></td></tr></table></figure></p>
+<h1 id="安装软件"><a href="#安装软件" class="headerlink" title="安装软件"></a>安装软件</h1><h2 id="HostD"><a href="#HostD" class="headerlink" title="HostD"></a>HostD</h2><h3 id="安装mariadb"><a href="#安装mariadb" class="headerlink" title="安装mariadb"></a>安装mariadb</h3><p>写了一个在<code>centos-6-x86-64</code>平台下自动安装二进制版<code>mariadb</code>的脚本放在我的<code>github</code>上了.仅限于<a href="http://www.magedu.com/" target="_blank" rel="external">马哥教育</a>教室环境,因为是需要去下载教室<code>ftp</code>上的二进制安装包再来安装的.联网环境下可执行以下指令安装.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -L https://raw.githubusercontent.com/twoyang0917/LearnInMagedu/master/shell/install_mariadb.sh | bash</span><br></pre></td></tr></table></figure></p>
+<p>因为执行了将<code>/usr/local/mysql/bin</code>路径导出至系统环境变量<code>PATH</code>,安装完成后需要启动新的<code>bash</code>.另外服务是没有启动的,也没有做开机自启动的,需要手动执行命令.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@34400575 ~]<span class="comment"># exec bash</span></span><br><span class="line">[root@34400575 ~]<span class="comment"># /etc/init.d/mysqld start</span></span><br><span class="line">Starting MySQL.. SUCCESS! </span><br><span class="line">[root@34400575 ~]<span class="comment"># chkconfig --add mysqld</span></span><br><span class="line">[root@34400575 ~]<span class="comment"># chkconfig --list mysqld</span></span><br><span class="line">mysqld         	0:off	1:off	2:on	3:on	4:on	5:on	6:off</span><br></pre></td></tr></table></figure></p>
+<h3 id="安装NFS"><a href="#安装NFS" class="headerlink" title="安装NFS"></a>安装NFS</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@34400575 ~]<span class="comment"># yum install -y nfs-utils</span></span><br></pre></td></tr></table></figure>
+<p>获取<code>discuz</code>安装包</p>
+<h2 id="HostC"><a href="#HostC" class="headerlink" title="HostC"></a>HostC</h2><p>注意: <code>nginx</code>属于<code>epel</code>源<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@b9cf468b ~]<span class="comment"># yum install -y nginx php-fpm php-mbstring php-mysql nfs-utils mariadb</span></span><br></pre></td></tr></table></figure></p>
+<h2 id="HostB"><a href="#HostB" class="headerlink" title="HostB"></a>HostB</h2><p>注意: <code>nginx</code>属于<code>epel</code>源<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@80e54d87 ~]<span class="comment"># yum install -y nginx php-fpm php-mbstring php-mysql nfs-utils mariadb</span></span><br></pre></td></tr></table></figure></p>
+<h2 id="HostA"><a href="#HostA" class="headerlink" title="HostA"></a>HostA</h2><p>安装<code>LVS</code>的<code>cli</code>接口程序<code>ipvsadm</code><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@8a028eb8 ~]<span class="comment"># yum install -y ipvsadm</span></span><br></pre></td></tr></table></figure></p>
+<h1 id="配置集群"><a href="#配置集群" class="headerlink" title="配置集群"></a>配置集群</h1><h2 id="HostD-1"><a href="#HostD-1" class="headerlink" title="HostD"></a>HostD</h2><h3 id="配置mariadb"><a href="#配置mariadb" class="headerlink" title="配置mariadb"></a>配置mariadb</h3><p>安全初始化完成后,创建<code>discuz</code>数据库和<code>dscz</code>用户,并授权其可以远程操作数据库.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">[root@34400575 ~]<span class="comment"># mysql_secure_installation</span></span><br><span class="line">[root@34400575 ~]<span class="comment"># mysql -u root -p</span></span><br><span class="line">Enter password: </span><br><span class="line">Welcome to the MariaDB monitor.  Commands end with ; or \g.</span><br><span class="line">Your MariaDB connection id is 3</span><br><span class="line">Server version: 5.5.46-MariaDB-log MariaDB Server</span><br><span class="line"></span><br><span class="line">Copyright (c) 2000, 2015, Oracle, MariaDB Corporation Ab and others.</span><br><span class="line"></span><br><span class="line">Type <span class="string">'help;'</span> or <span class="string">'\h'</span> <span class="keyword">for</span> help. Type <span class="string">'\c'</span> to clear the current input statement.</span><br><span class="line"></span><br><span class="line">MariaDB [(none)]&gt; create database discuz;</span><br><span class="line">Query OK, 1 row affected (0.00 sec)</span><br><span class="line"></span><br><span class="line">MariaDB [(none)]&gt; create user <span class="string">'dscz'</span>@<span class="string">'localhost'</span> identified by <span class="string">'magedu'</span>;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line">MariaDB [(none)]&gt; grant all privileges on discuz.* to <span class="string">'dscz'</span>@<span class="string">'%'</span> identified by <span class="string">'magedu'</span>;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line">MariaDB [(none)]&gt; flush privileges;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br></pre></td></tr></table></figure></p>
+<h3 id="配置NFS"><a href="#配置NFS" class="headerlink" title="配置NFS"></a>配置NFS</h3><p>重点不在<code>NFS</code>,就不考虑权限设置的合不合理了,直接使用<code>root</code>用户,并且不压缩其权限了.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">[root@34400575 ~]<span class="comment"># mkdir /nfshare/</span></span><br><span class="line">[root@34400575 ~]<span class="comment"># ls -dl /nfshare/</span></span><br><span class="line">drwxr-xr-x 2 root root 6 May 9 17:01 /nfshare/</span><br><span class="line">[root@34400575 ~]<span class="comment"># echo "/nfshare/ 172.18.71.101(rw,no_root_squash,async) 172.18.71.102(rw,no_root_squash,async)" &gt; /etc/exports</span></span><br><span class="line">[root@34400575 ~]<span class="comment"># /etc/init.d/rpcbind start</span></span><br><span class="line">Starting rpcbind:                                          [  OK  ]</span><br><span class="line">[root@34400575 ~]<span class="comment"># /etc/init.d/nfs start</span></span><br><span class="line">Starting NFS services:                                     [  OK  ]</span><br><span class="line">Starting NFS quotas:                                       [  OK  ]</span><br><span class="line">Starting NFS mountd:                                       [  OK  ]</span><br><span class="line">Starting NFS daemon:                                       [  OK  ]</span><br><span class="line">Starting RPC idmapd:                                       [  OK  ]</span><br><span class="line">[root@34400575 ~]<span class="comment"># chkconfig rpcbind on</span></span><br><span class="line">[root@34400575 ~]<span class="comment"># chkconfig nfs on</span></span><br><span class="line">[root@34400575 ~]<span class="comment"># chkconfig rpcbind --list</span></span><br><span class="line">rpcbind        	0:off	1:off	2:on	3:on	4:on	5:on	6:off</span><br><span class="line">[root@34400575 ~]<span class="comment"># chkconfig nfs --list</span></span><br><span class="line">nfs            	0:off	1:off	2:on	3:on	4:on	5:on	6:off</span><br><span class="line">[root@34400575 ~]<span class="comment"># showmount -e 127.0.0.1</span></span><br><span class="line">Export list <span class="keyword">for</span> 127.0.0.1:</span><br><span class="line">/nfshare 172.18.71.102,172.18.71.101</span><br></pre></td></tr></table></figure></p>
+<p>解压<code>discuz</code>的程序包至<code>/nfshare/</code>目录.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@34400575 ~]<span class="comment"># mkdir /nfshare/discuz/</span></span><br><span class="line">[root@34400575 ~]<span class="comment"># unzip /tmp/Discuz_X3.2_SC_UTF8.zip -d /nfshare/discuz/</span></span><br><span class="line">[root@34400575 ~]<span class="comment"># ls /nfshare/discuz/</span></span><br><span class="line">readme  upload  utility</span><br></pre></td></tr></table></figure></p>
+<h2 id="HostC-1"><a href="#HostC-1" class="headerlink" title="HostC"></a>HostC</h2><p>给<code>RS</code>配置<code>VIP</code>之前先要禁止<code>RS</code>响应VIP的ARP请求.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">echo 1 &gt; /proc/sys/net/ipv4/conf/all/arp_ignore</span><br><span class="line">echo 1 &gt; /proc/sys/net/ipv4/conf/lo/arp_ignore</span><br><span class="line">echo 2 &gt; /proc/sys/net/ipv4/conf/all/arp_announce</span><br><span class="line">echo 2 &gt; /proc/sys/net/ipv4/conf/lo/arp_announce</span><br></pre></td></tr></table></figure></p>
+<p>在本地回环接口别名<code>lo:0</code>上配置<code>VIP</code>,并增加路由<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ifconfig lo:0 172.18.71.111 broadcast 172.18.71.111 netmask 255.255.255.255 up</span><br><span class="line">route add -host 172.18.71.111 lo:0</span><br></pre></td></tr></table></figure></p>
+<p>测试连接<code>HostD</code>上的<code>mariadb</code><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@b9cf468b ~]<span class="comment"># mysql -h 172.18.71.202 -u dscz -p</span></span><br></pre></td></tr></table></figure></p>
+<p>挂在<code>HostD</code>上的<code>NFS</code>共享存储目录,属主属组修改为<code>apache</code>.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@b9cf468b ~]<span class="comment"># showmount -e 172.18.71.202</span></span><br><span class="line">Export list <span class="keyword">for</span> 172.18.71.202:</span><br><span class="line">/nfshare 172.18.71.102,172.18.71.101</span><br><span class="line">[root@b9cf468b ~]<span class="comment"># mkdir /htdocs</span></span><br><span class="line">[root@b9cf468b ~]<span class="comment"># ls -dl /htdocs/</span></span><br><span class="line">drwxr-xr-x 2 root root 6 May 9 17:05 /htdocs/</span><br><span class="line">[root@b9cf468b ~]<span class="comment"># mount -t nfs 172.18.71.202:/nfshare /htdocs</span></span><br><span class="line">[root@b9cf468b ~]<span class="comment"># ls /htdocs/</span></span><br><span class="line">discuz</span><br><span class="line">[root@b9cf468b ~]<span class="comment"># chown -R apache:apache /htdocs/discuz/</span></span><br></pre></td></tr></table></figure></p>
+<p>启动<code>php-fpm</code><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@b9cf468b ~]<span class="comment"># systemctl start php-fpm.service</span></span><br><span class="line">[root@b9cf468b ~]<span class="comment"># ss -tnl | grep 900</span></span><br><span class="line">LISTEN     0      128    127.0.0.1:9000                     *:*</span><br></pre></td></tr></table></figure></p>
+<p>按照如下方式配置<code>nginx</code>,测试没有语法错误,启动<code>nginx</code>.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">[root@b9cf468b nginx]<span class="comment"># cat /etc/nginx/nginx.conf</span></span><br><span class="line">server &#123;</span><br><span class="line">        listen       80;</span><br><span class="line">        server_name  b9cf468b.twoyang.com;</span><br><span class="line"></span><br><span class="line">        <span class="comment"># Load configuration files for the default server block.</span></span><br><span class="line">        include /etc/nginx/default.d/*.conf;</span><br><span class="line"></span><br><span class="line">	location / &#123;</span><br><span class="line">	    root	/htdocs/discuz/upload;</span><br><span class="line">	    index index.html index.htm index.php;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">        location ~ \.php$ &#123;</span><br><span class="line">            root         /htdocs/discuz/upload;</span><br><span class="line">            fastcgi_pass 127.0.0.1:9000;</span><br><span class="line">            fastcgi_index index.php;</span><br><span class="line"></span><br><span class="line">            include /etc/nginx/fastcgi.conf;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        error_page 404 /404.html;</span><br><span class="line">            location = /40x.html &#123;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        error_page 500 502 503 504 /50x.html;</span><br><span class="line">            location = /50x.html &#123;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">[root@b9cf468b nginx]<span class="comment"># nginx -t</span></span><br><span class="line">nginx: the configuration file /etc/nginx/nginx.conf syntax is ok</span><br><span class="line">nginx: configuration file /etc/nginx/nginx.conf <span class="built_in">test</span> is successful</span><br><span class="line">[root@b9cf468b nginx]<span class="comment"># nginx</span></span><br><span class="line">[root@b9cf468b nginx]<span class="comment"># ss -tnl | grep 80</span></span><br><span class="line">LISTEN     0      128          *:80                       *:*</span><br></pre></td></tr></table></figure></p>
+<p>测试一下通过<code>VIP</code>访问<code>discuz</code>安装页面,注意加上最后的<code>/</code>.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@b9cf468b nginx]<span class="comment"># curl -I http://172.18.71.111/install/</span></span><br><span class="line">HTTP/1.1 200 OK</span><br><span class="line">Server: nginx/1.6.3</span><br><span class="line">Date: Mon, 09 May 2016 10:23:50 GMT</span><br><span class="line">Content-Type: text/html</span><br><span class="line">Connection: keep-alive</span><br><span class="line">X-Powered-By: PHP/5.4.16</span><br></pre></td></tr></table></figure></p>
+<h2 id="HostB-1"><a href="#HostB-1" class="headerlink" title="HostB"></a>HostB</h2><p>做与<code>HostC</code>相同配置</p>
+<h2 id="HostA-1"><a href="#HostA-1" class="headerlink" title="HostA"></a>HostA</h2><p>配置<code>VIP</code>地址,并打开核心转发功能.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ifconfig eth0:0 172.18.71.111 broadcast 172.18.71.111 netmask 255.255.255.255 up</span><br><span class="line"><span class="built_in">echo</span> 1 &gt; /proc/sys/net/ipv4/ip_forward</span><br></pre></td></tr></table></figure></p>
+<p>先使用<code>rr(Round Robin)</code>调度算法,期望会话丢失情况出现.若出现会话丢失情况,改用<code>sh(Source Hash)</code>调度算法再做测试,期望会话能够保持.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@8a028eb8 ~]<span class="comment"># ipvsadm -A -t 172.18.71.111:80 -s rr</span></span><br><span class="line">[root@8a028eb8 ~]<span class="comment"># ipvsadm -a -t 172.18.71.111:80 -r 172.18.71.101:80 -g</span></span><br><span class="line">[root@8a028eb8 ~]<span class="comment"># ipvsadm -a -t 172.18.71.111:80 -r 172.18.71.102:80 -g</span></span><br><span class="line">[root@8a028eb8 ~]<span class="comment"># ipvsadm -Ln</span></span><br><span class="line">IP Virtual Server version 1.2.1 (size=4096)</span><br><span class="line">Prot LocalAddress:Port Scheduler Flags</span><br><span class="line">  -&gt; RemoteAddress:Port           Forward Weight ActiveConn InActConn</span><br><span class="line">TCP  172.18.71.111:80 rr</span><br><span class="line">  -&gt; 172.18.71.101:80             Route   1      0          0         </span><br><span class="line">  -&gt; 172.18.71.102:80             Route   1      0          0</span><br></pre></td></tr></table></figure></p>
+<h1 id="测试验证"><a href="#测试验证" class="headerlink" title="测试验证"></a>测试验证</h1><p>与<code>lvs-nat</code>模型的步骤和结论均一致,刷新页面不会丢失会话,暂时不太清楚会话是如何保持的,先存疑吧.</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/lvs/" rel="tag">#lvs</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/05/09/基于lvs-nat模型的discuz负载均衡实现/" rel="next" title="基于lvs-nat模型的discuz负载均衡实现">
+                <i class="fa fa-chevron-left"></i> 基于lvs-nat模型的discuz负载均衡实现
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <div class="ds-share flat" data-thread-key="2016/05/09/基于lvs-dr模型的discuz负载均衡实现/"
+     data-title="基于lvs-dr模型的discuz负载均衡实现"
+     data-content=""
+     data-url="http://www.twoyang.net/2016/05/09/基于lvs-dr模型的discuz负载均衡实现/">
+  <div class="ds-share-inline">
+    <ul  class="ds-share-icons-16">
+
+      <li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
+      <li><a class="ds-weibo" href="javascript:void(0);" data-service="weibo">微博</a></li>
+      <li><a class="ds-qzone" href="javascript:void(0);" data-service="qzone">QQ空间</a></li>
+      <li><a class="ds-qqt" href="javascript:void(0);" data-service="qqt">腾讯微博</a></li>
+      <li><a class="ds-wechat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+
+    </ul>
+    <div class="ds-share-icons-more">
+    </div>
+  </div>
+</div>
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/05/09/基于lvs-dr模型的discuz负载均衡实现/"
+           data-title="基于lvs-dr模型的discuz负载均衡实现" data-url="http://www.twoyang.net/2016/05/09/基于lvs-dr模型的discuz负载均衡实现/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xltax.com1.z0.glb.clouddn.com/twoyang.jpg"
+               alt="twoyang" />
+          <p class="site-author-name" itemprop="name">twoyang</p>
+          <p class="site-description motion-element" itemprop="description">The quieter you become.The more you are able to hear.</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">13</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        <div class="links-of-blogroll motion-element">
+          
+            <div class="links-of-blogroll-title">友情链接</div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.magedu.com/" target="_blank">马哥教育</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="https://shadowsocks.be/9.html" target="_blank">科学上网</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.isetsuna.com/hexo/introduction/" target="_blank">Hexo博客系列</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://mrchen.org/" target="_blank">Mrchen</a>
+                </li>
+              
+            </ul>
+          
+        </div>
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#说明"><span class="nav-number">1.</span> <span class="nav-text">说明</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#规划"><span class="nav-number">2.</span> <span class="nav-text">规划</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#时间同步"><span class="nav-number">3.</span> <span class="nav-text">时间同步</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#安装软件"><span class="nav-number">4.</span> <span class="nav-text">安装软件</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#HostD"><span class="nav-number">4.1.</span> <span class="nav-text">HostD</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#安装mariadb"><span class="nav-number">4.1.1.</span> <span class="nav-text">安装mariadb</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#安装NFS"><span class="nav-number">4.1.2.</span> <span class="nav-text">安装NFS</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HostC"><span class="nav-number">4.2.</span> <span class="nav-text">HostC</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HostB"><span class="nav-number">4.3.</span> <span class="nav-text">HostB</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HostA"><span class="nav-number">4.4.</span> <span class="nav-text">HostA</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#配置集群"><span class="nav-number">5.</span> <span class="nav-text">配置集群</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#HostD-1"><span class="nav-number">5.1.</span> <span class="nav-text">HostD</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#配置mariadb"><span class="nav-number">5.1.1.</span> <span class="nav-text">配置mariadb</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置NFS"><span class="nav-number">5.1.2.</span> <span class="nav-text">配置NFS</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HostC-1"><span class="nav-number">5.2.</span> <span class="nav-text">HostC</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HostB-1"><span class="nav-number">5.3.</span> <span class="nav-text">HostB</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HostA-1"><span class="nav-number">5.4.</span> <span class="nav-text">HostA</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#测试验证"><span class="nav-number">6.</span> <span class="nav-text">测试验证</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">twoyang</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+
+  
+
+
+
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=0.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=0.5.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=0.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=0.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=0.5.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"twoyang"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+  
+
+
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>
