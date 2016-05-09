@@ -63,12 +63,12 @@
 <meta property="og:url" content="http://www.twoyang.net/2016/04/12/DNS域名解析服务器/index.html">
 <meta property="og:site_name" content="TwOyAng'blog">
 <meta property="og:description" content="实验环境准备三台虚拟机，均可以通过网关172.18.71.1连接互联网，其中HostC仅作为测试机使用。123HostA: CentOS-6.7-x86_64 eth0:172.18.71.101/24 eth1:192.168.71.101/24 gw：172.18.71.1/24HostB: CentOS-7.2-x86_64 eno16777736:172.18.71.102/24 gw：1">
-<meta property="og:image" content="http://7xltax.com1.z0.glb.clouddn.com/recursion&Iteration.png">
-<meta property="og:updated_time" content="2016-04-16T14:13:06.792Z">
+<meta property="og:image" content="http://7xltax.com1.z0.glb.clouddn.com/4f5317ee-d848-4568-abf7-8e025d54050a.png">
+<meta property="og:updated_time" content="2016-05-09T14:03:16.724Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="DNS域名解析服务器">
 <meta name="twitter:description" content="实验环境准备三台虚拟机，均可以通过网关172.18.71.1连接互联网，其中HostC仅作为测试机使用。123HostA: CentOS-6.7-x86_64 eth0:172.18.71.101/24 eth1:192.168.71.101/24 gw：172.18.71.1/24HostB: CentOS-7.2-x86_64 eno16777736:172.18.71.102/24 gw：1">
-<meta name="twitter:image" content="http://7xltax.com1.z0.glb.clouddn.com/recursion&Iteration.png">
+<meta name="twitter:image" content="http://7xltax.com1.z0.glb.clouddn.com/4f5317ee-d848-4568-abf7-8e025d54050a.png">
 
 
 
@@ -296,7 +296,7 @@
 <p>修改主配置文件<code>/etc/named.conf</code>，注释掉仅允许本机查询请求和<code>dnssec</code>（可能影响实验结果）。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">options &#123;</span><br><span class="line">	...</span><br><span class="line">	//allow-query     &#123; localhost; &#125;;</span><br><span class="line">	...</span><br><span class="line"></span><br><span class="line">	//dnssec-enable yes;</span><br><span class="line">	//dnssec-validation yes;</span><br><span class="line">	//dnssec-lookaside auto;</span><br><span class="line">	...</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
 <p>一般来说，多节点协同工作首先就是要校准时间，使之时间同步。联网状态下可使用<code>ntpdate</code>命令统一找授时中心校准，不能联网可使用<code>date</code>命令手动校准。</p>
 <p>在此状态下，给各个虚拟机都做个快照，以便做完一个实验能够快速还原至原始状态。<br><a id="more"></a></p>
-<h1 id="递归与迭代"><a href="#递归与迭代" class="headerlink" title="递归与迭代"></a>递归与迭代</h1><p>文中多次提到了递归与迭代，有必要说明一下，递归与迭代其实是一个相对的概念。下图所示是一个完整的域名解析过程，对于内网<code>DNS</code>服务器而言，它是做了一次递归查询；但对于公共<code>DNS</code>服务器而言，它从根域到<code>com</code>域再到<code>magedu</code>域迭代了3次。<br><img src="http://7xltax.com1.z0.glb.clouddn.com/recursion&amp;Iteration.png" alt="递归与迭代"></p>
+<h1 id="递归与迭代"><a href="#递归与迭代" class="headerlink" title="递归与迭代"></a>递归与迭代</h1><p>文中多次提到了递归与迭代，有必要说明一下，递归与迭代其实是一个相对的概念。下图所示是一个完整的域名解析过程，对于内网<code>DNS</code>服务器而言，它是做了一次递归查询；但对于公共<code>DNS</code>服务器而言，它从根域到<code>com</code>域再到<code>magedu</code>域迭代了3次。<br><img src="http://7xltax.com1.z0.glb.clouddn.com/4f5317ee-d848-4568-abf7-8e025d54050a.png" alt="递归与迭代"></p>
 <h1 id="缓存DNS服务器"><a href="#缓存DNS服务器" class="headerlink" title="缓存DNS服务器"></a>缓存DNS服务器</h1><p>本例中仅使用<code>HostA</code>作为服务器，主机名设置为<code>ns1.magedu.com</code>。</p>
 <p>修改的主配置文件<code>/etc/named.conf</code>，在监听地址列表中增加<code>172.18.71.101</code>。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">options &#123;</span><br><span class="line">	listen-on port 53 &#123; 127.0.0.1; 172.18.71.101; &#125;;</span><br><span class="line">	...</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
 <p>直接启动服务，即是一个缓存域名服务器。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@ns1 named]<span class="comment"># /etc/init.d/named start</span></span><br><span class="line">Generating /etc/rndc.key:                                  [  OK  ]</span><br><span class="line">Starting named:                                            [  OK  ]</span><br></pre></td></tr></table></figure></p>
@@ -517,7 +517,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">11</span>
+              <span class="site-state-item-count">12</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -534,7 +534,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">13</span>
+                <span class="site-state-item-count">14</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

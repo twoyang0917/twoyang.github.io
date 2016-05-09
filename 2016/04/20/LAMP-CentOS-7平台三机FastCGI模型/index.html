@@ -67,14 +67,14 @@
 <meta property="og:description" content="需求1234CentOS-7平台上搭建LAMP，其中php作为独立的服务工作；(1) 三者分离于三台主机；(2) 一个虚拟主机用于提供phpMyAdmin；另一个虚拟主机用于提供wordpress；(3) 安装xcache，为php提供加速；
 解析
 由于CentOS-7平台提供了以上各应用的rpm安装包，且均包含了各应用的新特性，所以各应用程序可以直接使用yum源安装，而无需通过编译源码来安装。">
-<meta property="og:image" content="http://7xltax.com1.z0.glb.clouddn.com/QQ%E5%9B%BE%E7%89%8720160420222236.png">
-<meta property="og:updated_time" content="2016-04-20T14:25:18.035Z">
+<meta property="og:image" content="http://7xltax.com1.z0.glb.clouddn.com/538b2805-1156-4c78-8efa-ec3405ade4b7.png">
+<meta property="og:updated_time" content="2016-05-09T13:53:43.396Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="LAMP--CentOS-7平台三机FastCGI模型">
 <meta name="twitter:description" content="需求1234CentOS-7平台上搭建LAMP，其中php作为独立的服务工作；(1) 三者分离于三台主机；(2) 一个虚拟主机用于提供phpMyAdmin；另一个虚拟主机用于提供wordpress；(3) 安装xcache，为php提供加速；
 解析
 由于CentOS-7平台提供了以上各应用的rpm安装包，且均包含了各应用的新特性，所以各应用程序可以直接使用yum源安装，而无需通过编译源码来安装。">
-<meta name="twitter:image" content="http://7xltax.com1.z0.glb.clouddn.com/QQ%E5%9B%BE%E7%89%8720160420222236.png">
+<meta name="twitter:image" content="http://7xltax.com1.z0.glb.clouddn.com/538b2805-1156-4c78-8efa-ec3405ade4b7.png">
 
 
 
@@ -312,7 +312,7 @@
 <li>需要配置<code>DNS</code>服务，或者修改主机<code>hosts</code>文件来实现名称解析。</li>
 <li>两台主机均需要配置好<code>yum</code>源，除发行版<code>base</code>源外还需要<code>EPEL</code>源。<br><em>配置名称解析和<code>yum</code>源不在本文介绍范围内，请参考其他资料。各程序安装包不提供，请自行下载。</em></li>
 </ul>
-<p>如图所示：<br><img src="http://7xltax.com1.z0.glb.clouddn.com/QQ%E5%9B%BE%E7%89%8720160420222236.png" alt="CentOS-7-fastcgi"></p>
+<p>如图所示：<br><img src="http://7xltax.com1.z0.glb.clouddn.com/538b2805-1156-4c78-8efa-ec3405ade4b7.png" alt="CentOS-7-fastcgi"></p>
 <h1 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h1><p>配置时一般习惯按照从后端到前端的顺序来进行，便于测试验证前一步配置，思路上也比较清晰，容易梳理。所以首先配置后端<code>DB</code>服务器<code>HostC</code>，然后配置中间<code>App</code>服务器<code>HostB</code>，最后配置后端<code>Web</code>服务器<code>HostA</code>。</p>
 <h2 id="HostC"><a href="#HostC" class="headerlink" title="HostC"></a>HostC</h2><p>安装<code>mariadb</code><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># yum instal -y mariadb-server</span></span><br></pre></td></tr></table></figure></p>
 <p>在默认配置基础上增加一些配置，包括设置默认字符集、默认字符排序、默认存储引擎、独立表空间、不做域名反解。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># vim /etc/my.cnf.d/client.cnf</span></span><br><span class="line">[client]</span><br><span class="line">default-character-set=utf8</span><br><span class="line">[root@localhost ~]<span class="comment"># vim /etc/my.cnf.d/mysql-clients.cnf</span></span><br><span class="line">[mysql]</span><br><span class="line">default-character-set=utf8</span><br><span class="line">[root@localhost ~]<span class="comment"># vim /etc/my.cnf.d/server.cnf</span></span><br><span class="line">[mysqld]</span><br><span class="line">character-set-server=utf8</span><br><span class="line">collation-server=utf8_general_ci</span><br><span class="line">default-storage-engine=InnoDB</span><br><span class="line">innodb-file-per-table=TRUE</span><br><span class="line">skip-name-resolve=TRUE</span><br></pre></td></tr></table></figure></p>
@@ -475,7 +475,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">11</span>
+              <span class="site-state-item-count">12</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -492,7 +492,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">13</span>
+                <span class="site-state-item-count">14</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

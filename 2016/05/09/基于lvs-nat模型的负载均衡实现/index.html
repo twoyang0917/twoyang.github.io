@@ -41,7 +41,7 @@
 <link href="/css/main.css?v=0.5.0" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="lvs," />
 
 
 
@@ -57,15 +57,30 @@
 
 
 
-<meta name="description" content="The quieter you become.The more you are able to hear.">
-<meta property="og:type" content="website">
-<meta property="og:title" content="TwOyAng'blog">
-<meta property="og:url" content="http://www.twoyang.net/index.html">
+<meta name="description" content="说明本文并不涉及lvs工作原理的介绍和论述,而仅是记录基于lvs-nat模型的负载均衡的实现过程.需要了解更多技术细节请参照博文《VS的工作模型和调度算法介绍》
+规划
+lvs-nat模型本身最少需要一台机器作为前端VS(Virtual Server)和两台机器作为后端的RS(Real Server)才能够体现出负载均衡效果.
+因为需要负载均衡的应用是discuz,同一客户端一系列请求如果被调度至不">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于lvs-nat模型的discuz负载均衡实现">
+<meta property="og:url" content="http://www.twoyang.net/2016/05/09/基于lvs-nat模型的负载均衡实现/index.html">
 <meta property="og:site_name" content="TwOyAng'blog">
-<meta property="og:description" content="The quieter you become.The more you are able to hear.">
+<meta property="og:description" content="说明本文并不涉及lvs工作原理的介绍和论述,而仅是记录基于lvs-nat模型的负载均衡的实现过程.需要了解更多技术细节请参照博文《VS的工作模型和调度算法介绍》
+规划
+lvs-nat模型本身最少需要一台机器作为前端VS(Virtual Server)和两台机器作为后端的RS(Real Server)才能够体现出负载均衡效果.
+因为需要负载均衡的应用是discuz,同一客户端一系列请求如果被调度至不">
+<meta property="og:image" content="http://7xltax.com1.z0.glb.clouddn.com/lvs-nat.png">
+<meta property="og:image" content="http://7xltax.com1.z0.glb.clouddn.com/01f02006-22a0-4004-91d2-4404d317c1be.png">
+<meta property="og:image" content="http://7xltax.com1.z0.glb.clouddn.com/36487431-1404-4cf6-b0c6-9843eb9b995a.png?imageView2/2/w/600/h/600">
+<meta property="og:image" content="http://7xltax.com1.z0.glb.clouddn.com/d050dedd-a87a-42cd-9f06-247489b96dd0.png">
+<meta property="og:updated_time" content="2016-05-09T13:39:49.512Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="TwOyAng'blog">
-<meta name="twitter:description" content="The quieter you become.The more you are able to hear.">
+<meta name="twitter:title" content="基于lvs-nat模型的discuz负载均衡实现">
+<meta name="twitter:description" content="说明本文并不涉及lvs工作原理的介绍和论述,而仅是记录基于lvs-nat模型的负载均衡的实现过程.需要了解更多技术细节请参照博文《VS的工作模型和调度算法介绍》
+规划
+lvs-nat模型本身最少需要一台机器作为前端VS(Virtual Server)和两台机器作为后端的RS(Real Server)才能够体现出负载均衡效果.
+因为需要负载均衡的应用是discuz,同一客户端一系列请求如果被调度至不">
+<meta name="twitter:image" content="http://7xltax.com1.z0.glb.clouddn.com/lvs-nat.png">
 
 
 
@@ -83,7 +98,7 @@
   };
 </script>
 
-  <title> TwOyAng'blog </title>
+  <title> 基于lvs-nat模型的discuz负载均衡实现 | TwOyAng'blog </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -113,9 +128,7 @@
     
   
 
-  <div class="container one-collumn sidebar-position-left 
-   page-home 
- ">
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -202,9 +215,9 @@
         <div class="content-wrap">
           <div id="content" class="content">
             
-  <section id="posts" class="posts-expand">
+
+  <div id="posts" class="posts-expand">
     
-      
 
   
   
@@ -224,10 +237,7 @@
             
             
               
-                
-                <a class="post-title-link" href="/2016/05/09/基于lvs-nat模型的负载均衡实现/" itemprop="url">
-                  基于lvs-nat模型的discuz负载均衡实现
-                </a>
+                基于lvs-nat模型的discuz负载均衡实现
               
             
           </h1>
@@ -292,9 +302,7 @@
       
 
       
-        
-          
-            <h1 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h1><p>本文并不涉及<code>lvs</code>工作原理的介绍和论述,而仅是记录基于<code>lvs-nat</code>模型的负载均衡的实现过程.需要了解更多技术细节请参照博文<a href="http://www.178linux.com/14177" target="_blank" rel="external">《VS的工作模型和调度算法介绍》</a></p>
+        <h1 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h1><p>本文并不涉及<code>lvs</code>工作原理的介绍和论述,而仅是记录基于<code>lvs-nat</code>模型的负载均衡的实现过程.需要了解更多技术细节请参照博文<a href="http://www.178linux.com/14177" target="_blank" rel="external">《VS的工作模型和调度算法介绍》</a></p>
 <h1 id="规划"><a href="#规划" class="headerlink" title="规划"></a>规划</h1><ul>
 <li><code>lvs-nat</code>模型本身最少需要一台机器作为前端<code>VS(Virtual Server)</code>和两台机器作为后端的<code>RS(Real Server)</code>才能够体现出负载均衡效果.</li>
 <li>因为需要负载均衡的应用是<code>discuz</code>,同一客户端一系列请求如果被调度至不同<code>RS</code>,无法保障用户访问连贯性和数据一致性,所以还需要考虑会话保持和数据共享的问题.</li>
@@ -329,507 +337,70 @@
 <p>持续刷新页面,可以看到确实是在两个<code>RS</code>之间轮调,然而并没有出现会话丢失.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@8a028eb8 ~]<span class="comment"># ipvsadm -Ln</span></span><br><span class="line">IP Virtual Server version 1.2.1 (size=4096)</span><br><span class="line">Prot LocalAddress:Port Scheduler Flags</span><br><span class="line">  -&gt; RemoteAddress:Port           Forward Weight ActiveConn InActConn</span><br><span class="line">TCP  172.18.71.201:80 rr</span><br><span class="line">  -&gt; 192.168.71.101:80            Masq    1      3          2         </span><br><span class="line">  -&gt; 192.168.71.102:80            Masq    1      3          2</span><br></pre></td></tr></table></figure></p>
 <p>暂时不太清楚会话是如何保持的,先存疑吧.</p>
 
-          
-        
       
     </div>
 
     <div>
       
+        
+      
     </div>
 
     <footer class="post-footer">
       
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/05/08/rsync-inotify实现数据同步/" itemprop="url">
-                  rsync+inotify实现数据同步
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-05-08T20:27:41+08:00" content="2016-05-08">
-              2016-05-08
-            </time>
-          </span>
-
+        <div class="post-tags">
           
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Cluster/" itemprop="url" rel="index">
-                    <span itemprop="name">Cluster</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
+            <a href="/tags/lvs/" rel="tag">#lvs</a>
           
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2016/05/08/rsync-inotify实现数据同步/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/08/rsync-inotify实现数据同步/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
         </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
       
 
       
-        
-          <h1 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h1><p>在集群中实现数据共享一般有以下这么几种方式,<code>rsync+inotify</code>是其中独特的一种.它的原理是在集群节点之间进行数据同步,说白了就是主节点数据有更新就立即向其它节点复制差异部分的数据文件,以实现节点之间数据保持一致.不过这种方式效率极低,稍有实力的公司都不会采用这种方案.但是它的好处就在于便宜,我们做实验的时候还是可以用一用.<br><img src="http://7xltax.com1.z0.glb.clouddn.com/data_share.png" alt="data_share"></p>
-<p>本文仅记录实现过程,需要了解具体技术细节请参照<a href="http://www.178linux.com/6318">《rsync+inotify 实现数据实时同步》</a>.<br>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2016/05/08/rsync-inotify实现数据同步/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/05/08/rsync-inotify实现数据同步/" rel="next" title="rsync+inotify实现数据同步">
+                <i class="fa fa-chevron-left"></i> rsync+inotify实现数据同步
+              </a>
+            
           </div>
-        
-      
-    </div>
 
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
+          <div class="post-nav-prev post-nav-item">
             
-            
-              
-                
-                <a class="post-title-link" href="/2016/05/07/iptables基本应用/" itemprop="url">
-                  iptables基本应用
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-05-07T10:17:39+08:00" content="2016-05-07">
-              2016-05-07
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Security/" itemprop="url" rel="index">
-                    <span itemprop="name">Security</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2016/05/07/iptables基本应用/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/07/iptables基本应用/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
+          </div>
         </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
       
 
       
-        
-          <h1 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h1><p><code>iptables/netfilter</code>虽然只是<code>Linux</code>的一个基本组件，但是它基本涉及到了<code>Linux</code>全领域的知识，想要玩的溜，仅仅知道它是怎么工作的是远远不够的，还需要知道网络结构，协议报文封装格式，常见服务的监听端口和工作原理等等。要想深入浅出将其说明白恐怕需要单独开个文档类的项目，因此本文不打算介绍<code>iptables/netfilter</code>详细的工作流程，而是简单介绍一下实际使用时的基本应用。</p>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2016/05/07/iptables基本应用/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
       
     </footer>
   </article>
 
 
-    
+
+    <div class="post-spread">
       
+        <div class="ds-share flat" data-thread-key="2016/05/09/基于lvs-nat模型的负载均衡实现/"
+     data-title="基于lvs-nat模型的discuz负载均衡实现"
+     data-content=""
+     data-url="http://www.twoyang.net/2016/05/09/基于lvs-nat模型的负载均衡实现/">
+  <div class="ds-share-inline">
+    <ul  class="ds-share-icons-16">
 
-  
-  
+      <li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
+      <li><a class="ds-weibo" href="javascript:void(0);" data-service="weibo">微博</a></li>
+      <li><a class="ds-qzone" href="javascript:void(0);" data-service="qzone">QQ空间</a></li>
+      <li><a class="ds-qqt" href="javascript:void(0);" data-service="qqt">腾讯微博</a></li>
+      <li><a class="ds-wechat" href="javascript:void(0);" data-service="wechat">微信</a></li>
 
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/04/22/CentOS-7平台上基于NFS的LAMP搭建/" itemprop="url">
-                  CentOS-7平台上基于NFS的LAMP搭建
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-04-22T20:46:06+08:00" content="2016-04-22">
-              2016-04-22
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Server/" itemprop="url" rel="index">
-                    <span itemprop="name">Server</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2016/04/22/CentOS-7平台上基于NFS的LAMP搭建/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/04/22/CentOS-7平台上基于NFS的LAMP搭建/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h1 id="规划准备"><a href="#规划准备" class="headerlink" title="规划准备"></a>规划准备</h1><p>两台机器均为<code>CentOS-7-x86_64</code>最小化安装，均关闭<code>iptables</code>和<code>SELinux</code>。其中一台<code>HostA</code>作为<code>NFS</code>服务器，提供后端数据库<code>mariadb</code>的存储和前端页面代码文件的存储，另外一台<code>HostB</code>作为<code>LAMP</code>应用平台。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">HostA</span><br><span class="line">IP地址：172.18.71.130</span><br><span class="line">FQDN：1478a474.twoyang.com</span><br><span class="line"></span><br><span class="line">HostB</span><br><span class="line">IP地址：172.18.71.202</span><br><span class="line">FQDN：ef352be0.twoyang.com</span><br></pre></td></tr></table></figure>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2016/04/22/CentOS-7平台上基于NFS的LAMP搭建/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
+    </ul>
+    <div class="ds-share-icons-more">
+    </div>
+  </div>
+</div>
       
     </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/04/22/CentOS-7平台上搭建vsftpd服务器/" itemprop="url">
-                  CentOS-7平台上搭建vsftpd服务器
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-04-22T15:31:05+08:00" content="2016-04-22">
-              2016-04-22
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Server/" itemprop="url" rel="index">
-                    <span itemprop="name">Server</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2016/04/22/CentOS-7平台上搭建vsftpd服务器/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/04/22/CentOS-7平台上搭建vsftpd服务器/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h1 id="实验环境"><a href="#实验环境" class="headerlink" title="实验环境"></a>实验环境</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">平台：CentOS-7-x86_64</span><br><span class="line">IP地址：172.18.71.130</span><br><span class="line">FQDN：1478a474.twoyang.com</span><br><span class="line">备注：iptables与SELinux均处于关闭状态</span><br></pre></td></tr></table></figure>
-<h1 id="最简应用"><a href="#最简应用" class="headerlink" title="最简应用"></a>最简应用</h1><p>安装并启动<code>vsftpd</code>服务<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@1478a474 ~]<span class="comment"># yum install -y vsftpd</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># systemctl start vsftpd</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># ss -tnlp | grep 21</span></span><br><span class="line">LISTEN     0      32          :::21                      :::*                   users:((<span class="string">"vsftpd"</span>,pid=2344,fd=3))</span><br></pre></td></tr></table></figure></p>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2016/04/22/CentOS-7平台上搭建vsftpd服务器/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-  </section>
-
-  
-  <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
-  </nav>
-
+  </div>
 
 
           </div>
@@ -837,6 +408,14 @@
 
 
           
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/05/09/基于lvs-nat模型的负载均衡实现/"
+           data-title="基于lvs-nat模型的discuz负载均衡实现" data-url="http://www.twoyang.net/2016/05/09/基于lvs-nat模型的负载均衡实现/">
+      </div>
+    
+  </div>
+
 
         </div>
         
@@ -856,8 +435,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview sidebar-panel  sidebar-panel-active ">
+      <section class="site-overview sidebar-panel ">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="http://7xltax.com1.z0.glb.clouddn.com/twoyang.jpg"
@@ -930,6 +518,17 @@
 
       </section>
 
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#说明"><span class="nav-number">1.</span> <span class="nav-text">说明</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#规划"><span class="nav-number">2.</span> <span class="nav-text">规划</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#时间同步"><span class="nav-number">3.</span> <span class="nav-text">时间同步</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#安装软件"><span class="nav-number">4.</span> <span class="nav-text">安装软件</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#HostD"><span class="nav-number">4.1.</span> <span class="nav-text">HostD</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#安装mariadb"><span class="nav-number">4.1.1.</span> <span class="nav-text">安装mariadb</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#安装NFS"><span class="nav-number">4.1.2.</span> <span class="nav-text">安装NFS</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HostC"><span class="nav-number">4.2.</span> <span class="nav-text">HostC</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HostB"><span class="nav-number">4.3.</span> <span class="nav-text">HostB</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HostA"><span class="nav-number">4.4.</span> <span class="nav-text">HostA</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#配置集群"><span class="nav-number">5.</span> <span class="nav-text">配置集群</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#HostD-1"><span class="nav-number">5.1.</span> <span class="nav-text">HostD</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#配置mariadb"><span class="nav-number">5.1.1.</span> <span class="nav-text">配置mariadb</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置NFS"><span class="nav-number">5.1.2.</span> <span class="nav-text">配置NFS</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HostC-1"><span class="nav-number">5.2.</span> <span class="nav-text">HostC</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HostB-1"><span class="nav-number">5.3.</span> <span class="nav-text">HostB</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HostA-1"><span class="nav-number">5.4.</span> <span class="nav-text">HostA</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#测试验证"><span class="nav-number">6.</span> <span class="nav-text">测试验证</span></a></li></ol></div>
+            
+          </div>
+        </section>
       
 
     </div>
@@ -1014,6 +613,10 @@
   
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=0.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=0.5.0"></script>
+
+
 
   
 

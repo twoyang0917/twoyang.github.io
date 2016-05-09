@@ -67,14 +67,14 @@
 <meta property="og:description" content="需求12345CentOS-6平台上搭建LAMP，其中php作为独立的服务工作；(1) 三者分离于两台主机；(2) 一个虚拟主机用于提供phpMyAdmin；另一个虚拟主机用于提供wordpress；(3) 安装xcache，为php提供加速；(4) mpm为prefork模型；
 解析
 由于httpd是cpu密集型应用，php是io密集型应用，而mariadb既是cpu密集型又是io密集型。所以将">
-<meta property="og:image" content="http://7xltax.com1.z0.glb.clouddn.com/QQ%E5%9B%BE%E7%89%8720160420222321.png">
-<meta property="og:updated_time" content="2016-04-20T14:26:06.509Z">
+<meta property="og:image" content="http://7xltax.com1.z0.glb.clouddn.com/db83aeaa-3b28-4ef8-aa4c-851ae8c6927f.png">
+<meta property="og:updated_time" content="2016-05-09T13:46:00.975Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="LAMP--CentOS-6平台双机FastCGI模型">
 <meta name="twitter:description" content="需求12345CentOS-6平台上搭建LAMP，其中php作为独立的服务工作；(1) 三者分离于两台主机；(2) 一个虚拟主机用于提供phpMyAdmin；另一个虚拟主机用于提供wordpress；(3) 安装xcache，为php提供加速；(4) mpm为prefork模型；
 解析
 由于httpd是cpu密集型应用，php是io密集型应用，而mariadb既是cpu密集型又是io密集型。所以将">
-<meta name="twitter:image" content="http://7xltax.com1.z0.glb.clouddn.com/QQ%E5%9B%BE%E7%89%8720160420222321.png">
+<meta name="twitter:image" content="http://7xltax.com1.z0.glb.clouddn.com/db83aeaa-3b28-4ef8-aa4c-851ae8c6927f.png">
 
 
 
@@ -317,7 +317,7 @@
 <li>需要配置<code>DNS</code>服务，或者修改主机<code>hosts</code>文件来实现名称解析。</li>
 <li>两台主机均需要配置好<code>yum</code>源，除发行版<code>base</code>源外还需要<code>EPEL</code>源。<br><em>配置名称解析和<code>yum</code>源不在本文介绍范围内，请参考其他资料。各程序安装包不提供，请自行下载。</em></li>
 </ul>
-<p>如图所示：<br><img src="http://7xltax.com1.z0.glb.clouddn.com/QQ%E5%9B%BE%E7%89%8720160420222321.png" alt="CentOS-6-compile"></p>
+<p>如图所示：<br><img src="http://7xltax.com1.z0.glb.clouddn.com/db83aeaa-3b28-4ef8-aa4c-851ae8c6927f.png" alt="CentOS-6-compile"></p>
 <h1 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h1><p>配置时一般习惯按照从后端到前端的顺序来进行，便于测试验证前一步配置，思路上也比较清晰，容易梳理。所以首先配置后端<code>DB</code>服务器<code>HostB</code>，然后配置前端<code>Web</code>服务器<code>HostA</code>。</p>
 <h2 id="HostB"><a href="#HostB" class="headerlink" title="HostB"></a>HostB</h2><p>安装二进制版的<code>mariadb</code><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 增加一个系统用户mysql</span></span><br><span class="line">[root@localhost ~]<span class="comment"># useradd -r mysql</span></span><br><span class="line"><span class="comment"># 解压二进制安装包放置在`/usr/local/`目录下</span></span><br><span class="line">[root@localhost ~]<span class="comment"># tar -xf mariadb-5.5.46-linux-x86_64.tar.gz -C /usr/local/</span></span><br><span class="line">[root@localhost ~]<span class="comment"># cd /usr/local/</span></span><br><span class="line"><span class="comment"># 链接为`mysql`目录</span></span><br><span class="line">[root@localhost <span class="built_in">local</span>]<span class="comment"># ln -sv mariadb-5.5.46-linux-x86_64/ mysql</span></span><br><span class="line">`mysql<span class="string">' -&gt; `mariadb-5.5.46-linux-x86_64/'</span></span><br><span class="line"><span class="comment"># 修改其属主和属组</span></span><br><span class="line">[root@localhost <span class="built_in">local</span>]<span class="comment"># chown -R root:mysql mysql/</span></span><br><span class="line"><span class="comment"># 创建数据库存放目录`/data/mysql`</span></span><br><span class="line">[root@localhost <span class="built_in">local</span>]<span class="comment"># mkdir -pv /data/mysql</span></span><br><span class="line">mkdir: created directory `/data<span class="string">'</span><br><span class="line">mkdir: created directory `/data/mysql'</span></span><br><span class="line"><span class="comment"># 修改其属主和属组。</span></span><br><span class="line">[root@localhost <span class="built_in">local</span>]<span class="comment"># chown -R mysql:mysql /data/mysql/</span></span><br><span class="line"><span class="comment"># 安装</span></span><br><span class="line">[root@localhost <span class="built_in">local</span>]<span class="comment"># cd mysql/</span></span><br><span class="line">[root@localhost mysql]<span class="comment"># scripts/mysql_install_db --user=mysql --datadir=/data/mysql/</span></span><br><span class="line"><span class="comment"># 复制服务启动脚本至`/etc/rc.d/init.d`目录</span></span><br><span class="line">[root@localhost mysql]<span class="comment"># cp support-files/mysql.server /etc/rc.d/init.d/mysqld</span></span><br></pre></td></tr></table></figure></p>
 <p>复制模板配置文件，并在基础上增加一些配置项。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost mysql]<span class="comment"># \cp support-files/my-large.cnf /etc/my.cnf</span></span><br><span class="line">[root@localhost mysql]<span class="comment"># vim /etc/my.cnf</span></span><br><span class="line">[client]</span><br><span class="line">default-character-set=utf8</span><br><span class="line">[mysql]</span><br><span class="line">default-character-set=utf8</span><br><span class="line">[mysqld]</span><br><span class="line">datadir=/data/mysql</span><br><span class="line">character-set-server=utf8</span><br><span class="line">collation-server=utf8_general_ci</span><br><span class="line">default-storage-engine=InnoDB</span><br><span class="line">innodb-file-per-table=TRUE</span><br><span class="line">skip-name-resolve=TRUE</span><br></pre></td></tr></table></figure></p>
@@ -475,7 +475,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">11</span>
+              <span class="site-state-item-count">12</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -492,7 +492,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">13</span>
+                <span class="site-state-item-count">14</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
