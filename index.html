@@ -293,11 +293,11 @@
 
       
         
-          <h1 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h1><p>本文并不涉及<code>lvs</code>工作原理的介绍和论述,而仅是记录基于<code>lvs-nat</code>模型的负载均衡的实现过程.需要了解更多技术细节请参照博文<a href="http://www.178linux.com/14177">《VS的工作模型和调度算法介绍》</a></p>
+          <h1 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h1><p>本文并不涉及<code>lvs</code>工作原理的介绍和论述,而仅是记录基于<code>lvs-dr</code>模型的负载均衡的实现过程.需要了解更多技术细节请参照博文<a href="http://www.178linux.com/14177">《VS的工作模型和调度算法介绍》</a></p>
 <h1 id="规划"><a href="#规划" class="headerlink" title="规划"></a>规划</h1><ul>
 <li><code>lvs-dr</code>模型与之前的<code>lvs-nat</code>模型基本情况差不多,只是网络拓扑结构不同.</li>
 </ul>
-<p>四台主机需要初始化成如下状态.它们都是同一台宿主机上的虚拟机,均是最小化安装,<code>iptables</code>和<code>SELinux</code>均处于关闭状态.其中<code>192.168.71.0/24</code>网段是通过宿主机的<code>Host-Only</code>网卡连接起来的一个内部网络.<code>HostA</code>作为前端调度器,<code>HostA</code>的<code>eth1</code>口作为<code>192.168.71.0/24</code>内部网络的网关,<code>HostA</code>的<code>eth0</code>口上模拟配置向外提供服务公网地址.<code>HostB</code>和<code>HostC</code>作为两台<code>RS</code>提供真实的<code>web</code>服务,<code>HostD</code>作为<code>HostB</code>和<code>HostC</code>的后端共享存储提供<code>mariadb</code>和<code>NFS</code>.<br>
+<p>四台主机需要初始化成如下状态.它们都是同一台宿主机上的虚拟机,均是最小化安装,<code>iptables</code>和<code>SELinux</code>均处于关闭状态.四台主机均只有一个物理网口,原始<code>IP</code>地址均处于同一个网段<code>172.18.71.0/16</code>.其中<code>HostA</code>在网口别名<code>eth0:0</code>上配置<code>VIP</code>向用户提供服务,<code>HostB</code>和<code>HostC</code>在网口别名<code>lo:0</code>上需要关闭其<code>ARP</code>响应,然后也配置上<code>VIP</code>地址.<code>HostB</code>和<code>HostC</code>作为两台<code>RS</code>提供真实的<code>web</code>服务,<code>HostD</code>作为<code>HostB</code>和<code>HostC</code>的后端共享存储提供<code>mariadb</code>和<code>NFS</code>.<br>
           <div class="post-more-link text-center">
             <a class="btn" href="/2016/05/09/基于lvs-dr模型的discuz负载均衡实现/#more" rel="contents">
               阅读全文 &raquo;
