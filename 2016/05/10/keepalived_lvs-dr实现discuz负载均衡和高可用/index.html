@@ -69,7 +69,7 @@
 单主模型(主/备模型),即一台主机为MASTER,另一台主机为BACKUP.作为BACKUP的主机不会工作,只有当MA">
 <meta property="og:image" content="http://7xltax.com1.z0.glb.clouddn.com/6918cda0-9c29-49ac-b72c-ef0a25502d19.png">
 <meta property="og:image" content="http://7xltax.com1.z0.glb.clouddn.com/keepalived_lvs-dr.png">
-<meta property="og:updated_time" content="2016-05-13T13:43:10.920Z">
+<meta property="og:updated_time" content="2016-05-14T05:53:30.286Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="keepalived_lvs-dr实现discuz负载均衡和高可用">
 <meta name="twitter:description" content="说明前一篇博文《基于lvs-dr模型的discuz负载均衡实现》中由于前端调度器由于只有一台,如果损坏整个系统将无法对外提供服务.因此它成为了系统的SPOF(Single Point Of Failure),需要对其进行高可用.此时暂不考虑后端存储故障的情况.
@@ -297,7 +297,7 @@
       
 
       
-        <h1 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h1><p>前一篇博文<a href="http://twoyang0917.github.io//2016/05/09/%E5%9F%BA%E4%BA%8Elvs-dr%E6%A8%A1%E5%9E%8B%E7%9A%84discuz%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E5%AE%9E%E7%8E%B0/" target="_blank" rel="external">《基于lvs-dr模型的discuz负载均衡实现》</a>中由于前端调度器由于只有一台,如果损坏整个系统将无法对外提供服务.因此它成为了系统的<code>SPOF(Single Point Of Failure)</code>,需要对其进行高可用.此时暂不考虑后端存储故障的情况.</p>
+        <h1 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h1><p>前一篇博文<a href="http://twoyang0917.github.io/2016/05/09/%E5%9F%BA%E4%BA%8Elvs-dr%E6%A8%A1%E5%9E%8B%E7%9A%84discuz%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E5%AE%9E%E7%8E%B0/" target="_blank" rel="external">《基于lvs-dr模型的discuz负载均衡实现》</a>中由于前端调度器由于只有一台,如果损坏整个系统将无法对外提供服务.因此它成为了系统的<code>SPOF(Single Point Of Failure)</code>,需要对其进行高可用.此时暂不考虑后端存储故障的情况.</p>
 <h2 id="单主模型与双主模型"><a href="#单主模型与双主模型" class="headerlink" title="单主模型与双主模型"></a>单主模型与双主模型</h2><ul>
 <li>单主模型(主/备模型),即一台主机为<code>MASTER</code>,另一台主机为<code>BACKUP</code>.作为<code>BACKUP</code>的主机不会工作,只有当<code>MASTER</code>主机宕机,这时<code>BACKUP</code>主机取而代之成为<code>MASTER</code>才会开始工作.因此在单主模型始终有一个主机不工作,会造成资源浪费.</li>
 <li>双主模型无非就是两个单主模型叠加,两台主机互为主备.这样再在前端<code>DNS</code>解析时加上双<code>A</code>记录,即可实现两台主机同时工作,既实现了高可用同时还兼具负载均衡.</li>
@@ -471,7 +471,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">15</span>
+              <span class="site-state-item-count">16</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -488,7 +488,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">17</span>
+                <span class="site-state-item-count">19</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
