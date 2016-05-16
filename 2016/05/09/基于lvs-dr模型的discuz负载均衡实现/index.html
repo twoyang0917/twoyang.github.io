@@ -72,7 +72,7 @@ lvs-dr模型与之前的lvs-nat模型基本情况差不多,只是网络拓扑结
 
 四台主机需要初始化成如下状态.它们都是同一台宿主机上的虚拟机,均是最小化安装,iptables和SELinux均处于关闭状态.四台主机均只有一个物理网">
 <meta property="og:image" content="http://7xltax.com1.z0.glb.clouddn.com/lvs-dr.png">
-<meta property="og:updated_time" content="2016-05-10T12:40:36.287Z">
+<meta property="og:updated_time" content="2016-05-16T12:41:59.718Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="基于lvs-dr模型的discuz负载均衡实现">
 <meta name="twitter:description" content="说明本文并不涉及lvs工作原理的介绍和论述,而仅是记录基于lvs-dr模型的负载均衡的实现过程.需要了解更多技术细节请参照博文《VS的工作模型和调度算法介绍》
@@ -330,6 +330,8 @@ lvs-dr模型与之前的lvs-nat模型基本情况差不多,只是网络拓扑结
 <h2 id="HostA-1"><a href="#HostA-1" class="headerlink" title="HostA"></a>HostA</h2><p>配置<code>VIP</code>地址,并打开核心转发功能.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ifconfig eth0:0 172.18.71.111 broadcast 172.18.71.111 netmask 255.255.255.255 up</span><br><span class="line"><span class="built_in">echo</span> 1 &gt; /proc/sys/net/ipv4/ip_forward</span><br></pre></td></tr></table></figure></p>
 <p>先使用<code>rr(Round Robin)</code>调度算法,期望会话丢失情况出现.若出现会话丢失情况,改用<code>sh(Source Hash)</code>调度算法再做测试,期望会话能够保持.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@8a028eb8 ~]<span class="comment"># ipvsadm -A -t 172.18.71.111:80 -s rr</span></span><br><span class="line">[root@8a028eb8 ~]<span class="comment"># ipvsadm -a -t 172.18.71.111:80 -r 172.18.71.101:80 -g</span></span><br><span class="line">[root@8a028eb8 ~]<span class="comment"># ipvsadm -a -t 172.18.71.111:80 -r 172.18.71.102:80 -g</span></span><br><span class="line">[root@8a028eb8 ~]<span class="comment"># ipvsadm -Ln</span></span><br><span class="line">IP Virtual Server version 1.2.1 (size=4096)</span><br><span class="line">Prot LocalAddress:Port Scheduler Flags</span><br><span class="line">  -&gt; RemoteAddress:Port           Forward Weight ActiveConn InActConn</span><br><span class="line">TCP  172.18.71.111:80 rr</span><br><span class="line">  -&gt; 172.18.71.101:80             Route   1      0          0         </span><br><span class="line">  -&gt; 172.18.71.102:80             Route   1      0          0</span><br></pre></td></tr></table></figure></p>
 <h1 id="测试验证"><a href="#测试验证" class="headerlink" title="测试验证"></a>测试验证</h1><p>与<code>lvs-nat</code>模型的步骤和结论均一致,刷新页面不会丢失会话,暂时不太清楚会话是如何保持的,先存疑吧.</p>
+<hr>
+<p>2016-05-16 更新<br>知道为什么会话可以保持了,是因为在<code>Discuz! X</code>中一如继往的,<code>SESSION</code>并没有使用<code>PHP</code>自带的<code>SESSION</code>机制，而是系统的一套自带的机制。实现细节请参照<a href="http://www.discuz.net/thread-1680999-1-1.html" target="_blank" rel="external">《Discuz! X 中 SESSION 机制讲解》</a></p>
 
       
     </div>
