@@ -225,6 +225,128 @@
             
               
                 
+                <a class="post-title-link" href="/2016/04/12/DNS域名解析服务器/" itemprop="url">
+                  DNS域名解析服务器
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-04-12T19:31:23+08:00" content="2016-04-12">
+              2016-04-12
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Server/" itemprop="url" rel="index">
+                    <span itemprop="name">Server</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/04/12/DNS域名解析服务器/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/04/12/DNS域名解析服务器/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h1 id="实验环境"><a href="#实验环境" class="headerlink" title="实验环境"></a>实验环境</h1><p>准备三台虚拟机，均可以通过网关<code>172.18.71.1</code>连接互联网，其中<code>HostC</code>仅作为测试机使用。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">HostA: CentOS-6.7-x86_64 eth0:172.18.71.101/24 eth1:192.168.71.101/24 gw：172.18.71.1/24</span><br><span class="line">HostB: CentOS-7.2-x86_64 eno16777736:172.18.71.102/24 gw：172.18.71.1/24</span><br><span class="line">HostC: CentOS-7.2-x86_64 eth0:172.18.71.103/24 gw：172.18.71.1/24</span><br></pre></td></tr></table></figure></p>
+<p>确保<code>iptables</code>与<code>SELinux</code>均处于关闭状态。</p>
+<p>安装<code>bind</code><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@ns1 ~]<span class="comment"># yum install -y bind bind-libs bind-utils</span></span><br></pre></td></tr></table></figure></p>
+<p>修改主配置文件<code>/etc/named.conf</code>，注释掉仅允许本机查询请求和<code>dnssec</code>（可能影响实验结果）。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">options &#123;</span><br><span class="line">    ...</span><br><span class="line">    //allow-query     &#123; localhost; &#125;;</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    //dnssec-enable yes;</span><br><span class="line">    //dnssec-validation yes;</span><br><span class="line">    //dnssec-lookaside auto;</span><br><span class="line">    ...</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>一般来说，多节点协同工作首先就是要校准时间，使之时间同步。联网状态下可使用<code>ntpdate</code>命令统一找授时中心校准，不能联网可使用<code>date</code>命令手动校准。</p>
+<p>在此状态下，给各个虚拟机都做个快照，以便做完一个实验能够快速还原至原始状态。<br>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2016/04/12/DNS域名解析服务器/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2016/04/11/使用OpenSSL创建私有CA/" itemprop="url">
                   使用OpenSSL创建私有CA
                 </a>
@@ -374,7 +496,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">16</span>
+              <span class="site-state-item-count">17</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -391,7 +513,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">19</span>
+                <span class="site-state-item-count">20</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

@@ -225,6 +225,126 @@
             
               
                 
+                <a class="post-title-link" href="/2016/05/20/动静分离与会话保持/" itemprop="url">
+                  会话保持与动静分离
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-05-20T20:44:23+08:00" content="2016-05-20">
+              2016-05-20
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Cluster/" itemprop="url" rel="index">
+                    <span itemprop="name">Cluster</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/05/20/动静分离与会话保持/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/20/动静分离与会话保持/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h1 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h1><p>本文是上一篇<a href="http://twoyang0917.github.io/2016/05/14/keepalived_tengine%E5%AE%9E%E7%8E%B0discuz%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E5%92%8C%E9%AB%98%E5%8F%AF%E7%94%A8/">《keepalived_tengine实现discuz负载均衡和高可用》</a>和上上一篇<a href="http://twoyang0917.github.io/2016/05/12/keepalived_nginx%E5%AE%9E%E7%8E%B0discuz%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E5%92%8C%E9%AB%98%E5%8F%AF%E7%94%A8/">《keepalived_nginx实现discuz负载均衡和高可用》</a>的续. 因为之前没有考虑动静分离和会话保持的问题, 现在准备续上. 实际上每一个部分都应该作为独立的组件, 部署在单独的服务器上, 但是我的机器性能有限, 带不动那么多台虚拟机, 所以不新增机器. 而是在<code>HostD</code>上新增<code>memcache</code>服务作为会话保持服务器, 直接将前端<code>VS</code>主机作为静态资源处理服务器. 这样部署规划/网络结构图/逻辑结构图也都没有什么变化, 主要的变化在于:</p>
+<ul>
+<li>需要前端<code>tengine</code>在接到客户端静态资源请求时不向后代理, 而是自身直接响应.</li>
+<li>因为<code>discuz</code>的<code>session</code>并没有使用<code>php</code>自带的<code>session</code>机制, 即使用了<code>memcache</code>也没有什么用, 遂换成<code>phpwind</code>.
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2016/05/20/动静分离与会话保持/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2016/05/14/keepalived_tengine实现discuz负载均衡和高可用/" itemprop="url">
                   keepalived_tengine实现discuz负载均衡和高可用
                 </a>
@@ -293,7 +413,7 @@
 
       
         
-          <h1 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h1><p>在上一篇博文<a href="http://twoyang0917.github.io">《keepalived_nginx实现discuz负载均衡和高可用》</a>中说到由于<code>nginx</code>将<code>health_check</code>功能放入商业版本,导致如果使用社区版的<code>nginx</code>进行负载均衡的话,没有办法对后端的<code>RS</code>进行健康状态检查,所以现在准备使用<code>tengine</code>来取代<code>nginx</code>.这样部署规划/网络结构图/逻辑结构图都没有什么变化,安装配置过程也基本没有变化,就不赘述了,只是要将两个<code>RS</code>上的<code>nginx</code>替换为<code>tengine</code>这部分需要描述清楚.<br>
+          <h1 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h1><p>在上一篇博文<a href="http://twoyang0917.github.io/2016/05/12/keepalived_nginx%E5%AE%9E%E7%8E%B0discuz%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E5%92%8C%E9%AB%98%E5%8F%AF%E7%94%A8/">《keepalived_nginx实现discuz负载均衡和高可用》</a>中说到由于<code>nginx</code>将<code>health_check</code>功能放入商业版本,导致如果使用社区版的<code>nginx</code>进行负载均衡的话,没有办法对后端的<code>RS</code>进行健康状态检查,所以现在准备使用<code>tengine</code>来取代<code>nginx</code>.这样部署规划/网络结构图/逻辑结构图都没有什么变化,安装配置过程也基本没有变化,就不赘述了,只是要将两个<code>RS</code>上的<code>nginx</code>替换为<code>tengine</code>这部分需要描述清楚.<br>
           <div class="post-more-link text-center">
             <a class="btn" href="/2016/05/14/keepalived_tengine实现discuz负载均衡和高可用/#more" rel="contents">
               阅读全文 &raquo;
@@ -410,7 +530,7 @@
 
       
         
-          <h1 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h1><p><strong>此文需要配合下一篇博文<a href="http://twoyang0917.github.io">《keepalived_tengine实现discuz负载均衡和高可用》</a>一起服用,疗效更好.</strong></p>
+          <h1 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h1><p><strong>此文需要配合下一篇博文<a href="http://twoyang0917.github.io/2016/05/14/keepalived_tengine%E5%AE%9E%E7%8E%B0discuz%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E5%92%8C%E9%AB%98%E5%8F%AF%E7%94%A8/">《keepalived_tengine实现discuz负载均衡和高可用》</a>一起服用,疗效更好.</strong></p>
 <p>此次实验使用<code>nginx</code>替代<code>lvs</code>作为前端调度器,使用<code>keepalived</code>对<code>nginx</code>做双主模型高可用向后做反向代理.中间的<code>RS</code>服务器使用<code>httpd+php</code>来处理<code>php</code>页面请求,<code>httpd</code>和<code>php</code>以模块方式结合.暂不考虑会话保存服务器问题和动静资源分离的问题.</p>
 <h2 id="单主模型与双主模型"><a href="#单主模型与双主模型" class="headerlink" title="单主模型与双主模型"></a>单主模型与双主模型</h2><ul>
 <li>单主模型(主/备模型),即一台主机为<code>MASTER</code>,另一台主机为<code>BACKUP</code>.作为<code>BACKUP</code>的主机不会工作,只有当<code>MASTER</code>主机宕机,这时<code>BACKUP</code>主机取而代之成为<code>MASTER</code>才会开始工作.因此在单主模型始终有一个主机不工作,会造成资源浪费.</li>
@@ -687,129 +807,6 @@
 
 
     
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/05/09/基于lvs-nat模型的discuz负载均衡实现/" itemprop="url">
-                  基于lvs-nat模型的discuz负载均衡实现
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-05-09T08:46:42+08:00" content="2016-05-09">
-              2016-05-09
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Cluster/" itemprop="url" rel="index">
-                    <span itemprop="name">Cluster</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2016/05/09/基于lvs-nat模型的discuz负载均衡实现/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/09/基于lvs-nat模型的discuz负载均衡实现/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h1 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h1><p>本文并不涉及<code>lvs</code>工作原理的介绍和论述,而仅是记录基于<code>lvs-nat</code>模型的负载均衡的实现过程.需要了解更多技术细节请参照博文<a href="http://www.178linux.com/14177">《VS的工作模型和调度算法介绍》</a></p>
-<h1 id="规划"><a href="#规划" class="headerlink" title="规划"></a>规划</h1><ul>
-<li><code>lvs-nat</code>模型本身最少需要一台机器作为前端<code>VS(Virtual Server)</code>和两台机器作为后端的<code>RS(Real Server)</code>才能够体现出负载均衡效果.</li>
-<li>因为需要负载均衡的应用是<code>discuz</code>,同一客户端一系列请求如果被调度至不同<code>RS</code>,无法保障用户访问连贯性和数据一致性,所以还需要考虑会话保持和数据共享的问题.</li>
-<li>会话保持的解决方案主要有三种:源地址哈希/会话集群/会话服务器,这里选择源地址哈希(即将来自同一客户端的请求始终调度至同一台服务器).只需要将<code>LVS</code>集群的调度算法配置为<code>SH(Source Hash)</code>即可,比较简单,但实际上这种方案存在弊端.如果初始调度的<code>RS</code>宕机,将请求重新调度至其它<code>RS</code>时就无法获取到之前的会话了.不过马哥还没讲另外两种方案,就只考虑正常情况下的会话保持了.</li>
-<li>数据共享的解决方案在前面一篇文章《<code>rsync+inotify</code>实现数据同步》中提到过,我们做实验有条件用到的可能就是<code>rsync+inotify</code>/<code>Samba</code>/<code>NFS</code>这么几种了.这里我们选择<code>NFS</code>,搭建起来比较方便,性能也还不错.</li>
-</ul>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2016/05/09/基于lvs-nat模型的discuz负载均衡实现/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -855,7 +852,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">16</span>
+              <span class="site-state-item-count">17</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -872,7 +869,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">19</span>
+                <span class="site-state-item-count">20</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

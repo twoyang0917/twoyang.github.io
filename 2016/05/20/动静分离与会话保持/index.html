@@ -1,0 +1,641 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
+
+
+
+
+  <link href="//fonts.googleapis.com/css?family=Lato:300,400,700,400italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=0.5.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="memcache," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=0.5.0" />
+
+
+
+
+
+
+<meta name="description" content="说明本文是上一篇《keepalived_tengine实现discuz负载均衡和高可用》和上上一篇《keepalived_nginx实现discuz负载均衡和高可用》的续. 因为之前没有考虑动静分离和会话保持的问题, 现在准备续上. 实际上每一个部分都应该作为独立的组件, 部署在单独的服务器上, 但是我的机器性能有限, 带不动那么多台虚拟机, 所以不新增机器. 而是在HostD上新增memcach">
+<meta property="og:type" content="article">
+<meta property="og:title" content="会话保持与动静分离">
+<meta property="og:url" content="http://www.twoyang.net/2016/05/20/动静分离与会话保持/index.html">
+<meta property="og:site_name" content="TwOyAng'blog">
+<meta property="og:description" content="说明本文是上一篇《keepalived_tengine实现discuz负载均衡和高可用》和上上一篇《keepalived_nginx实现discuz负载均衡和高可用》的续. 因为之前没有考虑动静分离和会话保持的问题, 现在准备续上. 实际上每一个部分都应该作为独立的组件, 部署在单独的服务器上, 但是我的机器性能有限, 带不动那么多台虚拟机, 所以不新增机器. 而是在HostD上新增memcach">
+<meta property="og:updated_time" content="2016-05-21T14:16:03.359Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="会话保持与动静分离">
+<meta name="twitter:description" content="说明本文是上一篇《keepalived_tengine实现discuz负载均衡和高可用》和上上一篇《keepalived_nginx实现discuz负载均衡和高可用》的续. 因为之前没有考虑动静分离和会话保持的问题, 现在准备续上. 实际上每一个部分都应该作为独立的组件, 部署在单独的服务器上, 但是我的机器性能有限, 带不动那么多台虚拟机, 所以不新增机器. 而是在HostD上新增memcach">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+  <title> 会话保持与动静分离 | TwOyAng'blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=55583792";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">TwOyAng'blog</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-th fa-fw"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                会话保持与动静分离
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-05-20T20:44:23+08:00" content="2016-05-20">
+              2016-05-20
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Cluster/" itemprop="url" rel="index">
+                    <span itemprop="name">Cluster</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/05/20/动静分离与会话保持/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/20/动静分离与会话保持/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h1><p>本文是上一篇<a href="http://twoyang0917.github.io/2016/05/14/keepalived_tengine%E5%AE%9E%E7%8E%B0discuz%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E5%92%8C%E9%AB%98%E5%8F%AF%E7%94%A8/" target="_blank" rel="external">《keepalived_tengine实现discuz负载均衡和高可用》</a>和上上一篇<a href="http://twoyang0917.github.io/2016/05/12/keepalived_nginx%E5%AE%9E%E7%8E%B0discuz%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E5%92%8C%E9%AB%98%E5%8F%AF%E7%94%A8/" target="_blank" rel="external">《keepalived_nginx实现discuz负载均衡和高可用》</a>的续. 因为之前没有考虑动静分离和会话保持的问题, 现在准备续上. 实际上每一个部分都应该作为独立的组件, 部署在单独的服务器上, 但是我的机器性能有限, 带不动那么多台虚拟机, 所以不新增机器. 而是在<code>HostD</code>上新增<code>memcache</code>服务作为会话保持服务器, 直接将前端<code>VS</code>主机作为静态资源处理服务器. 这样部署规划/网络结构图/逻辑结构图也都没有什么变化, 主要的变化在于:</p>
+<ul>
+<li>需要前端<code>tengine</code>在接到客户端静态资源请求时不向后代理, 而是自身直接响应.</li>
+<li>因为<code>discuz</code>的<code>session</code>并没有使用<code>php</code>自带的<code>session</code>机制, 即使用了<code>memcache</code>也没有什么用, 遂换成<code>phpwind</code>.<a id="more"></a>
+</li>
+</ul>
+<h1 id="会话保持"><a href="#会话保持" class="headerlink" title="会话保持"></a>会话保持</h1><p>由于要换成<code>phpwind</code>应用, 还是从最后端的数据开始吧.</p>
+<h2 id="HostD"><a href="#HostD" class="headerlink" title="HostD"></a>HostD</h2><p>创建<code>phpwind</code>数据库和用户<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [(none)]&gt; create database phpwind;</span><br><span class="line">Query OK, 1 row affected (0.00 sec)</span><br><span class="line"></span><br><span class="line">MariaDB [(none)]&gt; grant all on phpwind.* to <span class="string">'phpwind'</span>@<span class="string">'%'</span> identified by <span class="string">'magedu'</span>;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line">MariaDB [(none)]&gt; flush privileges;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br></pre></td></tr></table></figure></p>
+<p>使用<code>nfs</code>提供<code>phpwind</code>代码文件<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@34400575 ~]<span class="comment"># mkdir /nfshare/phpwind</span></span><br><span class="line">[root@34400575 ~]<span class="comment"># unzip /tmp/phpwind_UTF8_8.7.1.zip -d /nfshare/phpwind/</span></span><br></pre></td></tr></table></figure></p>
+<p>安装并启动<code>memcache</code><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@34400575 ~]<span class="comment"># yum install -y memcached</span></span><br><span class="line">[root@34400575 ~]<span class="comment"># /etc/init.d/memcached start</span></span><br><span class="line">正在启动 memcached：                                       [确定]</span><br><span class="line">[root@34400575 ~]<span class="comment"># ss -tnl | grep 11211</span></span><br><span class="line">LISTEN     0      128                      :::11211                   :::*     </span><br><span class="line">LISTEN     0      128                       *:11211                    *:*</span><br></pre></td></tr></table></figure></p>
+<h2 id="HostB"><a href="#HostB" class="headerlink" title="HostB"></a>HostB</h2><p>将<code>discuz</code>修改为<code>phpwind</code>应用<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[root@80e54d87 ~]<span class="comment"># mount -t nfs 172.18.71.202:/nfshare /htdocs</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># chown -R apache:apache /htdocs/phpwind/</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># vim /etc/httpd/conf.d/vhosts.conf</span></span><br><span class="line">&lt;VirtualHost *:80&gt;</span><br><span class="line">    ServerName 80e54d87.twoyang.com</span><br><span class="line">    DocumentRoot <span class="string">"/htdocs/phpwind/upload/"</span></span><br><span class="line">    &lt;Directory <span class="string">"/htdocs/phpwind/upload/"</span>&gt;</span><br><span class="line">        Options Indexes FollowSymLinks</span><br><span class="line">        AllowOverride None</span><br><span class="line">        Require all granted</span><br><span class="line">    &lt;/Directory&gt;</span><br><span class="line">&lt;/VirtualHost&gt;</span><br></pre></td></tr></table></figure></p>
+<p>给<code>php</code>安装<code>memcache</code>扩展模块, 并配置<code>php</code>的<code>session</code>存储在<code>memcache</code>中, 重启<code>httpd</code>服务使之生效.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@80e54d87 ~]<span class="comment"># yum install -y php-memcache</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># vim /etc/php.ini</span></span><br><span class="line">session.save_handler = memcache</span><br><span class="line">session.save_path = <span class="string">"tcp://172.18.71.202:11211?persistent=1&amp;weight=1&amp;timeout=1&amp;retry_interval=15"</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># vim /etc/httpd/conf.d/php.conf</span></span><br><span class="line">php_value session.save_handler <span class="string">"memcache"</span></span><br><span class="line">php_value session.save_path <span class="string">"tcp://172.18.71.202:11211?persistent=1&amp;weight=1&amp;timeout=1&amp;retry_interval=15"</span></span><br><span class="line"></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># systemctl restart httpd</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># ss -tnl | grep 80</span></span><br><span class="line">LISTEN     0      128         :::80                      :::*</span><br></pre></td></tr></table></figure></p>
+<p>使用浏览器打开安装向导页面<code>http://172.18.71.101/install.php</code>, 安装<code>phpwind</code>应用.</p>
+<h2 id="HostC"><a href="#HostC" class="headerlink" title="HostC"></a>HostC</h2><p><code>HostC</code>与<code>HostB</code>做相同配置</p>
+<h2 id="测试验证"><a href="#测试验证" class="headerlink" title="测试验证"></a>测试验证</h2><p>使用<code>admin</code>用户登录/退出论坛, 重复几次. 然后登录<code>memcache</code>查看<code>get_hits</code>(缓存命中次数).<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">[root@80e54d87 ~]<span class="comment"># yum install -y telnet</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># telnet 172.18.71.202 11211</span></span><br><span class="line">Trying 172.18.71.202...</span><br><span class="line">Connected to 172.18.71.202.</span><br><span class="line">Escape character is <span class="string">'^]'</span>.</span><br><span class="line">stats</span><br><span class="line">STAT pid 2472</span><br><span class="line">STAT uptime 429</span><br><span class="line">STAT time 1463791798</span><br><span class="line">STAT version 1.4.4</span><br><span class="line">STAT pointer_size 64</span><br><span class="line">STAT rusage_user 0.005999</span><br><span class="line">STAT rusage_system 0.016997</span><br><span class="line">STAT curr_connections 12</span><br><span class="line">STAT total_connections 13</span><br><span class="line">STAT connection_structures 13</span><br><span class="line">STAT cmd_get 12</span><br><span class="line">STAT cmd_<span class="built_in">set</span> 34</span><br><span class="line">STAT cmd_flush 0</span><br><span class="line">STAT get_hits 10</span><br><span class="line">STAT get_misses 2</span><br><span class="line">STAT delete_misses 0</span><br><span class="line">STAT delete_hits 2</span><br><span class="line">STAT incr_misses 3</span><br><span class="line">STAT incr_hits 9</span><br><span class="line">STAT decr_misses 0</span><br><span class="line">STAT decr_hits 0</span><br><span class="line">STAT cas_misses 0</span><br><span class="line">STAT cas_hits 0</span><br><span class="line">STAT cas_badval 0</span><br><span class="line">STAT auth_cmds 0</span><br><span class="line">STAT auth_errors 0</span><br><span class="line">STAT bytes_<span class="built_in">read</span> 4235</span><br><span class="line">STAT bytes_written 3899</span><br><span class="line">STAT <span class="built_in">limit</span>_maxbytes 67108864</span><br><span class="line">STAT accepting_conns 1</span><br><span class="line">STAT listen_disabled_num 0</span><br><span class="line">STAT threads 4</span><br><span class="line">STAT conn_yields 0</span><br><span class="line">STAT bytes 363</span><br><span class="line">STAT curr_items 2</span><br><span class="line">STAT total_items 25</span><br><span class="line">STAT evictions 0</span><br><span class="line">END</span><br></pre></td></tr></table></figure></p>
+<p>说明登录时的会话被保存在了<code>memcache</code>中, 再此登录会首先从<code>memcache</code>中检索, 如果会话仍在缓存中没有过期, 会优先使用缓存中的会话.这个可能看起来不够直观, 直接使用测试代码来测试下.</p>
+<p>建立会话代码页面<code>setsess.php</code><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@80e54d87 ~]<span class="comment"># vim /htdocs/phpwind/upload/setsess.php</span></span><br><span class="line">&lt;?php</span><br><span class="line">session_start();</span><br><span class="line"><span class="keyword">if</span> (!isset(<span class="variable">$_SESSION</span>[<span class="string">'www.MageEdu.com'</span>])) &#123;</span><br><span class="line">  <span class="variable">$_SESSION</span>[<span class="string">'www.MageEdu.com'</span>] = time();</span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">print</span> <span class="variable">$_SESSION</span>[<span class="string">'www.MageEdu.com'</span>];</span><br><span class="line"><span class="built_in">print</span> <span class="string">"&lt;br&gt;&lt;br&gt;"</span>;</span><br><span class="line"><span class="built_in">print</span> <span class="string">"Session ID: "</span> . session_id();</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure></p>
+<p>访问页面<code>setsess.php</code>获取会话<code>ID</code>.注意此会话<code>ID</code>需要写入<code>showsess.php</code>代码中.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@80e54d87 ~]<span class="comment"># curl http://172.18.71.101/setsess.php</span></span><br><span class="line">1463792352&lt;br&gt;&lt;br&gt;Session ID: e6hpgbpi4qj6f4jmp2145hq9q0</span><br></pre></td></tr></table></figure></p>
+<p>访问页面<code>showsess.php</code>, 根据给出的会话<code>ID</code>获取会话值. 强制刷新<code>(Ctrl+F5)</code>会发现, 会话值并没有变化, 说明会话被缓存了.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">[root@80e54d87 ~]<span class="comment"># vim /htdocs/phpwind/upload/showsess.php</span></span><br><span class="line">&lt;?php</span><br><span class="line">session_start();</span><br><span class="line"><span class="variable">$memcache_obj</span> = new Memcache;</span><br><span class="line">// 获取memcache服务器中存储的session</span><br><span class="line"><span class="variable">$memcache_obj</span>-&gt;connect(<span class="string">'172.18.71.202'</span>, 11211);</span><br><span class="line"><span class="variable">$mysess</span>=session_id();</span><br><span class="line">var_dump(<span class="variable">$memcache_obj</span>-&gt;get(<span class="variable">$mysess</span>));</span><br><span class="line"><span class="variable">$memcache_obj</span>-&gt;close();</span><br><span class="line">?&gt;</span><br><span class="line"></span><br><span class="line">&lt;?php</span><br><span class="line">// Generating cookies must take place before any HTML.</span><br><span class="line">// Check <span class="keyword">for</span> existing <span class="string">"SessionId"</span> cookie</span><br><span class="line"><span class="variable">$session</span> = <span class="variable">$HTTP_COOKIE_VARS</span>[<span class="string">"SessionId"</span>];</span><br><span class="line">// 如果当前session id存在于memcache服务器中, 就输出当前session的值.</span><br><span class="line"><span class="keyword">if</span> ( <span class="variable">$session</span> == <span class="string">"e6hpgbpi4qj6f4jmp2145hq9q0"</span> ) &#123;</span><br><span class="line">// Generate time-based unique id.</span><br><span class="line">// Use user<span class="string">'s IP address to make more unique.</span><br><span class="line">$session = uniqid ( getenv ( "REMOTE_ADDR" ) );</span><br><span class="line">// Send session id - expires when browser exits</span><br><span class="line">SetCookie ( "SessionId", $session );</span><br><span class="line">&#125;</span><br><span class="line">?&gt;</span><br><span class="line">&lt;HTML&gt;</span><br><span class="line">&lt;HEAD&gt;&lt;TITLE&gt;Session Test&lt;/TITLE&gt;&lt;/HEAD&gt;</span><br><span class="line">&lt;BODY&gt; &lt;br&gt; 16 Current session id: &lt;?php echo $session ?&gt;</span><br><span class="line">&lt;/BODY&gt;&lt;/HTML&gt;</span></span><br></pre></td></tr></table></figure></p>
+<h1 id="动静分离"><a href="#动静分离" class="headerlink" title="动静分离"></a>动静分离</h1><h2 id="HostA"><a href="#HostA" class="headerlink" title="HostA"></a>HostA</h2><p>由于静态内容要在前端进行处理, <code>php</code>页面请求发往后端<code>RS</code>进行处理. 所以前端后端服务器都需要有<code>phpwind</code>代码文件.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">[root@8a028eb8 ~]<span class="comment"># mount -t nfs 172.18.71.202:/nfshare /htdocs/</span></span><br><span class="line">[root@8a028eb8 ~]<span class="comment"># vim /usr/local/nginx/conf/nginx.conf</span></span><br><span class="line">http &#123;</span><br><span class="line">    ...</span><br><span class="line">    server &#123;</span><br><span class="line">        listen       80;</span><br><span class="line">        server_name  localhost;</span><br><span class="line">        charset utf-8;</span><br><span class="line"></span><br><span class="line">        <span class="built_in">set</span> <span class="variable">$my_host</span> <span class="variable">$http_host</span>;</span><br><span class="line">        <span class="keyword">if</span> (<span class="variable">$http_host</span> = <span class="string">"backend"</span>) &#123;</span><br><span class="line">            <span class="built_in">set</span> <span class="variable">$my_host</span> <span class="string">"127.0.0.1"</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 其余内容本机处理</span></span><br><span class="line">        location / &#123;</span><br><span class="line">            root /htdocs/phpwind/upload;</span><br><span class="line">            index index.php index.html;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment"># php页面请求发往后端RS进行处理</span></span><br><span class="line">        location ~* \.php$ &#123;</span><br><span class="line">            proxy_pass   http://backend;</span><br><span class="line">            proxy_<span class="built_in">set</span>_header Host <span class="variable">$my_host</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        error_page  404              /404.html;</span><br><span class="line"></span><br><span class="line">        <span class="comment"># redirect server error pages to the static page /50x.html</span></span><br><span class="line">        <span class="comment">#</span></span><br><span class="line">        error_page   500 502 503 504  /50x.html;</span><br><span class="line">        location = /50x.html &#123;</span><br><span class="line">            root   html;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="HostE"><a href="#HostE" class="headerlink" title="HostE"></a>HostE</h2><p><code>HostE</code>与<code>HostA</code>做相同配置</p>
+<h2 id="测试验证-1"><a href="#测试验证-1" class="headerlink" title="测试验证"></a>测试验证</h2><p>直接通过浏览器访问页面一切正常, 可能这样说明不了什么问题. 所以将前端<code>phpwind</code>代码文件中的<code>php</code>文件删除, 而将后端<code>phpwind</code>代码文件中的静态文件删除. 不过需要将<code>phpwind</code>代码文件复制到各自的文件系统上进行操作, 因此之前一直是通过<code>nfs</code>挂载的方式拿到的代码文件, 如果直接删除, 其它挂载此<code>nfs</code>的节点也会受影响.</p>
+<h3 id="HostA-amp-HostE"><a href="#HostA-amp-HostE" class="headerlink" title="HostA &amp; HostE"></a>HostA &amp; HostE</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@80e54d87 ~]<span class="comment"># cp -r /htdocs/phpwind/ /tmp/</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># umount /htdocs/</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># cp -r /tmp/phpwind/ /htdocs/</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># find /htdocs/phpwind/upload/ -name "*.php" | xargs rm -f</span></span><br></pre></td></tr></table></figure>
+<h3 id="HostB-amp-HostC"><a href="#HostB-amp-HostC" class="headerlink" title="HostB &amp; HostC"></a>HostB &amp; HostC</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@80e54d87 ~]<span class="comment"># cp -r /htdocs/phpwind/ /tmp/</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># umount /htdocs/</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># cp -r /tmp/phpwind/ /htdocs/</span></span><br><span class="line"><span class="comment"># 当然还有其它静态资源文件, 这里为了测试只需删除部分即可.</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># find /htdocs/phpwind/upload/ -name "*.css" -or -name "*.jpg" | xargs rm -f</span></span><br></pre></td></tr></table></figure>
+<p>这样操作以后, 再来通过浏览器访问页面, 发现仍然正常. 说明确实可行, 动态资源和静态资源被分离了.</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/memcache/" rel="tag">#memcache</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/05/14/keepalived_tengine实现discuz负载均衡和高可用/" rel="next" title="keepalived_tengine实现discuz负载均衡和高可用">
+                <i class="fa fa-chevron-left"></i> keepalived_tengine实现discuz负载均衡和高可用
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <div class="ds-share flat" data-thread-key="2016/05/20/动静分离与会话保持/"
+     data-title="会话保持与动静分离"
+     data-content=""
+     data-url="http://www.twoyang.net/2016/05/20/动静分离与会话保持/">
+  <div class="ds-share-inline">
+    <ul  class="ds-share-icons-16">
+
+      <li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
+      <li><a class="ds-weibo" href="javascript:void(0);" data-service="weibo">微博</a></li>
+      <li><a class="ds-qzone" href="javascript:void(0);" data-service="qzone">QQ空间</a></li>
+      <li><a class="ds-qqt" href="javascript:void(0);" data-service="qqt">腾讯微博</a></li>
+      <li><a class="ds-wechat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+
+    </ul>
+    <div class="ds-share-icons-more">
+    </div>
+  </div>
+</div>
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/05/20/动静分离与会话保持/"
+           data-title="会话保持与动静分离" data-url="http://www.twoyang.net/2016/05/20/动静分离与会话保持/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xltax.com1.z0.glb.clouddn.com/twoyang.jpg"
+               alt="twoyang" />
+          <p class="site-author-name" itemprop="name">twoyang</p>
+          <p class="site-description motion-element" itemprop="description">The quieter you become.The more you are able to hear.</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">17</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">20</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        <div class="links-of-blogroll motion-element">
+          
+            <div class="links-of-blogroll-title">友情链接</div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.magedu.com/" target="_blank">马哥教育</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="https://shadowsocks.be/9.html" target="_blank">科学上网</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.isetsuna.com/hexo/introduction/" target="_blank">Hexo博客系列</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://mrchen.org/" target="_blank">Mrchen</a>
+                </li>
+              
+            </ul>
+          
+        </div>
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#说明"><span class="nav-number">1.</span> <span class="nav-text">说明</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#会话保持"><span class="nav-number">2.</span> <span class="nav-text">会话保持</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#HostD"><span class="nav-number">2.1.</span> <span class="nav-text">HostD</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HostB"><span class="nav-number">2.2.</span> <span class="nav-text">HostB</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HostC"><span class="nav-number">2.3.</span> <span class="nav-text">HostC</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#测试验证"><span class="nav-number">2.4.</span> <span class="nav-text">测试验证</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#动静分离"><span class="nav-number">3.</span> <span class="nav-text">动静分离</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#HostA"><span class="nav-number">3.1.</span> <span class="nav-text">HostA</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HostE"><span class="nav-number">3.2.</span> <span class="nav-text">HostE</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#测试验证-1"><span class="nav-number">3.3.</span> <span class="nav-text">测试验证</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#HostA-amp-HostE"><span class="nav-number">3.3.1.</span> <span class="nav-text">HostA & HostE</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HostB-amp-HostC"><span class="nav-number">3.3.2.</span> <span class="nav-text">HostB & HostC</span></a></li></ol></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">twoyang</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+
+  
+
+
+
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=0.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=0.5.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=0.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=0.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=0.5.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"twoyang"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+  
+
+
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>
