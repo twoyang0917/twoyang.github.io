@@ -225,7 +225,247 @@
             
               
                 
-                <a class="post-title-link" href="/2016/05/23/varnish简单应用/" itemprop="url">
+                <a class="post-title-link" href="/2016/05/25/基于haproxy实现资源分离/" itemprop="url">
+                  基于haproxy实现资源分离
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-05-25T19:16:45+08:00" content="2016-05-25">
+              2016-05-25
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Cluster/" itemprop="url" rel="index">
+                    <span itemprop="name">Cluster</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/05/25/基于haproxy实现资源分离/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/25/基于haproxy实现资源分离/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h1 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h1><p><a href="http://xuding.blog.51cto.com/4890434/1747722">《haproxy负载均衡代理服务详解》</a>, 这是某位师兄写的博客, 基本上马哥讲到的知识点都覆盖到了.</p>
+<p>官方文档并不在<a href="https://www.haproxy.com/">haproxy</a>官方站点上面, 而是放在了<code>github</code>代码托管站点, 地址是<a href="http://cbonte.github.io/haproxy-dconv/">HAProxy Documentation Converter</a>.</p>
+<p>目前有<code>1.7/1.6/1.5/1.4</code>这么几个版本分支, 其中<code>1.7</code>为开发版, 其余为稳定版.<code>CentOS-7-x86_64</code>上<code>yum</code>源中提供的是<code>1.5</code>版的, 所以文档也要看对应版本的, 因为配置项有增删改.</p>
+<h1 id="规划"><a href="#规划" class="headerlink" title="规划"></a>规划</h1><p>准备五台虚拟机, 均为<code>CentOS-7-x86_64</code>最小化安装, <code>iptables</code>与<code>SELinux</code>均处于关闭状态, 配置好<code>yum</code>源.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">HostA(haproxy)</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: 1478a474.twoyang.com</span><br><span class="line">eno16777736: 172.18.71.130/16</span><br><span class="line">gateway: 172.18.0.1</span><br><span class="line"></span><br><span class="line">HostB(RS1)</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: fcc0d070.twoyang.com</span><br><span class="line">eno16777736: 172.18.71.135/16</span><br><span class="line">gateway: 172.18.0.1</span><br><span class="line"></span><br><span class="line">HostC(RS2)</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: 1f5fafa6.twoyang.com</span><br><span class="line">eno16777736: 172.18.71.103/16</span><br><span class="line">gateway: 172.18.0.1</span><br><span class="line"></span><br><span class="line">HostD(RS3)</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: b9cf468b.twoyang.com</span><br><span class="line">eno16777736: 172.18.71.102/16</span><br><span class="line">gateway: 172.18.0.1</span><br><span class="line"></span><br><span class="line">HostE(RS4)</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: 80e54d87.twoyang.com</span><br><span class="line">eno16777736: 172.18.71.101/16</span><br><span class="line">gateway: 172.18.0.1</span><br></pre></td></tr></table></figure></p>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2016/05/25/基于haproxy实现资源分离/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/05/25/haproxy基本应用/" itemprop="url">
+                  haproxy基本应用
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-05-25T13:17:02+08:00" content="2016-05-25">
+              2016-05-25
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Cluster/" itemprop="url" rel="index">
+                    <span itemprop="name">Cluster</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/05/25/haproxy基本应用/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/25/haproxy基本应用/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h1 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h1><p><a href="http://xuding.blog.51cto.com/4890434/1747722">《haproxy负载均衡代理服务详解》</a>, 这是某位师兄写的博客, 基本上马哥讲到的知识点都覆盖到了.</p>
+<p>官方文档并不在<a href="https://www.haproxy.com/">haproxy</a>官方站点上面, 而是放在了<code>github</code>代码托管站点, 地址是<a href="http://cbonte.github.io/haproxy-dconv/">HAProxy Documentation Converter</a>.</p>
+<p>目前有<code>1.7/1.6/1.5/1.4</code>这么几个版本分支, 其中<code>1.7</code>为开发版, 其余为稳定版.<code>CentOS-7-x86_64</code>上<code>yum</code>源中提供的是<code>1.5</code>版的, 所以文档也要看对应版本的, 因为配置项有增删改.</p>
+<h1 id="规划"><a href="#规划" class="headerlink" title="规划"></a>规划</h1><p>准备三台虚拟机, 均为<code>CentOS-7-x86_64</code>最小化安装, <code>iptables</code>与<code>SELinux</code>均处于关闭状态, 配置好<code>yum</code>源.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">HostA(haproxy)</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: 1478a474.twoyang.com</span><br><span class="line">eno16777736: 172.18.71.130/16</span><br><span class="line">gateway: 172.18.0.1</span><br><span class="line"></span><br><span class="line">HostB(RS1)</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: fcc0d070.twoyang.com</span><br><span class="line">eno16777736: 172.18.71.135/16</span><br><span class="line">gateway: 172.18.0.1</span><br><span class="line"></span><br><span class="line">HostC(RS2)</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: 1f5fafa6.twoyang.com</span><br><span class="line">eno16777736: 172.18.71.103/16</span><br><span class="line">gateway: 172.18.0.1</span><br></pre></td></tr></table></figure></p>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2016/05/25/haproxy基本应用/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/05/23/varnish基本应用/" itemprop="url">
                   varnish基本应用
                 </a>
               
@@ -253,8 +493,8 @@
               <span class="post-meta-item-text">分类于</span>
               
                 <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Server/" itemprop="url" rel="index">
-                    <span itemprop="name">Server</span>
+                  <a href="/categories/Cluster/" itemprop="url" rel="index">
+                    <span itemprop="name">Cluster</span>
                   </a>
                 </span>
 
@@ -269,8 +509,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/2016/05/23/varnish简单应用/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/23/varnish简单应用/" itemprop="commentsCount"></span>
+                <a href="/2016/05/23/varnish基本应用/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/23/varnish基本应用/" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -298,7 +538,7 @@
 <p><code>3.0</code>与<code>4.0</code>的<code>vcl</code>语法有较大差别,不能通用, 这里使用的是<code>Varnish 4.0</code>版本, .</p>
 <h1 id="规划"><a href="#规划" class="headerlink" title="规划"></a>规划</h1><p>结构很简单, 就不画图了. <code>varnish</code>既是缓存, 也同时作为前端, 后端两台就是<code>Real Server</code>.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">HostA(varnish)</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: 1478a474.twoyang.com</span><br><span class="line">eno16777736: 172.18.71.130/16</span><br><span class="line">gateway: 172.18.0.1</span><br><span class="line"></span><br><span class="line">HostB(RS1)</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: fcc0d070.twoyang.com</span><br><span class="line">eno16777736: 172.18.71.135/16</span><br><span class="line">gateway: 172.18.0.1</span><br><span class="line"></span><br><span class="line">HostC(RS2)</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: 1f5fafa6.twoyang.com</span><br><span class="line">eno16777736: 172.18.71.103/16</span><br><span class="line">gateway: 172.18.0.1</span><br></pre></td></tr></table></figure></p>
           <div class="post-more-link text-center">
-            <a class="btn" href="/2016/05/23/varnish简单应用/#more" rel="contents">
+            <a class="btn" href="/2016/05/23/varnish基本应用/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -561,251 +801,6 @@
 
 
     
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/05/12/keepalived_nginx实现discuz负载均衡和高可用/" itemprop="url">
-                  keepalived_nginx实现discuz负载均衡和高可用
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-05-12T21:21:33+08:00" content="2016-05-12">
-              2016-05-12
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Cluster/" itemprop="url" rel="index">
-                    <span itemprop="name">Cluster</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2016/05/12/keepalived_nginx实现discuz负载均衡和高可用/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/12/keepalived_nginx实现discuz负载均衡和高可用/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h1 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h1><p><strong>此文需要配合下一篇博文<a href="http://twoyang0917.github.io/2016/05/14/keepalived_tengine%E5%AE%9E%E7%8E%B0discuz%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E5%92%8C%E9%AB%98%E5%8F%AF%E7%94%A8/">《keepalived_tengine实现discuz负载均衡和高可用》</a>一起服用,疗效更好.</strong></p>
-<p>此次实验使用<code>nginx</code>替代<code>lvs</code>作为前端调度器,使用<code>keepalived</code>对<code>nginx</code>做双主模型高可用向后做反向代理.中间的<code>RS</code>服务器使用<code>httpd+php</code>来处理<code>php</code>页面请求,<code>httpd</code>和<code>php</code>以模块方式结合.暂不考虑会话保存服务器问题和动静资源分离的问题.</p>
-<h2 id="单主模型与双主模型"><a href="#单主模型与双主模型" class="headerlink" title="单主模型与双主模型"></a>单主模型与双主模型</h2><ul>
-<li>单主模型(主/备模型),即一台主机为<code>MASTER</code>,另一台主机为<code>BACKUP</code>.作为<code>BACKUP</code>的主机不会工作,只有当<code>MASTER</code>主机宕机,这时<code>BACKUP</code>主机取而代之成为<code>MASTER</code>才会开始工作.因此在单主模型始终有一个主机不工作,会造成资源浪费.</li>
-<li>双主模型无非就是两个单主模型叠加,两台主机互为主备.这样再在前端<code>DNS</code>解析时加上双<code>A</code>记录,即可实现两台主机同时工作,既实现了高可用同时还兼具负载均衡.</li>
-</ul>
-<h1 id="规划"><a href="#规划" class="headerlink" title="规划"></a>规划</h1><p>前端使用两台<code>nginx</code>服务器作为前端调度器,使用<code>keepalived</code>对<code>nginx</code>做双主模型高可用.中间两台<code>httpd+php</code>服务器作为<code>RS</code>服务器,后端一台共享存储提供<code>mariadb</code>和<code>NFS</code>服务.因为不再使用<code>LVS</code>调度,而是通过<code>nginx</code>反向代理来实现,所以中间的<code>RS</code>服务器上不需要在本地回环网口的别名上配置<code>VIP</code>了.<br>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2016/05/12/keepalived_nginx实现discuz负载均衡和高可用/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/05/10/keepalived_lvs-dr实现discuz负载均衡和高可用/" itemprop="url">
-                  keepalived_lvs-dr实现discuz负载均衡和高可用
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-05-10T20:25:34+08:00" content="2016-05-10">
-              2016-05-10
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Cluster/" itemprop="url" rel="index">
-                    <span itemprop="name">Cluster</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2016/05/10/keepalived_lvs-dr实现discuz负载均衡和高可用/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/10/keepalived_lvs-dr实现discuz负载均衡和高可用/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h1 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h1><p>前一篇博文<a href="http://twoyang0917.github.io/2016/05/09/%E5%9F%BA%E4%BA%8Elvs-dr%E6%A8%A1%E5%9E%8B%E7%9A%84discuz%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E5%AE%9E%E7%8E%B0/">《基于lvs-dr模型的discuz负载均衡实现》</a>中由于前端调度器由于只有一台,如果损坏整个系统将无法对外提供服务.因此它成为了系统的<code>SPOF(Single Point Of Failure)</code>,需要对其进行高可用.此时暂不考虑后端存储故障的情况.</p>
-<h2 id="单主模型与双主模型"><a href="#单主模型与双主模型" class="headerlink" title="单主模型与双主模型"></a>单主模型与双主模型</h2><ul>
-<li>单主模型(主/备模型),即一台主机为<code>MASTER</code>,另一台主机为<code>BACKUP</code>.作为<code>BACKUP</code>的主机不会工作,只有当<code>MASTER</code>主机宕机,这时<code>BACKUP</code>主机取而代之成为<code>MASTER</code>才会开始工作.因此在单主模型始终有一个主机不工作,会造成资源浪费.</li>
-<li>双主模型无非就是两个单主模型叠加,两台主机互为主备.这样再在前端<code>DNS</code>解析时加上双<code>A</code>记录,即可实现两台主机同时工作,既实现了高可用同时还兼具负载均衡.</li>
-</ul>
-<h1 id="规划"><a href="#规划" class="headerlink" title="规划"></a>规划</h1><p>再增加一台服务器作为前端调度器,与之前已有的一台前端调度器一起做<code>keepalived</code>高可用.其它部分基本可以沿用之前的方案.需要改变的是<code>VIP</code>不再直接配置在<code>VS</code>上,而是基于<code>keepalived</code>的<code>VRRP</code>协议在两台<code>VS</code>上动态漂移,但是后端的两台<code>RS</code>还是要在网口别名<code>lo:0</code>上配置<code>VIP</code>.因为准备做双主模型,所以需要配置两个<code>VIP</code>.<br>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2016/05/10/keepalived_lvs-dr实现discuz负载均衡和高可用/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -851,7 +846,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">18</span>
+              <span class="site-state-item-count">20</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -868,7 +863,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">21</span>
+                <span class="site-state-item-count">22</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

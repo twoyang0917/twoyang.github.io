@@ -1,0 +1,638 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
+
+
+
+
+  <link href="//fonts.googleapis.com/css?family=Lato:300,400,700,400italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=0.5.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="haproxy," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=0.5.0" />
+
+
+
+
+
+
+<meta name="description" content="说明《haproxy负载均衡代理服务详解》, 这是某位师兄写的博客, 基本上马哥讲到的知识点都覆盖到了.
+官方文档并不在haproxy官方站点上面, 而是放在了github代码托管站点, 地址是HAProxy Documentation Converter.
+目前有1.7/1.6/1.5/1.4这么几个版本分支, 其中1.7为开发版, 其余为稳定版.CentOS-7-x86_64上yum源中提供的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于haproxy实现资源分离">
+<meta property="og:url" content="http://www.twoyang.net/2016/05/25/基于haproxy实现资源分离/index.html">
+<meta property="og:site_name" content="TwOyAng'blog">
+<meta property="og:description" content="说明《haproxy负载均衡代理服务详解》, 这是某位师兄写的博客, 基本上马哥讲到的知识点都覆盖到了.
+官方文档并不在haproxy官方站点上面, 而是放在了github代码托管站点, 地址是HAProxy Documentation Converter.
+目前有1.7/1.6/1.5/1.4这么几个版本分支, 其中1.7为开发版, 其余为稳定版.CentOS-7-x86_64上yum源中提供的">
+<meta property="og:image" content="http://7xltax.com1.z0.glb.clouddn.com/122c4b06-baa4-43af-970e-43d7fc1b1d37.png">
+<meta property="og:image" content="http://7xltax.com1.z0.glb.clouddn.com/a7a5018b-6b33-4f8a-bbee-7af124dd7d65.png">
+<meta property="og:updated_time" content="2016-05-26T15:02:26.608Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="基于haproxy实现资源分离">
+<meta name="twitter:description" content="说明《haproxy负载均衡代理服务详解》, 这是某位师兄写的博客, 基本上马哥讲到的知识点都覆盖到了.
+官方文档并不在haproxy官方站点上面, 而是放在了github代码托管站点, 地址是HAProxy Documentation Converter.
+目前有1.7/1.6/1.5/1.4这么几个版本分支, 其中1.7为开发版, 其余为稳定版.CentOS-7-x86_64上yum源中提供的">
+<meta name="twitter:image" content="http://7xltax.com1.z0.glb.clouddn.com/122c4b06-baa4-43af-970e-43d7fc1b1d37.png">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+  <title> 基于haproxy实现资源分离 | TwOyAng'blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=55583792";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">TwOyAng'blog</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-th fa-fw"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                基于haproxy实现资源分离
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-05-25T19:16:45+08:00" content="2016-05-25">
+              2016-05-25
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Cluster/" itemprop="url" rel="index">
+                    <span itemprop="name">Cluster</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/05/25/基于haproxy实现资源分离/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/25/基于haproxy实现资源分离/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h1><p><a href="http://xuding.blog.51cto.com/4890434/1747722" target="_blank" rel="external">《haproxy负载均衡代理服务详解》</a>, 这是某位师兄写的博客, 基本上马哥讲到的知识点都覆盖到了.</p>
+<p>官方文档并不在<a href="https://www.haproxy.com/" target="_blank" rel="external">haproxy</a>官方站点上面, 而是放在了<code>github</code>代码托管站点, 地址是<a href="http://cbonte.github.io/haproxy-dconv/" target="_blank" rel="external">HAProxy Documentation Converter</a>.</p>
+<p>目前有<code>1.7/1.6/1.5/1.4</code>这么几个版本分支, 其中<code>1.7</code>为开发版, 其余为稳定版.<code>CentOS-7-x86_64</code>上<code>yum</code>源中提供的是<code>1.5</code>版的, 所以文档也要看对应版本的, 因为配置项有增删改.</p>
+<h1 id="规划"><a href="#规划" class="headerlink" title="规划"></a>规划</h1><p>准备五台虚拟机, 均为<code>CentOS-7-x86_64</code>最小化安装, <code>iptables</code>与<code>SELinux</code>均处于关闭状态, 配置好<code>yum</code>源.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">HostA(haproxy)</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: 1478a474.twoyang.com</span><br><span class="line">eno16777736: 172.18.71.130/16</span><br><span class="line">gateway: 172.18.0.1</span><br><span class="line"></span><br><span class="line">HostB(RS1)</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: fcc0d070.twoyang.com</span><br><span class="line">eno16777736: 172.18.71.135/16</span><br><span class="line">gateway: 172.18.0.1</span><br><span class="line"></span><br><span class="line">HostC(RS2)</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: 1f5fafa6.twoyang.com</span><br><span class="line">eno16777736: 172.18.71.103/16</span><br><span class="line">gateway: 172.18.0.1</span><br><span class="line"></span><br><span class="line">HostD(RS3)</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: b9cf468b.twoyang.com</span><br><span class="line">eno16777736: 172.18.71.102/16</span><br><span class="line">gateway: 172.18.0.1</span><br><span class="line"></span><br><span class="line">HostE(RS4)</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: 80e54d87.twoyang.com</span><br><span class="line">eno16777736: 172.18.71.101/16</span><br><span class="line">gateway: 172.18.0.1</span><br></pre></td></tr></table></figure></p>
+<a id="more"></a>
+<p>这里<code>haproxy</code>作为前端调度器, 后端四台<code>Real Server</code>, 分别提供不同的功能模块. <code>RS1</code>处理<code>php</code>动态页面请求, <code>RS2</code>处理静态资源<code>(html/css/js)</code>请求, <code>RS3</code>处理多媒体资源<code>(image/audio/video)</code>请求, <code>RS4</code>处理用户上传请求.</p>
+<p><img src="http://7xltax.com1.z0.glb.clouddn.com/122c4b06-baa4-43af-970e-43d7fc1b1d37.png" alt="haprxoy"></p>
+<p>期望的是模拟实现如下图所示架构的前端部分<br><img src="http://7xltax.com1.z0.glb.clouddn.com/a7a5018b-6b33-4f8a-bbee-7af124dd7d65.png" alt="architecture"></p>
+<h1 id="HostB"><a href="#HostB" class="headerlink" title="HostB"></a>HostB</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@fcc0d070 ~]<span class="comment"># yum install -y httpd php</span></span><br><span class="line">[root@fcc0d070 ~]<span class="comment"># echo "&lt;?php phpinfo();?&gt;" &gt; /var/www/html/index.php</span></span><br><span class="line">[root@fcc0d070 ~]<span class="comment"># systemctl start httpd.service </span></span><br><span class="line">[root@fcc0d070 ~]<span class="comment"># ss -tnl | grep 80</span></span><br><span class="line">LISTEN     0      128         :::80                      :::*                  </span><br><span class="line">[root@fcc0d070 ~]<span class="comment"># curl -I http://172.18.71.135</span></span><br><span class="line">HTTP/1.1 200 OK</span><br><span class="line">Date: Thu, 12 May 2016 15:00:35 GMT</span><br><span class="line">Server: Apache/2.4.6 (CentOS) PHP/5.4.16</span><br><span class="line">X-Powered-By: PHP/5.4.16</span><br><span class="line">Content-Type: text/html; charset=UTF-8</span><br></pre></td></tr></table></figure>
+<h1 id="HostC"><a href="#HostC" class="headerlink" title="HostC"></a>HostC</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@1f5fafa6 ~]<span class="comment"># yum install -y httpd</span></span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># echo "Real Server 2" &gt; /var/www/html/index.html</span></span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># systemctl start httpd.service</span></span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># ss -tnl | grep 80</span></span><br><span class="line">LISTEN     0      128         :::80                      :::*                  </span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># curl http://172.18.71.103</span></span><br><span class="line">Real Server 2</span><br></pre></td></tr></table></figure>
+<h1 id="HostD"><a href="#HostD" class="headerlink" title="HostD"></a>HostD</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">[root@b9cf468b ~]<span class="comment"># yum install -y httpd</span></span><br><span class="line">[root@b9cf468b ~]<span class="comment"># cp /usr/share/wallpapers/CentOS7/contents/images/2560x1600.jpg /var/www/html/wall.jpg</span></span><br><span class="line">[root@b9cf468b ~]<span class="comment"># systemctl start httpd.service</span></span><br><span class="line">[root@b9cf468b ~]<span class="comment"># ss -tnl | grep 80</span></span><br><span class="line">LISTEN     0      128         :::80                      :::*                  </span><br><span class="line">[root@b9cf468b ~]<span class="comment"># curl -I http://172.18.71.102/wall.jpg</span></span><br><span class="line">HTTP/1.1 200 OK</span><br><span class="line">Date: Wed, 25 May 2016 06:30:14 GMT</span><br><span class="line">Server: Apache/2.4.6 (CentOS)</span><br><span class="line">Last-Modified: Wed, 25 May 2016 06:27:47 GMT</span><br><span class="line">ETag: <span class="string">"eaadb-533a4c5a9a604"</span></span><br><span class="line">Accept-Ranges: bytes</span><br><span class="line">Content-Length: 961243</span><br><span class="line">Content-Type: image/jpeg</span><br></pre></td></tr></table></figure>
+<h1 id="HostE"><a href="#HostE" class="headerlink" title="HostE"></a>HostE</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">[root@80e54d87 ~]<span class="comment"># yum install -y httpd</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># systemctl start httpd.service</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># ss -tnl | grep 80</span></span><br><span class="line">LISTEN     0      128         :::80                      :::*                  </span><br><span class="line"><span class="comment"># 因为httpd以apache用户身份运行, 通过httpd的PUT方法上传文件, apache必须有上传目录写权限.</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># chown -R apache:apache /var/www/html</span></span><br><span class="line"><span class="comment"># 默认PUT方法是禁止的</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># curl -T anaconda-ks.cfg http://172.18.71.101/</span></span><br><span class="line">&lt;!DOCTYPE HTML PUBLIC <span class="string">"-//IETF//DTD HTML 2.0//EN"</span>&gt;</span><br><span class="line">&lt;html&gt;&lt;head&gt;</span><br><span class="line">&lt;title&gt;405 Method Not Allowed&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;&lt;body&gt;</span><br><span class="line">&lt;h1&gt;Method Not Allowed&lt;/h1&gt;</span><br><span class="line">&lt;p&gt;The requested method PUT is not allowed <span class="keyword">for</span> the URL /anaconda-ks.cfg.&lt;/p&gt;</span><br><span class="line">&lt;/body&gt;&lt;/html&gt;</span><br><span class="line"><span class="comment"># 启用apache的dav功能即可</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># vim /etc/httpd/conf/httpd.conf</span></span><br><span class="line">&lt;Directory <span class="string">"/var/www/html"</span>&gt;</span><br><span class="line">    DAV on</span><br><span class="line">    Options Indexes FollowSymLinks</span><br><span class="line">    AllowOverride None</span><br><span class="line">    Require all granted</span><br><span class="line">&lt;/Directory&gt;</span><br><span class="line">[root@80e54d87 ~]<span class="comment"># curl -T anaconda-ks.cfg http://172.18.71.101/</span></span><br><span class="line">&lt;!DOCTYPE HTML PUBLIC <span class="string">"-//IETF//DTD HTML 2.0//EN"</span>&gt;</span><br><span class="line">&lt;html&gt;&lt;head&gt;</span><br><span class="line">&lt;title&gt;201 Created&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;&lt;body&gt;</span><br><span class="line">&lt;h1&gt;Created&lt;/h1&gt;</span><br><span class="line">&lt;p&gt;Resource /anaconda-ks.cfg has been created.&lt;/p&gt;</span><br><span class="line">&lt;/body&gt;&lt;/html&gt;</span><br><span class="line"><span class="comment"># 先把这文件删了, 后面还要用它来做测试.</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># rm -f /var/www/html/anaconda-ks.cfg</span></span><br></pre></td></tr></table></figure>
+<h1 id="HostA"><a href="#HostA" class="headerlink" title="HostA"></a>HostA</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line">[root@1478a474 ~]<span class="comment"># yum install -y haproxy</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># cp /etc/haproxy/haproxy.cfg&#123;,.bak&#125;</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># vim /etc/haproxy/haproxy.cfg</span></span><br><span class="line">global</span><br><span class="line">    <span class="built_in">log</span>         127.0.0.1 <span class="built_in">local</span>2</span><br><span class="line">    chroot      /var/lib/haproxy</span><br><span class="line">    pidfile     /var/run/haproxy.pid</span><br><span class="line">    maxconn     4000</span><br><span class="line">    user        haproxy</span><br><span class="line">    group       haproxy</span><br><span class="line">    daemon</span><br><span class="line">    stats socket /var/lib/haproxy/stats</span><br><span class="line"></span><br><span class="line">defaults</span><br><span class="line">    mode                    http</span><br><span class="line">    <span class="built_in">log</span>                     global</span><br><span class="line">    option                  httplog</span><br><span class="line">    option                  dontlognull</span><br><span class="line">    option http-server-close</span><br><span class="line">    option forwardfor       except 127.0.0.0/8</span><br><span class="line">    option                  redispatch</span><br><span class="line">    retries                 3</span><br><span class="line">    timeout http-request    10s</span><br><span class="line">    timeout queue           1m</span><br><span class="line">    timeout connect         10s</span><br><span class="line">    timeout client          1m</span><br><span class="line">    timeout server          1m</span><br><span class="line">    timeout http-keep-alive 10s</span><br><span class="line">    timeout check           10s</span><br><span class="line">    maxconn                 3000</span><br><span class="line"></span><br><span class="line">frontend  web *:80</span><br><span class="line">    acl url_static       path_beg       -i /static /javascript /stylesheets</span><br><span class="line">    acl url_static       path_end       -i .html .css .js</span><br><span class="line">    acl url_media       path_beg       -i /images /audios /videos</span><br><span class="line">    acl url_media       path_end       -i .jpg .gif .png .mp3 .aac .mp4 .wmv</span><br><span class="line">    acl method_put      method PUT</span><br><span class="line"></span><br><span class="line">    use_backend static          <span class="keyword">if</span> url_static</span><br><span class="line">    use_backend media           <span class="keyword">if</span> url_media</span><br><span class="line">    use_backend upload          <span class="keyword">if</span> method_put</span><br><span class="line">    default_backend             php</span><br><span class="line"></span><br><span class="line">backend static</span><br><span class="line">    balance     roundrobin</span><br><span class="line">    server      static 172.18.71.103:80 check</span><br><span class="line"></span><br><span class="line">backend media</span><br><span class="line">    balance     roundrobin</span><br><span class="line">    server      media 172.18.71.102:80 check</span><br><span class="line"></span><br><span class="line">backend upload</span><br><span class="line">    balance     roundrobin</span><br><span class="line">    server      upload 172.18.71.101:80 check</span><br><span class="line"></span><br><span class="line">backend php</span><br><span class="line">    balance     roundrobin</span><br><span class="line">    server      php 172.18.71.135:80 check</span><br><span class="line">[root@1478a474 ~]<span class="comment"># systemctl start haproxy.service</span></span><br></pre></td></tr></table></figure>
+<h1 id="测试验证"><a href="#测试验证" class="headerlink" title="测试验证"></a>测试验证</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">[root@1478a474 ~]<span class="comment"># curl -I http://172.18.71.130/index.php</span></span><br><span class="line">HTTP/1.1 200 OK</span><br><span class="line">Date: Thu, 12 May 2016 16:42:41 GMT</span><br><span class="line">Server: Apache/2.4.6 (CentOS) PHP/5.4.16</span><br><span class="line">X-Powered-By: PHP/5.4.16</span><br><span class="line">Content-Type: text/html; charset=UTF-8</span><br><span class="line"></span><br><span class="line">[root@1478a474 ~]<span class="comment"># curl http://172.18.71.130/index.html</span></span><br><span class="line">Real Server 2</span><br><span class="line">[root@1478a474 ~]<span class="comment"># curl -I http://172.18.71.130/wall.jpg</span></span><br><span class="line">HTTP/1.1 200 OK</span><br><span class="line">Date: Wed, 25 May 2016 08:05:08 GMT</span><br><span class="line">Server: Apache/2.4.6 (CentOS)</span><br><span class="line">Last-Modified: Wed, 25 May 2016 06:27:47 GMT</span><br><span class="line">ETag: <span class="string">"eaadb-533a4c5a9a604"</span></span><br><span class="line">Accept-Ranges: bytes</span><br><span class="line">Content-Length: 961243</span><br><span class="line">Content-Type: image/jpeg</span><br><span class="line"></span><br><span class="line">[root@1478a474 ~]<span class="comment"># curl -T anaconda-ks.cfg http://172.18.71.130/</span></span><br><span class="line">&lt;!DOCTYPE HTML PUBLIC <span class="string">"-//IETF//DTD HTML 2.0//EN"</span>&gt;</span><br><span class="line">&lt;html&gt;&lt;head&gt;</span><br><span class="line">&lt;title&gt;201 Created&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;&lt;body&gt;</span><br><span class="line">&lt;h1&gt;Created&lt;/h1&gt;</span><br><span class="line">&lt;p&gt;Resource /anaconda-ks.cfg has been created.&lt;/p&gt;</span><br><span class="line">&lt;/body&gt;&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/haproxy/" rel="tag">#haproxy</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/05/25/haproxy基本应用/" rel="next" title="haproxy基本应用">
+                <i class="fa fa-chevron-left"></i> haproxy基本应用
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <div class="ds-share flat" data-thread-key="2016/05/25/基于haproxy实现资源分离/"
+     data-title="基于haproxy实现资源分离"
+     data-content=""
+     data-url="http://www.twoyang.net/2016/05/25/基于haproxy实现资源分离/">
+  <div class="ds-share-inline">
+    <ul  class="ds-share-icons-16">
+
+      <li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
+      <li><a class="ds-weibo" href="javascript:void(0);" data-service="weibo">微博</a></li>
+      <li><a class="ds-qzone" href="javascript:void(0);" data-service="qzone">QQ空间</a></li>
+      <li><a class="ds-qqt" href="javascript:void(0);" data-service="qqt">腾讯微博</a></li>
+      <li><a class="ds-wechat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+
+    </ul>
+    <div class="ds-share-icons-more">
+    </div>
+  </div>
+</div>
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/05/25/基于haproxy实现资源分离/"
+           data-title="基于haproxy实现资源分离" data-url="http://www.twoyang.net/2016/05/25/基于haproxy实现资源分离/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xltax.com1.z0.glb.clouddn.com/twoyang.jpg"
+               alt="twoyang" />
+          <p class="site-author-name" itemprop="name">twoyang</p>
+          <p class="site-description motion-element" itemprop="description">The quieter you become.The more you are able to hear.</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">20</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">22</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        <div class="links-of-blogroll motion-element">
+          
+            <div class="links-of-blogroll-title">友情链接</div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.magedu.com/" target="_blank">马哥教育</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="https://shadowsocks.be/9.html" target="_blank">科学上网</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.isetsuna.com/hexo/introduction/" target="_blank">Hexo博客系列</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://mrchen.org/" target="_blank">Mrchen</a>
+                </li>
+              
+            </ul>
+          
+        </div>
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#说明"><span class="nav-number">1.</span> <span class="nav-text">说明</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#规划"><span class="nav-number">2.</span> <span class="nav-text">规划</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#HostB"><span class="nav-number">3.</span> <span class="nav-text">HostB</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#HostC"><span class="nav-number">4.</span> <span class="nav-text">HostC</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#HostD"><span class="nav-number">5.</span> <span class="nav-text">HostD</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#HostE"><span class="nav-number">6.</span> <span class="nav-text">HostE</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#HostA"><span class="nav-number">7.</span> <span class="nav-text">HostA</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#测试验证"><span class="nav-number">8.</span> <span class="nav-text">测试验证</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">twoyang</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+
+  
+
+
+
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=0.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=0.5.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=0.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=0.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=0.5.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"twoyang"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+  
+
+
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>
