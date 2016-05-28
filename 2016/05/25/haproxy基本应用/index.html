@@ -68,7 +68,7 @@
 官方文档并不在haproxy官方站点上面, 而是放在了github代码托管站点, 地址是HAProxy Documentation Converter.
 目前有1.7/1.6/1.5/1.4这么几个版本分支, 其中1.7为开发版, 其余为稳定版.CentOS-7-x86_64上yum源中提供的">
 <meta property="og:image" content="http://7xltax.com1.z0.glb.clouddn.com/89c0c9ce-a38c-49fd-9cb7-2b1e628825b5.png">
-<meta property="og:updated_time" content="2016-05-26T15:09:34.815Z">
+<meta property="og:updated_time" content="2016-05-26T15:17:17.578Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="haproxy基本应用">
 <meta name="twitter:description" content="说明《haproxy负载均衡代理服务详解》, 这是某位师兄写的博客, 基本上马哥讲到的知识点都覆盖到了.
@@ -347,7 +347,7 @@
 <p>使用浏览器访问<code>http://172.18.71.130/haproxy?stats</code>, 输入用户名和口令即可登入状态监控页. 在这里可以清楚得看到服务器的运行状态, 并且可以直接操控后端主机, 比如将某主机置为下线维护状态.<br><img src="http://7xltax.com1.z0.glb.clouddn.com/89c0c9ce-a38c-49fd-9cb7-2b1e628825b5.png" alt="haproxy?stats"></p>
 <h3 id="访问控制"><a href="#访问控制" class="headerlink" title="访问控制"></a>访问控制</h3><p>可以直接控制后端主机, 这种操作是很危险的, 所以仅仅是有认证措施还是不够的, 一般来说这种管理类的操作页面应该只能够通过内部网络才能够访问, 这就需要用到<code>ACL(Access Control List)</code>.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@1478a474 ~]<span class="comment"># vim /etc/haproxy/haproxy.cfg</span></span><br><span class="line">listen web *:80</span><br><span class="line">    mode http</span><br><span class="line">    stats <span class="built_in">enable</span></span><br><span class="line">    stats auth admin:magedu</span><br><span class="line">    <span class="comment"># 仅将本机(HostA)加入白名单</span></span><br><span class="line">    acl white_list src 127.0.0.1</span><br><span class="line">    <span class="comment"># 管理员控制功能只有在本机通过认证的用户才可以使用</span></span><br><span class="line">    stats admin <span class="keyword">if</span> TRUE white_list</span><br><span class="line">    server srv1 172.18.71.135:80 check</span><br><span class="line">    server srv2 172.18.71.103:80 check</span><br></pre></td></tr></table></figure></p>
 <p>再使用其它客户端访问<code>http://172.18.71.130/haproxy?stats</code>, 输入用户名和口令可以登入状态监控页, 但是只能看到状态信息, 而不显示管理员控制功能. 若将客户端IP地址加入白名单, 重启<code>haproxy</code>服务, 再次登录状态监控页, 就可以使用管理员控制功能了.</p>
-<p><code>ACL</code>是<code>haproxy</code>的一个重要功能, 这里只讲到了根据源<code>IP</code>地址做访问控制规则, 实际上它还有众多其它方式. 比如根据请求报文的<code>uri</code>做模式匹配, 以实现资源分离的访问控制规则. 再比如根据请求报文的数据段信息做模式匹配, 以实现敏感词过滤等等. 没办法穷举, 此处略过, 如需了解技术细节请参照官方文档.</p>
+<p><code>ACL</code>是<code>haproxy</code>的一个重要功能, 这里只讲到了根据源<code>IP</code>地址做访问控制规则, 实际上它还有众多其它方式. 比如根据请求报文的<code>uri</code>做模式匹配, 以实现资源分离的访问控制规则. 再比如根据请求报文的数据段信息做模式匹配, 以实现敏感词过滤等等. 没办法穷举, 此处略过, 如需了解更多技术细节请参照官方文档.</p>
 
       
     </div>
@@ -472,7 +472,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">20</span>
+              <span class="site-state-item-count">22</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -489,7 +489,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">22</span>
+                <span class="site-state-item-count">25</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

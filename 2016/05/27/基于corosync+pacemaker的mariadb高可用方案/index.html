@@ -1,0 +1,699 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
+
+
+
+
+  <link href="//fonts.googleapis.com/css?family=Lato:300,400,700,400italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=0.5.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="corosync,pacemaker," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=0.5.0" />
+
+
+
+
+
+
+<meta name="description" content="规划准备三台虚拟机, 均为CentOS-7-x86_64最小化安装, iptables与SELinux均处于关闭状态, 配置好yum源.1234567891011121314151617HostAOS: CentOS-7-x86_64hostname: 80e54d87.twoyang.comeno16777736: 172.18.71.101/16gateway: 172.18.0.1HostB">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于corosync&pacemaker的mariadb高可用方案">
+<meta property="og:url" content="http://www.twoyang.net/2016/05/27/基于corosync+pacemaker的mariadb高可用方案/index.html">
+<meta property="og:site_name" content="TwOyAng'blog">
+<meta property="og:description" content="规划准备三台虚拟机, 均为CentOS-7-x86_64最小化安装, iptables与SELinux均处于关闭状态, 配置好yum源.1234567891011121314151617HostAOS: CentOS-7-x86_64hostname: 80e54d87.twoyang.comeno16777736: 172.18.71.101/16gateway: 172.18.0.1HostB">
+<meta property="og:updated_time" content="2016-05-28T13:07:42.050Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="基于corosync&pacemaker的mariadb高可用方案">
+<meta name="twitter:description" content="规划准备三台虚拟机, 均为CentOS-7-x86_64最小化安装, iptables与SELinux均处于关闭状态, 配置好yum源.1234567891011121314151617HostAOS: CentOS-7-x86_64hostname: 80e54d87.twoyang.comeno16777736: 172.18.71.101/16gateway: 172.18.0.1HostB">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+  <title> 基于corosync&pacemaker的mariadb高可用方案 | TwOyAng'blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=55583792";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">TwOyAng'blog</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-th fa-fw"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                基于corosync&pacemaker的mariadb高可用方案
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-05-27T13:04:18+08:00" content="2016-05-27">
+              2016-05-27
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Cluster/" itemprop="url" rel="index">
+                    <span itemprop="name">Cluster</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/05/27/基于corosync+pacemaker的mariadb高可用方案/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/27/基于corosync+pacemaker的mariadb高可用方案/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="规划"><a href="#规划" class="headerlink" title="规划"></a>规划</h1><p>准备三台虚拟机, 均为<code>CentOS-7-x86_64</code>最小化安装, <code>iptables</code>与<code>SELinux</code>均处于关闭状态, 配置好<code>yum</code>源.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">HostA</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: 80e54d87.twoyang.com</span><br><span class="line">eno16777736: 172.18.71.101/16</span><br><span class="line">gateway: 172.18.0.1</span><br><span class="line"></span><br><span class="line">HostB</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: b9cf468b.twoyang.com</span><br><span class="line">eno16777736: 172.18.71.102/16</span><br><span class="line">gateway: 172.18.0.1</span><br><span class="line"></span><br><span class="line">HostC</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: 1f5fafa6.twoyang.com</span><br><span class="line">eno16777736: 172.18.71.103/16</span><br><span class="line">gateway: 172.18.0.1</span><br></pre></td></tr></table></figure></p>
+<a id="more"></a>
+<p><code>HostA</code>与<code>HostB</code>构建一个基于<code>corosync+pacemaker</code>的双节点集群. <code>HostC</code>作为<code>NFS</code>服务器, 为<code>mariadb</code>提供统一的存储服务. 这里不考虑存储的高可用性, 因为生产环境中存储的高可用性一般需要通过硬件来解决.</p>
+<h1 id="mariadb"><a href="#mariadb" class="headerlink" title="mariadb"></a>mariadb</h1><h2 id="HostC"><a href="#HostC" class="headerlink" title="HostC"></a>HostC</h2><p>安装<code>nfs</code>, 并导出共享目录.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@1f5fafa6 ~]<span class="comment"># yum install -y nfs-utils</span></span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># mkdir /nfshare</span></span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># systemctl start rpcbind.service</span></span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># systemctl start nfs.service</span></span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># showmount -e 127.0.0.1</span></span><br><span class="line">Export list <span class="keyword">for</span> 127.0.0.1:</span><br><span class="line">/nfshare 172.18.71.0/24</span><br></pre></td></tr></table></figure></p>
+<h2 id="HostA"><a href="#HostA" class="headerlink" title="HostA"></a>HostA</h2><p>安装<code>mariadb</code>, 并挂载<code>nfs</code>共享目录作为<code>mariadb</code>的数据目录.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@80e54d87 ~]<span class="comment"># yum install -y nfs-utils mariadb-server</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># mkdir -p /data/mysql</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># mount -t nfs 172.18.71.103:/nfshare /data/mysql</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># chown mysql:mysql /data/mysql</span></span><br></pre></td></tr></table></figure></p>
+<p>修改<code>mariadb</code>的部分配置<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">sed -i <span class="string">'/\[client\]/a\default-character-set=utf8'</span> /etc/my.cnf.d/client.cnf</span><br><span class="line">sed -i <span class="string">'/\[mysql\]/a\default-character-set=utf8'</span> /etc/my.cnf.d/mysql-clients.cnf</span><br><span class="line">sed -i <span class="string">'/\[mysqld\]/a\character-set-server=utf8'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[mysqld\]/a\collation-server=utf8_general_ci'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[mysqld\]/a\default-storage-engine=InnoDB'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[mysqld\]/a\innodb-file-per-table=TRUE'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[mysqld\]/a\skip-name-resolve=TRUE'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[mysqld\]/a\datadir=/data/mysql'</span> /etc/my.cnf.d/server.cnf</span><br></pre></td></tr></table></figure></p>
+<p>启动<code>mariadb</code>, 并授权<code>root</code>用户在本网段内可以远程登录, 不需要口令.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@80e54d87 ~]<span class="comment"># systemctl start mariadb.service </span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># ss -tnl | grep 3306</span></span><br><span class="line">LISTEN     0      50           *:3306                     *:*</span><br><span class="line">[root@b9cf468b ~]<span class="comment"># mysql</span></span><br><span class="line">...</span><br><span class="line">MariaDB [(none)]&gt; grant all privileges on *.* to <span class="string">'root'</span>@<span class="string">'172.18.71.%'</span>;</span><br><span class="line">Query OK, 0 rows affected (0.01 sec)</span><br><span class="line"></span><br><span class="line">MariaDB [(none)]&gt; flush privileges;</span><br><span class="line">Query OK, 0 rows affected (0.01 sec)</span><br></pre></td></tr></table></figure></p>
+<p>停止<code>mariadb</code>. 因为服务启动时, 服务进程使用<code>nfs</code>共享目录中的文件, 是会产生锁的, 此时<code>HostB</code>也要使用<code>nfs</code>共享目录作为数据目录来启动<code>mariadb</code>是会被阻塞的. 另外使用高可用集群时, 服务应该作为集群资源由集群统一管理的.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@80e54d87 ~]<span class="comment"># systemctl stop mariadb.service</span></span><br></pre></td></tr></table></figure></p>
+<p>设置<code>mariadb</code>服务为自启动. 因为<code>centos7</code>中引入了<code>systemd</code>机制, 服务即使设置为自启动也并不会真的启动, 而是在首次访问该服务时才会启动. 这样做是为了<code>pacemaker</code>能够使用<code>mariadb</code>的<code>systemd</code>文件作为其<code>(RA)Resource Agent</code>来管理<code>mariadb</code>.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@80e54d87 ~]<span class="comment"># systemctl enable mariadb.service</span></span><br></pre></td></tr></table></figure></p>
+<h2 id="HostB"><a href="#HostB" class="headerlink" title="HostB"></a>HostB</h2><p>与<code>HostA</code>做相同配置</p>
+<h1 id="corosync-amp-pacemaker"><a href="#corosync-amp-pacemaker" class="headerlink" title="corosync&amp;pacemaker"></a>corosync&amp;pacemaker</h1><h2 id="HostA-1"><a href="#HostA-1" class="headerlink" title="HostA"></a>HostA</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">[root@80e54d87 ~]<span class="comment"># yum install -y corosync pacemaker</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># cp /etc/corosync/corosync.conf.example /etc/corosync/corosync.conf</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># vim /etc/corosync/corosync.conf</span></span><br><span class="line">totem &#123;</span><br><span class="line">	version: 2</span><br><span class="line">    cluster_name: mariadb_cluster</span><br><span class="line">	crypto_cipher: aes128</span><br><span class="line">	crypto_<span class="built_in">hash</span>: sha1</span><br><span class="line">	interface &#123;</span><br><span class="line">		ringnumber: 0</span><br><span class="line">		bindnetaddr: 172.18.71.0</span><br><span class="line">		mcastaddr: 239.255.71.1</span><br><span class="line">		mcastport: 5405</span><br><span class="line">		ttl: 1</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line">logging &#123;</span><br><span class="line">	fileline: off</span><br><span class="line">	to_stderr: no</span><br><span class="line">	to_logfile: yes</span><br><span class="line">	logfile: /var/<span class="built_in">log</span>/cluster/corosync.log</span><br><span class="line">	to_syslog: yes</span><br><span class="line">	debug: off</span><br><span class="line">	timestamp: on</span><br><span class="line">	logger_subsys &#123;</span><br><span class="line">		subsys: QUORUM</span><br><span class="line">		debug: off</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line">quorum &#123;</span><br><span class="line">	provider: corosync_votequorum</span><br><span class="line">&#125;</span><br><span class="line">nodelist &#123;</span><br><span class="line">    node &#123;</span><br><span class="line">        ring0_addr: 172.18.71.101</span><br><span class="line">        nodeid: 1</span><br><span class="line">    &#125;</span><br><span class="line">    node &#123;</span><br><span class="line">        ring0_addr: 172.18.71.102</span><br><span class="line">        nodeid: 2</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment"># 生成认证key</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># corosync-keygen -l</span></span><br><span class="line">Corosync Cluster Engine Authentication key generator.</span><br><span class="line">Gathering 1024 bits <span class="keyword">for</span> key from /dev/urandom.</span><br><span class="line">Writing corosync key to /etc/corosync/authkey.</span><br><span class="line"><span class="comment"># 启动corosync服务</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># systemctl start corosync.service</span></span><br><span class="line"><span class="comment"># 启动pacemaker服务</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># systemctl start pacemaker.service</span></span><br><span class="line"><span class="comment"># 待HostB安装完corosync&amp;pacemaker后, 将配置文件与认证key拷贝至HostB</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># scp -p /etc/corosync/&#123;authkey,corosync.conf&#125; root@172.18.71.102:/etc/corosync/</span></span><br></pre></td></tr></table></figure>
+<h2 id="HostB-1"><a href="#HostB-1" class="headerlink" title="HostB"></a>HostB</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@80e54d87 ~]<span class="comment"># yum install -y corosync pacemaker</span></span><br><span class="line"><span class="comment"># 启动corosync服务</span></span><br><span class="line">[root@b9cf468b ~]<span class="comment"># systemctl start corosync.service</span></span><br><span class="line"><span class="comment"># 启动pacemaker服务</span></span><br><span class="line">[root@b9cf468b ~]<span class="comment"># systemctl start pacemaker.service</span></span><br></pre></td></tr></table></figure>
+<p><code>pacemaker</code>的配置是通过配置工具来进行的. 有<code>CLI</code>接口的, 像<code>crmsh</code>, <code>pcs</code>等; 也有<code>GUI</code>接口的, 像<code>cluster-glue</code>, <code>LCMC</code>等. <code>pacemaker</code>的配置只需要在集群中的某一个节点上进行即可, 配置完成提交后, <code>pacemaker</code>会自动将配置信息同步给其它节点.</p>
+<h1 id="crmsh"><a href="#crmsh" class="headerlink" title="crmsh"></a>crmsh</h1><p><code>crmsh</code>是<code>SUSE</code>提供的集群配置工具, <code>centos-7</code>的<code>yum</code>源中并没有提供此安装包. 因此还需要去<code>SUSE</code>官方站点去下载此工具包, 并解决依赖关系, <code>base</code>源和<code>epel</code>最好都要提供.</p>
+<h2 id="HostA-2"><a href="#HostA-2" class="headerlink" title="HostA"></a>HostA</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 我这里将发行版不提供的安装包做成了yum源就可以直接使用yum来安装了</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># yum-config-manager --add-repo=http://172.18.71.254/templates/twoyang-c7.repo</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># yum install -y crmsh</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># crm</span></span><br><span class="line">crm(live)<span class="comment"># configure</span></span><br><span class="line"><span class="comment"># 一般来说高可用集群中是需要有stonith设备的, 无论是hardware/software/meatware总是需要配置一个的.</span></span><br><span class="line"><span class="comment"># 这样才能够在集群分裂发生争用时爆了某一方的头, 才能更好地对外提供服务, 而不是将有限的资源耗费在内部斗争上.</span></span><br><span class="line"><span class="comment"># 所以stonith功能默认时启用的, 但是需要自行配置stonith设备. </span></span><br><span class="line"><span class="comment"># 而我们这里没有stonith设备, 也不考虑集群分离的情形, 所以直接禁用掉stonith功能.</span></span><br><span class="line">crm(live)configure<span class="comment"># property stonith-enabled=false</span></span><br><span class="line"><span class="comment"># 双节点集群同时有没有仲裁设备的情况下, 无论哪一个节点出现故障, 另外一方都无法获得法定票数(大于总票数的一半).</span></span><br><span class="line"><span class="comment"># 修改当无法达到法定票数时的策略为忽略</span></span><br><span class="line">crm(live)configure<span class="comment"># property no-quorum-policy=ignore</span></span><br><span class="line">crm(live)configure<span class="comment"># verify</span></span><br><span class="line">crm(live)configure<span class="comment"># commit</span></span><br><span class="line"><span class="comment"># 高可用一个基于nfs共享存储的mairadb服务, 需要三个资源. </span></span><br><span class="line"><span class="comment"># 一个是对外提供服务的IP地址, 一个是nfs共享目录, 还有一个就是mariadb服务本身. 首先来添加这三个资源.</span></span><br><span class="line">crm(live)configure<span class="comment"># primitive srvip ocf:heartbeat:IPaddr2 params ip=172.18.71.130 cidr_netmask=24 op monitor timeout=20s interval=10s</span></span><br><span class="line">crm(live)configure<span class="comment"># primitive nfs ocf:heartbeat:Filesystem params device=172.18.71.103:/nfshare \</span></span><br><span class="line">directory=/data/mysql fstype=nfs op monitor timeout=40 interval=20 op start timeout=60 op stop timeout=60</span><br><span class="line">crm(live)configure<span class="comment"># primitive mariadb systemd:mariadb op monitor timeout=15 interval=15 start-delay=15</span></span><br><span class="line">crm(live)configure<span class="comment"># show</span></span><br><span class="line">node 1: 80e54d87.twoyang.com</span><br><span class="line">node 2: b9cf468b.twoyang.com</span><br><span class="line">primitive mariadb systemd:mariadb \</span><br><span class="line">	op monitor timeout=15 interval=15 start-delay=15</span><br><span class="line">primitive nfs Filesystem \</span><br><span class="line">	params device=<span class="string">"172.18.71.103:/nfshare"</span> directory=<span class="string">"/data/mysql"</span> fstype=nfs \</span><br><span class="line">	op monitor timeout=40 interval=20 \</span><br><span class="line">	op start timeout=60 interval=0 \</span><br><span class="line">	op stop timeout=60 interval=0</span><br><span class="line">primitive srvip IPaddr2 \</span><br><span class="line">	params ip=172.18.71.130 cidr_netmask=24 \</span><br><span class="line">	op monitor timeout=20s interval=10s</span><br><span class="line">property cib-bootstrap-options: \</span><br><span class="line">	have-watchdog=<span class="literal">false</span> \</span><br><span class="line">	dc-version=1.1.13-10.el7-44eb2dd \</span><br><span class="line">	cluster-infrastructure=corosync \</span><br><span class="line">	cluster-name=mariadb_cluster \</span><br><span class="line">	stonith-enabled=<span class="literal">false</span> \</span><br><span class="line">	no-quorum-policy=ignore</span><br><span class="line">crm(live)configure<span class="comment"># verify</span></span><br><span class="line">crm(live)configure<span class="comment"># commit</span></span><br></pre></td></tr></table></figure>
+<p>配置完成后, 先看下状态. 发现三个资源并没有启动在一个节点上, 这是由于<code>HA</code>集群默认是轮询调度的, 尽量让节点之间的负载均衡一些. 但这并不符合我们的要求, 因此还需要定义约束关系.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">crm(live)<span class="comment"># status</span></span><br><span class="line">Last updated: Fri May 27 16:14:37 2016		Last change: Fri May 27 16:14:27 2016 by root via cibadmin on 80e54d87.twoyang.com</span><br><span class="line">Stack: corosync</span><br><span class="line">Current DC: 80e54d87.twoyang.com (version 1.1.13-10.el7-44eb2dd) - partition with quorum</span><br><span class="line">2 nodes and 3 resources configured</span><br><span class="line"></span><br><span class="line">Online: [ 80e54d87.twoyang.com b9cf468b.twoyang.com ]</span><br><span class="line"></span><br><span class="line"> srvip	(ocf::heartbeat:IPaddr2):	Started 80e54d87.twoyang.com</span><br><span class="line"> mariadb	(systemd:mariadb):	Started b9cf468b.twoyang.com</span><br><span class="line"> nfs	(ocf::heartbeat:Filesystem):	Started b9cf468b.twoyang.com</span><br></pre></td></tr></table></figure></p>
+<p>可以给资源和资源之间分别定义约束关系, 也可以将多个资源直接绑定为一个组.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">crm(live)configure<span class="comment"># group dbcls srvip nfs mariadb</span></span><br><span class="line">crm(live)configure<span class="comment"># verify</span></span><br><span class="line">crm(live)configure<span class="comment"># commit</span></span><br><span class="line">crm(live)configure<span class="comment"># cd</span></span><br><span class="line"><span class="comment"># 可以看到这次三个资源在同一个节点上启动</span></span><br><span class="line">crm(live)<span class="comment"># status</span></span><br><span class="line">Last updated: Fri May 27 16:19:54 2016		Last change: Fri May 27 16:19:47 2016 by root via cibadmin on 80e54d87.twoyang.com</span><br><span class="line">Stack: corosync</span><br><span class="line">Current DC: 80e54d87.twoyang.com (version 1.1.13-10.el7-44eb2dd) - partition with quorum</span><br><span class="line">2 nodes and 3 resources configured</span><br><span class="line"></span><br><span class="line">Online: [ 80e54d87.twoyang.com b9cf468b.twoyang.com ]</span><br><span class="line"></span><br><span class="line"> Resource Group: dbcls</span><br><span class="line">     srvip	(ocf::heartbeat:IPaddr2):	Started 80e54d87.twoyang.com</span><br><span class="line">     nfs	(ocf::heartbeat:Filesystem):	Started 80e54d87.twoyang.com</span><br><span class="line">     mariadb	(systemd:mariadb):	Started 80e54d87.twoyang.com</span><br></pre></td></tr></table></figure></p>
+<h2 id="测试验证"><a href="#测试验证" class="headerlink" title="测试验证"></a>测试验证</h2><pre><code class="bash"><span class="comment"># IP地址, 挂载的nfs共享目录, mariadb监听的3306端口都在.</span>
+[root@80e54d87 ~]<span class="comment"># ip addr show eno16777736</span>
+2: eno16777736: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc pfifo_fast state UP qlen 1000
+    link/ether 00:0c:29:3a:f4:45 brd ff:ff:ff:ff:ff:ff
+    inet 172.18.71.101/16 brd 172.18.255.255 scope global eno16777736
+       valid_lft forever preferred_lft forever
+    inet 172.18.71.130/24 brd 172.18.255.255 scope global eno16777736
+       valid_lft forever preferred_lft forever
+    inet6 fe80::20c:29ff:fe3a:f445/64 scope link 
+       valid_lft forever preferred_lft forever
+[root@80e54d87 ~]<span class="comment"># mount | grep /data/mysql</span>
+172.18.71.103:/nfshare on /data/mysql <span class="built_in">type</span> nfs4 (rw,relatime,vers=4.0,rsize=131072,wsize=131072,namlen=255,hard,proto=tcp,port=0,timeo=600,retrans=2,sec=sys,clientaddr=172.18.71.130,<span class="built_in">local</span>_lock=none,addr=172.18.71.103)
+[root@80e54d87 ~]<span class="comment"># ss -tnl | grep 3306</span>
+LISTEN     0      50           *:3306                     *:*
+<span class="comment"># 通过srvip可以正常访问mariadb服务.</span>
+[root@80e54d87 ~]<span class="comment"># mysql -h 172.18.71.130 -e "show databases;"</span>
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mysql              |
+| performance_schema |
+| <span class="built_in">test</span>               |
++--------------------+
+<span class="comment"># 将此节点设置为standby, 可以看到资源立即全部转移至另外一个节点上了.</span>
+[root@80e54d87 ~]<span class="comment"># crm node standby </span>
+[root@80e54d87 ~]<span class="comment"># crm status</span>
+Last updated: Fri May 27 16:25:15 2016        Last change: Fri May 27 16:25:05 2016 by root via crm_attribute on 80e54d87.twoyang.com
+Stack: corosync
+Current DC: 80e54d87.twoyang.com (version 1.1.13-10.el7-44eb2dd) - partition with quorum
+2 nodes and 3 resources configured
+
+Node 80e54d87.twoyang.com: standby
+Online: [ b9cf468b.twoyang.com ]
+
+ Resource Group: dbcls
+     srvip    (ocf::heartbeat:IPaddr2):    Started b9cf468b.twoyang.com
+     nfs    (ocf::heartbeat:Filesystem):    Started b9cf468b.twoyang.com
+     mariadb    (systemd:mariadb):    Started b9cf468b.twoyang.com
+<span class="comment"># 本节点上IP地址, 挂载的nfs共享目录, mariadb监听的3306端口都没有了.</span>
+[root@80e54d87 ~]<span class="comment"># ip addr show eno16777736</span>
+2: eno16777736: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc pfifo_fast state UP qlen 1000
+    link/ether 00:0c:29:3a:f4:45 brd ff:ff:ff:ff:ff:ff
+    inet 172.18.71.101/16 brd 172.18.255.255 scope global eno16777736
+       valid_lft forever preferred_lft forever
+    inet6 fe80::20c:29ff:fe3a:f445/64 scope link 
+       valid_lft forever preferred_lft forever
+[root@80e54d87 ~]<span class="comment"># mount | grep /data/mysql</span>
+[root@80e54d87 ~]<span class="comment"># ss -tnl | grep 3306</span>
+<span class="comment"># 但是通过srvip仍然可以正常访问mariadb服务, 说明资源确实转移至了另一个节点上.</span>
+[root@80e54d87 ~]<span class="comment"># mysql -h 172.18.71.130 -e "show databases;"</span>
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mysql              |
+| performance_schema |
+| <span class="built_in">test</span>               |
++--------------------+
+</code></pre>
+
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/corosync/" rel="tag">#corosync</a>
+          
+            <a href="/tags/pacemaker/" rel="tag">#pacemaker</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/05/25/基于haproxy实现资源分离/" rel="next" title="基于haproxy实现资源分离">
+                <i class="fa fa-chevron-left"></i> 基于haproxy实现资源分离
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/05/27/基于corosync+pacemaker的ldirectord高可用方案/" rel="prev" title="基于corosync&pacemaker的ldirectord高可用方案">
+                基于corosync&pacemaker的ldirectord高可用方案 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <div class="ds-share flat" data-thread-key="2016/05/27/基于corosync+pacemaker的mariadb高可用方案/"
+     data-title="基于corosync&pacemaker的mariadb高可用方案"
+     data-content=""
+     data-url="http://www.twoyang.net/2016/05/27/基于corosync+pacemaker的mariadb高可用方案/">
+  <div class="ds-share-inline">
+    <ul  class="ds-share-icons-16">
+
+      <li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
+      <li><a class="ds-weibo" href="javascript:void(0);" data-service="weibo">微博</a></li>
+      <li><a class="ds-qzone" href="javascript:void(0);" data-service="qzone">QQ空间</a></li>
+      <li><a class="ds-qqt" href="javascript:void(0);" data-service="qqt">腾讯微博</a></li>
+      <li><a class="ds-wechat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+
+    </ul>
+    <div class="ds-share-icons-more">
+    </div>
+  </div>
+</div>
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/05/27/基于corosync+pacemaker的mariadb高可用方案/"
+           data-title="基于corosync&pacemaker的mariadb高可用方案" data-url="http://www.twoyang.net/2016/05/27/基于corosync+pacemaker的mariadb高可用方案/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xltax.com1.z0.glb.clouddn.com/twoyang.jpg"
+               alt="twoyang" />
+          <p class="site-author-name" itemprop="name">twoyang</p>
+          <p class="site-description motion-element" itemprop="description">The quieter you become.The more you are able to hear.</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">22</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">25</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        <div class="links-of-blogroll motion-element">
+          
+            <div class="links-of-blogroll-title">友情链接</div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.magedu.com/" target="_blank">马哥教育</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="https://shadowsocks.be/9.html" target="_blank">科学上网</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.isetsuna.com/hexo/introduction/" target="_blank">Hexo博客系列</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://mrchen.org/" target="_blank">Mrchen</a>
+                </li>
+              
+            </ul>
+          
+        </div>
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#规划"><span class="nav-number">1.</span> <span class="nav-text">规划</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#mariadb"><span class="nav-number">2.</span> <span class="nav-text">mariadb</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#HostC"><span class="nav-number">2.1.</span> <span class="nav-text">HostC</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HostA"><span class="nav-number">2.2.</span> <span class="nav-text">HostA</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HostB"><span class="nav-number">2.3.</span> <span class="nav-text">HostB</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#corosync-amp-pacemaker"><span class="nav-number">3.</span> <span class="nav-text">corosync&pacemaker</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#HostA-1"><span class="nav-number">3.1.</span> <span class="nav-text">HostA</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HostB-1"><span class="nav-number">3.2.</span> <span class="nav-text">HostB</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#crmsh"><span class="nav-number">4.</span> <span class="nav-text">crmsh</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#HostA-2"><span class="nav-number">4.1.</span> <span class="nav-text">HostA</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#测试验证"><span class="nav-number">4.2.</span> <span class="nav-text">测试验证</span></a></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">twoyang</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+
+  
+
+
+
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=0.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=0.5.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=0.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=0.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=0.5.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"twoyang"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+  
+
+
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>
