@@ -1,0 +1,636 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
+
+
+
+
+  <link href="//fonts.googleapis.com/css?family=Lato:300,400,700,400italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=0.5.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="nginx," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=0.5.0" />
+
+
+
+
+
+
+<meta name="description" content="说明nginx的配置是非常丰富的, 本文仅是对常用配置举出一些实例. nginx的配置项和变量均是由模块引入的, 所以本文的结构是按照模块来分的. 并没有介绍全部的模块, 提到的模块里也并没有介绍全部的配置项和变量, 而是仅介绍了经常会用到的, 需更了解更多技术细节请参照官方文档.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="nginx常用配置">
+<meta property="og:url" content="http://www.twoyang.net/2016/05/30/nginx常用配置/index.html">
+<meta property="og:site_name" content="TwOyAng'blog">
+<meta property="og:description" content="说明nginx的配置是非常丰富的, 本文仅是对常用配置举出一些实例. nginx的配置项和变量均是由模块引入的, 所以本文的结构是按照模块来分的. 并没有介绍全部的模块, 提到的模块里也并没有介绍全部的配置项和变量, 而是仅介绍了经常会用到的, 需更了解更多技术细节请参照官方文档.">
+<meta property="og:updated_time" content="2016-06-01T03:31:28.485Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="nginx常用配置">
+<meta name="twitter:description" content="说明nginx的配置是非常丰富的, 本文仅是对常用配置举出一些实例. nginx的配置项和变量均是由模块引入的, 所以本文的结构是按照模块来分的. 并没有介绍全部的模块, 提到的模块里也并没有介绍全部的配置项和变量, 而是仅介绍了经常会用到的, 需更了解更多技术细节请参照官方文档.">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+  <title> nginx常用配置 | TwOyAng'blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=55583792";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">TwOyAng'blog</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-th fa-fw"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                nginx常用配置
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-05-30T09:46:04+08:00" content="2016-05-30">
+              2016-05-30
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Server/" itemprop="url" rel="index">
+                    <span itemprop="name">Server</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/05/30/nginx常用配置/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/30/nginx常用配置/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h1><p><code>nginx</code>的配置是非常丰富的, 本文仅是对常用配置举出一些实例. <code>nginx</code>的配置项和变量均是由模块引入的, 所以本文的结构是按照模块来分的. 并没有介绍全部的模块, 提到的模块里也并没有介绍全部的配置项和变量, 而是仅介绍了经常会用到的, 需更了解更多技术细节请参照<a href="http://nginx.org/en/docs/" target="_blank" rel="external">官方文档</a>.</p>
+<a id="more"></a>
+<h1 id="Core-functionality"><a href="#Core-functionality" class="headerlink" title="Core functionality"></a>Core functionality</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 定义worker进程的个数, 一般应该定义为CPU核心数减一个. 因为一般情况下nginx是以master/worker模型来工作,</span></span><br><span class="line"><span class="comment"># 一个master负责管理多个worker. worker进程数如果过多超过CPU核心数, 必然会发生争用CPU资源的情况发生, </span></span><br><span class="line"><span class="comment"># 导致大量的CPU时钟周期浪费在上下文切换上, 这样性能是不升反降的, 所以最好是一个进程始终跑在一个CPU核心上.</span></span><br><span class="line">Syntax:	worker_processes number | auto;</span><br><span class="line">Default:	worker_processes 1;</span><br><span class="line">Context:	main</span><br><span class="line"><span class="comment"># 但仅仅定义worker进程数量并不能保证进程不会切换CPU核心来运行, 所以这往往需要结合下面这个配置一起使用.</span></span><br><span class="line"><span class="comment"># 定义worker进程与CPU核心的亲缘性, 即尽量将worker进程与CPU核心做绑定.</span></span><br><span class="line">Syntax:	worker_cpu_affinity cpumask ...;</span><br><span class="line">worker_cpu_affinity auto [cpumask];</span><br><span class="line">Default:	—</span><br><span class="line">Context:	main</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看当前系统CPU核心数</span></span><br><span class="line">[root@1f5fafa6 nginx]<span class="comment"># grep "processor" /proc/cpuinfo</span></span><br><span class="line">processor	: 0</span><br><span class="line">processor	: 1</span><br><span class="line">processor	: 2</span><br><span class="line">processor	: 3</span><br><span class="line"><span class="comment"># 修改nginx配置如下</span></span><br><span class="line">[root@1f5fafa6 nginx]<span class="comment"># vim /etc/nginx/nginx.conf</span></span><br><span class="line">worker_processes 3;</span><br><span class="line">worker_cpu_affinity 0001 0010 0100;</span><br><span class="line"><span class="comment"># 将nginx运行起来, 可以看到1个master进程和3个worker进程, 3个worker进程始终在CPU核心0/1/2上运行.</span></span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># systemctl start nginx.service</span></span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># ss -tnl | grep 80</span></span><br><span class="line">LISTEN     0      128          *:80                       *:*</span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># watch -n1 "ps axo psr,cmd | grep nginx"</span></span><br><span class="line">Every 1.0s: ps axo psr,cmd | grep nginx                         Sat May  7 08:01:09 2016</span><br><span class="line"></span><br><span class="line">  3 nginx: master process /usr/sbin/nginx</span><br><span class="line">  0 nginx: worker process</span><br><span class="line">  1 nginx: worker process</span><br><span class="line">  2 nginx: worker process</span><br><span class="line">  3 watch -n1 ps axo psr,cmd | grep nginx</span><br><span class="line">  0 watch -n1 ps axo psr,cmd | grep nginx</span><br><span class="line">  2 sh -c ps axo psr,cmd | grep nginx</span><br><span class="line">  3 grep nginx</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 单个worker进程的最大并发连接数, 这个要配置在events中.</span></span><br><span class="line">Syntax:	worker_connections number;</span><br><span class="line">Default:	worker_connections 512;</span><br><span class="line">Context:	events</span><br><span class="line"><span class="comment"># 最大并发连接数还受限于以下的配置, 即单个worker进程能够打开的最大文件数.</span></span><br><span class="line"><span class="comment"># 因为每个连接都需要的打开一个套接字文件, 这是最低要求, 所以worker_rlimit_nofile的值应该必最大并发连接数还要大一些.</span></span><br><span class="line">Syntax:	worker_rlimit_nofile number;</span><br><span class="line">Default:	—</span><br><span class="line">Context:	main</span><br></pre></td></tr></table></figure>
+<h1 id="ngx-http-access-module"><a href="#ngx-http-access-module" class="headerlink" title="ngx_http_access_module"></a>ngx_http_access_module</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 只有两个directives: allow和deny. 通常与其它配置结合使用的.</span></span><br><span class="line">Syntax:	allow address | CIDR | unix: | all;</span><br><span class="line">Default:	—</span><br><span class="line">Context:	http, server, location, <span class="built_in">limit</span>_except</span><br><span class="line">Syntax:	deny address | CIDR | unix: | all;</span><br><span class="line">Default:	—</span><br><span class="line">Context:	http, server, location, <span class="built_in">limit</span>_except</span><br><span class="line"></span><br><span class="line"><span class="comment"># 配置实例</span></span><br><span class="line">location / &#123;</span><br><span class="line">    deny 172.18.71.103;</span><br><span class="line">    allow 172.18.0.0/16;</span><br><span class="line">    deny all;</span><br><span class="line">&#125;</span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># systemctl reload nginx.service</span></span><br><span class="line"><span class="comment"># 使用本机(172.18.71.103)去访问被拒绝.</span></span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># curl -I http://172.18.71.103</span></span><br><span class="line">HTTP/1.1 403 Forbidden</span><br><span class="line">Server: nginx/1.6.3</span><br><span class="line">Date: Sat, 07 May 2016 06:31:51 GMT</span><br><span class="line">Content-Type: text/html</span><br><span class="line">Content-Length: 168</span><br><span class="line">Connection: keep-alive</span><br><span class="line"><span class="comment"># 使用本网络(172.18.0.0/16)内的其它主机去访问则正常.</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># curl -I http://172.18.71.103</span></span><br><span class="line">HTTP/1.1 200 OK</span><br><span class="line">Server: nginx/1.6.3</span><br><span class="line">Date: Sat, 07 May 2016 06:32:30 GMT</span><br><span class="line">Content-Type: text/html</span><br><span class="line">Content-Length: 3700</span><br><span class="line">Last-Modified: Fri, 03 Jul 2015 12:42:44 GMT</span><br><span class="line">Connection: keep-alive</span><br><span class="line">ETag: <span class="string">"55968344-e74"</span></span><br><span class="line">Accept-Ranges: bytes</span><br><span class="line"><span class="comment"># 去掉此配置, 避免对后面的测试造成影响.</span></span><br></pre></td></tr></table></figure>
+<h1 id="ngx-http-core-module"><a href="#ngx-http-core-module" class="headerlink" title="ngx_http_core_module"></a>ngx_http_core_module</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># root与alias的区别</span></span><br><span class="line"><span class="comment"># root的用法</span></span><br><span class="line">Syntax:	root path;</span><br><span class="line">Default:	root html;</span><br><span class="line">Context:	http, server, location, <span class="keyword">if</span> <span class="keyword">in</span> location</span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># vim /etc/nginx/nginx.conf</span></span><br><span class="line">server &#123;</span><br><span class="line">        ...</span><br><span class="line">        location /images/ &#123;</span><br><span class="line">            root /data/;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># mkdir -p /data/images/</span></span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># echo "image" &gt; /data/images/index.html</span></span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># systemctl reload nginx.service</span></span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># curl http://172.18.71.103/images/index.html</span></span><br><span class="line">image</span><br><span class="line"></span><br><span class="line"><span class="comment"># alias的用法</span></span><br><span class="line">Syntax:	<span class="built_in">alias</span> path;</span><br><span class="line">Default:	—</span><br><span class="line">Context:	location</span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># vim /etc/nginx/nginx.conf</span></span><br><span class="line">server &#123;</span><br><span class="line">        ...</span><br><span class="line">        location /images/ &#123;</span><br><span class="line">            <span class="comment"># 注意末尾的'/'必须带</span></span><br><span class="line">            <span class="built_in">alias</span> /data/images/;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># systemctl reload nginx.service</span></span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># curl http://172.18.71.103/images/index.html</span></span><br><span class="line">image</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 下载限速</span></span><br><span class="line">Syntax:	<span class="built_in">limit</span>_rate rate;</span><br><span class="line">Default:	<span class="built_in">limit</span>_rate 0;</span><br><span class="line">Context:	http, server, location, <span class="keyword">if</span> <span class="keyword">in</span> location</span><br><span class="line"><span class="comment"># 限制下载速度为10k</span></span><br><span class="line"><span class="built_in">limit</span>_rate   10k;</span><br><span class="line"></span><br><span class="line"><span class="comment">#　限制method</span></span><br><span class="line">Syntax:	<span class="built_in">limit</span>_except method ... &#123; ... &#125;</span><br><span class="line">Default:	—</span><br><span class="line">Context:	location</span><br><span class="line"><span class="comment"># 仅开放GET/POST方法</span></span><br><span class="line"><span class="built_in">limit</span>_except GET POST &#123;</span><br><span class="line">    deny all;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="ngx-http-stub-status-module"><a href="#ngx-http-stub-status-module" class="headerlink" title="ngx_http_stub_status_module"></a>ngx_http_stub_status_module</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 状态页</span></span><br><span class="line">Syntax:	stub_status;</span><br><span class="line">Default:	—</span><br><span class="line">Context:	server, location</span><br><span class="line"></span><br><span class="line"><span class="comment"># 开启状态页</span></span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># vim /etc/nginx/nginx.conf</span></span><br><span class="line">location /status &#123;</span><br><span class="line">    <span class="comment"># 1.7.5之前的版本是这样配置的</span></span><br><span class="line">    stub_status on;</span><br><span class="line">    <span class="comment"># 1.7.5之后的版本就不需要on了</span></span><br><span class="line">    stub_status;</span><br><span class="line">&#125;</span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># systemctl reload nginx.service</span></span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># curl http://172.18.71.103/status</span></span><br><span class="line">Active connections: 1 </span><br><span class="line">server accepts handled requests</span><br><span class="line"> 4848 4848 4849 </span><br><span class="line">Reading: 0 Writing: 1 Waiting: 0</span><br><span class="line"><span class="comment"># Active connections: 处于活动状态的客户端连接的数量.</span></span><br><span class="line"><span class="comment"># accepts: 已经接受的客户端请求的总数.</span></span><br><span class="line"><span class="comment"># handled: 已经处理完成的客户端请求的总数.</span></span><br><span class="line"><span class="comment"># requests: 客户端发来的总的请求数.</span></span><br><span class="line"><span class="comment"># Reading: 处于读取客户端请求报文首部的连接数.</span></span><br><span class="line"><span class="comment"># Writing: 处于向客户端发送响应报文过程中的连接数.</span></span><br><span class="line"><span class="comment"># Waiting: 处于等待客户端发出请求的空闲连接数.</span></span><br></pre></td></tr></table></figure>
+<h1 id="ngx-http-auth-basic-module"><a href="#ngx-http-auth-basic-module" class="headerlink" title="ngx_http_auth_basic_module"></a>ngx_http_auth_basic_module</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 认证方式</span></span><br><span class="line">Syntax:	auth_basic string | off;</span><br><span class="line">Default:	auth_basic off;</span><br><span class="line">Context:	http, server, location, <span class="built_in">limit</span>_except</span><br><span class="line"><span class="comment">#　认证时的用户口令文件</span></span><br><span class="line">Syntax:	auth_basic_user_file file;</span><br><span class="line">Default:	—</span><br><span class="line">Context:	http, server, location, <span class="built_in">limit</span>_except</span><br><span class="line"></span><br><span class="line"><span class="comment"># 将/stats页面保护起来, 需要用户口令才能访问.</span></span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># vim /etc/nginx/nginx.conf</span></span><br><span class="line">location /status &#123;</span><br><span class="line">    stub_status on;</span><br><span class="line">    auth_basic <span class="string">"Admin Area"</span>;</span><br><span class="line">    auth_basic_user_file /etc/nginx/.ngxpasswd;</span><br><span class="line">&#125;</span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># echo "twoyang:$(openssl passwd magedu)" &gt; /etc/nginx/.ngxpasswd</span></span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># systemctl reload nginx.service</span></span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># curl http://172.18.71.103/status</span></span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;&lt;title&gt;401 Authorization Required&lt;/title&gt;&lt;/head&gt;</span><br><span class="line">&lt;body bgcolor=<span class="string">"white"</span>&gt;</span><br><span class="line">&lt;center&gt;&lt;h1&gt;401 Authorization Required&lt;/h1&gt;&lt;/center&gt;</span><br><span class="line">&lt;hr&gt;&lt;center&gt;nginx/1.6.3&lt;/center&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># curl -utwoyang:magedu http://172.18.71.103/status</span></span><br><span class="line">Active connections: 1 </span><br><span class="line">server accepts handled requests</span><br><span class="line"> 5763 5763 5766 </span><br><span class="line">Reading: 0 Writing: 1 Waiting: 0</span><br></pre></td></tr></table></figure>
+<h1 id="ngx-http-referer-module"><a href="#ngx-http-referer-module" class="headerlink" title="ngx_http_referer_module"></a>ngx_http_referer_module</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 定义合法的referer</span></span><br><span class="line">Syntax:	valid_referers none | blocked | server_names | string ...;</span><br><span class="line">Default:	—</span><br><span class="line">Context:	server, location</span><br><span class="line"><span class="comment"># 此模块引入的变量, 不合法的referer.</span></span><br><span class="line"><span class="variable">$invalid_referer</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 防盗链设置</span></span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># vim /etc/nginx/nginx.conf</span></span><br><span class="line">location /images &#123;</span><br><span class="line">    <span class="built_in">alias</span> /data/images/;</span><br><span class="line">    valid_referers none blocked server_name *.twoyang.com;</span><br><span class="line">    <span class="keyword">if</span> (<span class="variable">$invalid_referer</span>) &#123;</span><br><span class="line">        <span class="built_in">return</span> 403;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># systemctl reload nginx.service</span></span><br><span class="line"><span class="comment"># 模拟盗链主机</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># yum install -y nginx</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># echo "&lt;a href=\"http://172.18.71.103/images/morning.jpg\"&gt;link&lt;/a&gt;" &gt; /usr/share/nginx/html/index.html</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># systemctl start nginx.service</span></span><br><span class="line"><span class="comment"># 通过浏览器访问盗链主机主页, 点击链接, 发现被源主机拒绝, 返回403错误.</span></span><br></pre></td></tr></table></figure>
+<h1 id="ngx-http-gzip-module"><a href="#ngx-http-gzip-module" class="headerlink" title="ngx_http_gzip_module"></a>ngx_http_gzip_module</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 压缩响应报文开关</span></span><br><span class="line">Syntax:	gzip on | off;</span><br><span class="line">Default:	gzip off;</span><br><span class="line">Context:	http, server, location, <span class="keyword">if</span> <span class="keyword">in</span> location</span><br><span class="line"><span class="comment"># 压缩比例</span></span><br><span class="line">Syntax:	gzip_comp_level level;</span><br><span class="line">Default:	</span><br><span class="line">gzip_comp_level 1;</span><br><span class="line">Context:	http, server, location</span><br><span class="line"><span class="comment"># 因某些浏览器不支持解压缩功能的, 需要禁用.</span></span><br><span class="line">Syntax:	gzip_<span class="built_in">disable</span> regex ...;</span><br><span class="line">Default:	—</span><br><span class="line">Context:	http, server, location</span><br><span class="line"><span class="comment"># 大于此长度的响应报文才需要压缩, 太小了压缩没有必要.</span></span><br><span class="line">Syntax:	gzip_min_length length;</span><br><span class="line">Default:	gzip_min_length 20;</span><br><span class="line">Context:	http, server, location</span><br><span class="line"><span class="comment"># 设置压缩文件类型. 多媒体类型文件一般都是已经压缩过的文件, 再压缩并不能节省多少带宽, </span></span><br><span class="line"><span class="comment"># 但是却会浪费了不少CPU时钟周期, 得不偿失.</span></span><br><span class="line">Syntax:	gzip_types mime-type ...;</span><br><span class="line">Default:	gzip_types text/html;</span><br><span class="line">Context:	http, server, location</span><br></pre></td></tr></table></figure>
+<h1 id="ngx-http-ssl-module"><a href="#ngx-http-ssl-module" class="headerlink" title="ngx_http_ssl_module"></a>ngx_http_ssl_module</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 启用ssl功能</span></span><br><span class="line">Syntax:	ssl on | off;</span><br><span class="line">Default:	ssl off;</span><br><span class="line">Context:	http, server</span><br><span class="line"><span class="comment"># 不过建议不要这样启用, 而是在listen配置项中启用</span></span><br><span class="line">It is recommended to use the ssl parameter of the listen directive instead of this directive.</span><br><span class="line"><span class="comment"># 指定ssl证书文件</span></span><br><span class="line">Syntax:	ssl_certificate file;</span><br><span class="line">Default:	—</span><br><span class="line">Context:	http, server</span><br><span class="line"><span class="comment"># 指定服务器私钥文件</span></span><br><span class="line">Syntax:	ssl_certificate_key file;</span><br><span class="line">Default:	—</span><br><span class="line">Context:	http, server</span><br><span class="line"></span><br><span class="line"><span class="comment"># 建立CA的过程就跳过了, 直接生成本地私钥, 然后生成证书申请文件.</span></span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># (umask 077; openssl genrsa -out /etc/nginx/ssl.key 1024)</span></span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># openssl ca -in /etc/nginx/ssl.key -out /etc/nginx/ssl.crt</span></span><br><span class="line"><span class="comment"># 将证书申请文件交给CA签署, 拿回证书放在/etc/nginx目录下.</span></span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># ls -al /etc/nginx/ssl.crt </span></span><br><span class="line">-rw-r--r-- 1 root root 5893 Jun  1 05:38 /etc/nginx/ssl.crt</span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># vim /etc/nginx/nginx.conf</span></span><br><span class="line">server &#123;</span><br><span class="line">        ...</span><br><span class="line">        listen       443 ssl default_server;</span><br><span class="line">        ssl_certificate /etc/nginx/ssl.crt;</span><br><span class="line">        ssl_certificate_key /etc/nginx/ssl.key;</span><br><span class="line">        ...</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment"># 将域名www.magedu.com解析为本地地址.</span></span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># vim /etc/hosts</span></span><br><span class="line">127.0.0.1 www.magedu.com</span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># curl --ssl --cacert /etc/pki/CA/cacert.pem https://www.magedu.com</span></span><br><span class="line"><span class="comment"># 去掉此配置, 避免对后面的测试造成影响.</span></span><br></pre></td></tr></table></figure>
+<h1 id="ngx-http-rewrite-module"><a href="#ngx-http-rewrite-module" class="headerlink" title="ngx_http_rewrite_module"></a>ngx_http_rewrite_module</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># url重写规则</span></span><br><span class="line">Syntax:	rewrite regex replacement [flag];</span><br><span class="line">Default:	—</span><br><span class="line">Context:	server, location, <span class="keyword">if</span></span><br><span class="line">An optional flag parameter can be one of: last/<span class="built_in">break</span>/redirect/permanent</span><br><span class="line"><span class="comment"># 记录重写日志</span></span><br><span class="line">Syntax:	rewrite_<span class="built_in">log</span> on | off;</span><br><span class="line">Default:	rewrite_<span class="built_in">log</span> off;</span><br><span class="line">Context:	http, server, location, <span class="keyword">if</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 配置重写规则, 当遇到请求jpg资源时, 一律去/data/images/目录下去找资源.</span></span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># vim /etc/nginx/nginx.conf</span></span><br><span class="line">location ~ \.jpg$ &#123;</span><br><span class="line">    root /data/;</span><br><span class="line">    rewrite_<span class="built_in">log</span> on;</span><br><span class="line">    <span class="comment"># 此例一定要使用break, 即rewrite一次便不再匹配此rewrite规则, 否则会陷入死循环.</span></span><br><span class="line">    rewrite /([^/]*)\.jpg$ /images/<span class="variable">$1</span>.jpg <span class="built_in">break</span>;</span><br><span class="line">&#125;</span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># systemctl reload nginx.service</span></span><br><span class="line"><span class="comment"># 验证结果</span></span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># curl -I http://172.18.71.103/shop1024/class2048/item4096/morning.jpg</span></span><br><span class="line">HTTP/1.1 200 OK</span><br><span class="line">Server: nginx/1.6.3</span><br><span class="line">Date: Wed, 01 Jun 2016 09:13:32 GMT</span><br><span class="line">Content-Type: image/jpeg</span><br><span class="line">Content-Length: 980265</span><br><span class="line">Last-Modified: Sat, 07 May 2016 06:20:13 GMT</span><br><span class="line">Connection: keep-alive</span><br><span class="line">ETag: <span class="string">"572d891d-ef529"</span></span><br><span class="line">Accept-Ranges: bytes</span><br><span class="line"><span class="comment"># 查看rewrite日志</span></span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># tail /var/log/nginx/error.log</span></span><br><span class="line">...</span><br><span class="line">2016/06/01 06:28:43 [notice] 3047<span class="comment">#0: *55 "/([^/]*)\.jpg$" matches "/shop1024/class2048/item4096/morning.jpg", client: 172.18.254.225, server: _, request: "GET /shop1024/class2048/item4096/morning.jpg HTTP/1.1", host: "172.18.71.103"</span></span><br><span class="line">2016/06/01 06:28:43 [notice] 3047<span class="comment">#0: *55 rewritten data: "/images/morning.jpg", args: "", client: 172.18.254.225, server: _, request: "GET /shop1024/class2048/item4096/morning.jpg HTTP/1.1", host: "172.18.71.103"</span></span><br></pre></td></tr></table></figure>
+<h1 id="ngx-http-fastcgi-module"><a href="#ngx-http-fastcgi-module" class="headerlink" title="ngx_http_fastcgi_module"></a>ngx_http_fastcgi_module</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 将请求通过fastcgi协议交给后端主机处理</span></span><br><span class="line">Syntax:	fastcgi_pass address;</span><br><span class="line">Default:	—</span><br><span class="line">Context:	location, <span class="keyword">if</span> <span class="keyword">in</span> location</span><br><span class="line"><span class="comment"># 指定默认主页面文件名</span></span><br><span class="line">Syntax:	fastcgi_index name;</span><br><span class="line">Default:	—</span><br><span class="line">Context:	http, server, location</span><br><span class="line"><span class="comment"># 向后端主机传递参数</span></span><br><span class="line">Syntax:	fastcgi_param parameter value [<span class="keyword">if</span>_not_empty];</span><br><span class="line">Default:	—</span><br><span class="line">Context:	http, server, location</span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装php-fpm</span></span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># yum install -y  php-fpm</span></span><br><span class="line"><span class="comment"># 监听在本机9000端口, 并且只处理本地转交的请求.</span></span><br><span class="line"><span class="comment"># 如果使用其它主机作为php-fpm服务器, 需要做相应修改.</span></span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># vim /etc/php-fpm.d/www.conf</span></span><br><span class="line">listen = 127.0.0.1:9000</span><br><span class="line">listen.allowed_clients = 127.0.0.1</span><br><span class="line">...</span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># systemctl start php-fpm.service</span></span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># ss -tnl | grep 9000</span></span><br><span class="line">LISTEN     0      128    127.0.0.1:9000                     *:*</span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># echo "&lt;?php phpinfo();?&gt;" &gt; /usr/share/nginx/html/index.php</span></span><br><span class="line"><span class="comment"># 将以.php结尾的资源请求全部转交给php-fpm服务器处理</span></span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># vim /etc/nginx/nginx.conf</span></span><br><span class="line">location ~* \.php$ &#123;</span><br><span class="line">    fastcgi_pass 127.0.0.1:9000;</span><br><span class="line">    fastcgi_index index.php;</span><br><span class="line">    <span class="comment"># 需要传递许多的fastcgi参数给php-fpm, 均定义在fastcgi.conf文件中.</span></span><br><span class="line">    include fastcgi.conf;</span><br><span class="line">&#125;</span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># systemctl reload nginx.service</span></span><br><span class="line"><span class="comment"># 验证结果</span></span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># curl -I http://172.18.71.103/index.php</span></span><br><span class="line">HTTP/1.1 200 OK</span><br><span class="line">Server: nginx/1.6.3</span><br><span class="line">Date: Wed, 01 Jun 2016 09:12:38 GMT</span><br><span class="line">Content-Type: text/html</span><br><span class="line">Connection: keep-alive</span><br><span class="line">X-Powered-By: PHP/5.4.16</span><br></pre></td></tr></table></figure>
+<p>需要通过<code>fastcgi</code>交给后端主机处理的一般都是<code>nginx</code>自己处理不了的动态内容, 但这种方式毕竟没有直接响应的效率高. 所以将处理结果缓存下来, 一定时间内若再有客户端请求相同资源, 则可以直接将缓存结果返回给客户端, 从而大大提高效率.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 设置fastcgi的缓存路径/名称/大小等</span></span><br><span class="line">Syntax:	fastcgi_cache_path path [levels=levels] [use_temp_path=on|off] keys_zone=name:size [inactive=time] [max_size=size] [loader_files=number] [loader_sleep=time] [loader_threshold=time] [purger=on|off] [purger_files=number] [purger_sleep=time] [purger_threshold=time];</span><br><span class="line">Default:	—</span><br><span class="line">Context:	http</span><br><span class="line"><span class="comment"># 启用指定的fastcgi缓存</span></span><br><span class="line">Syntax:	fastcgi_cache zone | off;</span><br><span class="line">Default:	fastcgi_cache off;</span><br><span class="line">Context:	http, server, location</span><br><span class="line"><span class="comment"># 指定缓存的键, 一般都是拿请求的uri当key.</span></span><br><span class="line">Syntax:	fastcgi_cache_key string;</span><br><span class="line">Default:	—</span><br><span class="line">Context:	http, server, location</span><br><span class="line"><span class="comment"># 缓存的有效时长, 过期缓存不可以再使用, 需要重新去后端主机取得结果.</span></span><br><span class="line">Syntax:	fastcgi_cache_valid [code ...] time;</span><br><span class="line">Default:	—</span><br><span class="line">Context:	http, server, location</span><br><span class="line"></span><br><span class="line"><span class="comment"># 配置缓存</span></span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># vim /etc/nginx/nginx.conf</span></span><br><span class="line">http &#123;</span><br><span class="line">    ...</span><br><span class="line">    <span class="comment"># 只能定义在http上下文中</span></span><br><span class="line">    fastcgi_cache_path /etc/nginx/cache levels=1:2 keys_zone=php:8m;</span><br><span class="line">    server &#123;</span><br><span class="line">        ...</span><br><span class="line">        location ~* \.php$ &#123;</span><br><span class="line">            fastcgi_pass 127.0.0.1:9000;</span><br><span class="line">            fastcgi_index index.php;</span><br><span class="line">            include fastcgi.conf;</span><br><span class="line">            fastcgi_cache php;</span><br><span class="line">            fastcgi_cache_key <span class="variable">$request_uri</span>;</span><br><span class="line">            fastcgi_cache_valid 200 1m;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># systemctl reload nginx.service</span></span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># curl -I http://172.18.71.103/index.php</span></span><br><span class="line"><span class="comment"># 可以看到缓存目录中生成了一些缓存文件</span></span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># tree /etc/nginx/cache/</span></span><br><span class="line">/etc/nginx/cache/</span><br><span class="line">├── 1</span><br><span class="line">│   └── af</span><br><span class="line">│       └── e251273eb74a8ee3f661a7af00915af1</span><br><span class="line">├── b</span><br><span class="line">│   └── fe</span><br><span class="line">│       └── c86156f7dcfecf44876ca30d1bac7feb</span><br><span class="line">└── e</span><br><span class="line">    └── 39</span><br><span class="line">        └── f46b8508aa08a6f8670fb088b8a9739e</span><br><span class="line"></span><br><span class="line">6 directories, 3 files</span><br></pre></td></tr></table></figure></p>
+<h1 id="ngx-http-proxy-module"><a href="#ngx-http-proxy-module" class="headerlink" title="ngx_http_proxy_module"></a>ngx_http_proxy_module</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用另一台主机作为后端主机</span></span><br><span class="line">[root@b9cf468b ~]<span class="comment"># ip addr show eno16777736</span></span><br><span class="line">2: eno16777736: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc pfifo_fast state UP qlen 1000</span><br><span class="line">    link/ether 00:0c:29:6f:1f:d5 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 172.18.71.102/16 brd 172.18.255.255 scope global eno16777736</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">    inet6 fe80::20c:29ff:fe6f:1fd5/64 scope link </span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">[root@b9cf468b ~]<span class="comment"># yum install -y nginx</span></span><br><span class="line">[root@b9cf468b ~]<span class="comment"># mv /usr/share/nginx/html/index.html&#123;,.bak&#125;</span></span><br><span class="line">[root@b9cf468b ~]<span class="comment"># echo "Real Server" &gt; /usr/share/nginx/html/index.html</span></span><br><span class="line">[root@b9cf468b ~]<span class="comment"># systemctl start nginx.service </span></span><br><span class="line">[root@b9cf468b ~]<span class="comment"># curl http://172.18.71.102</span></span><br><span class="line">Real Server</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 指定反向代理至后端主机URL</span></span><br><span class="line">Syntax:	proxy_pass URL;</span><br><span class="line">Default:	—</span><br><span class="line">Context:	location, <span class="keyword">if</span> <span class="keyword">in</span> location, <span class="built_in">limit</span>_except</span><br><span class="line"></span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># vim /etc/nginx/nginx.conf</span></span><br><span class="line">location / &#123;</span><br><span class="line">    proxy_pass http://172.18.71.102;</span><br><span class="line">&#125;</span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># systemctl reload nginx.service</span></span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># curl http://172.18.71.103</span></span><br><span class="line">Real Server</span><br></pre></td></tr></table></figure>
+<p>反向代理时也可以设置缓存, 与<code>fastcgi</code>类似, 就不展开说了.</p>
+<h1 id="ngx-http-headers-module"><a href="#ngx-http-headers-module" class="headerlink" title="ngx_http_headers_module"></a>ngx_http_headers_module</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 给客户端响应的报文中增加一些首部信息.</span></span><br><span class="line">Syntax:	add_header name value [always];</span><br><span class="line">Default:	—</span><br><span class="line">Context:	http, server, location, <span class="keyword">if</span> <span class="keyword">in</span> location</span><br><span class="line"></span><br><span class="line"><span class="comment"># 比如调试反向代理时, 增加后端主机信息.</span></span><br><span class="line"><span class="comment"># 正常情况下, 出于安全考虑不应直接暴露后端主机信息.</span></span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># vim /etc/nginx/nginx.conf</span></span><br><span class="line">location / &#123;</span><br><span class="line">    proxy_pass http://172.18.71.102;</span><br><span class="line">    add_header X-Real-Server <span class="variable">$upstream_addr</span>;</span><br><span class="line">&#125;</span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># systemctl reload nginx.service </span></span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># curl -I http://172.18.71.103</span></span><br><span class="line">HTTP/1.1 200 OK</span><br><span class="line">Server: nginx/1.6.3</span><br><span class="line">Date: Wed, 01 Jun 2016 11:11:43 GMT</span><br><span class="line">Content-Type: text/html</span><br><span class="line">Content-Length: 12</span><br><span class="line">Connection: keep-alive</span><br><span class="line">Last-Modified: Wed, 01 Jun 2016 02:16:13 GMT</span><br><span class="line">ETag: <span class="string">"574e456d-c"</span></span><br><span class="line">Accept-Ranges: bytes</span><br><span class="line">X-Real-Server: 172.18.71.102:80</span><br></pre></td></tr></table></figure>
+<h1 id="ngx-http-upstream-module"><a href="#ngx-http-upstream-module" class="headerlink" title="ngx_http_upstream_module"></a>ngx_http_upstream_module</h1><p>此模块是<code>nginx</code>的一个重要模块, 用来定义上游服务器组成的负载均衡集群. 不过在这里不准备展开, 一是这个属于集群的内容, 在其它介绍集群的文章中提到过一些了; 二是内容比较多不说, 还有一些配置项属于企业版才有的功能. 还是参照官方文档把.</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/nginx/" rel="tag">#nginx</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/05/27/基于corosync+pacemaker的ldirectord高可用方案/" rel="next" title="基于corosync&pacemaker的ldirectord高可用方案">
+                <i class="fa fa-chevron-left"></i> 基于corosync&pacemaker的ldirectord高可用方案
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <div class="ds-share flat" data-thread-key="2016/05/30/nginx常用配置/"
+     data-title="nginx常用配置"
+     data-content=""
+     data-url="http://www.twoyang.net/2016/05/30/nginx常用配置/">
+  <div class="ds-share-inline">
+    <ul  class="ds-share-icons-16">
+
+      <li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
+      <li><a class="ds-weibo" href="javascript:void(0);" data-service="weibo">微博</a></li>
+      <li><a class="ds-qzone" href="javascript:void(0);" data-service="qzone">QQ空间</a></li>
+      <li><a class="ds-qqt" href="javascript:void(0);" data-service="qqt">腾讯微博</a></li>
+      <li><a class="ds-wechat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+
+    </ul>
+    <div class="ds-share-icons-more">
+    </div>
+  </div>
+</div>
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/05/30/nginx常用配置/"
+           data-title="nginx常用配置" data-url="http://www.twoyang.net/2016/05/30/nginx常用配置/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xltax.com1.z0.glb.clouddn.com/twoyang.jpg"
+               alt="twoyang" />
+          <p class="site-author-name" itemprop="name">twoyang</p>
+          <p class="site-description motion-element" itemprop="description">The quieter you become.The more you are able to hear.</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">23</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">25</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        <div class="links-of-blogroll motion-element">
+          
+            <div class="links-of-blogroll-title">友情链接</div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.magedu.com/" target="_blank">马哥教育</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="https://shadowsocks.be/9.html" target="_blank">科学上网</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.isetsuna.com/hexo/introduction/" target="_blank">Hexo博客系列</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://mrchen.org/" target="_blank">Mrchen</a>
+                </li>
+              
+            </ul>
+          
+        </div>
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#说明"><span class="nav-number">1.</span> <span class="nav-text">说明</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Core-functionality"><span class="nav-number">2.</span> <span class="nav-text">Core functionality</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ngx-http-access-module"><span class="nav-number">3.</span> <span class="nav-text">ngx_http_access_module</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ngx-http-core-module"><span class="nav-number">4.</span> <span class="nav-text">ngx_http_core_module</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ngx-http-stub-status-module"><span class="nav-number">5.</span> <span class="nav-text">ngx_http_stub_status_module</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ngx-http-auth-basic-module"><span class="nav-number">6.</span> <span class="nav-text">ngx_http_auth_basic_module</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ngx-http-referer-module"><span class="nav-number">7.</span> <span class="nav-text">ngx_http_referer_module</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ngx-http-gzip-module"><span class="nav-number">8.</span> <span class="nav-text">ngx_http_gzip_module</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ngx-http-ssl-module"><span class="nav-number">9.</span> <span class="nav-text">ngx_http_ssl_module</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ngx-http-rewrite-module"><span class="nav-number">10.</span> <span class="nav-text">ngx_http_rewrite_module</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ngx-http-fastcgi-module"><span class="nav-number">11.</span> <span class="nav-text">ngx_http_fastcgi_module</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ngx-http-proxy-module"><span class="nav-number">12.</span> <span class="nav-text">ngx_http_proxy_module</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ngx-http-headers-module"><span class="nav-number">13.</span> <span class="nav-text">ngx_http_headers_module</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ngx-http-upstream-module"><span class="nav-number">14.</span> <span class="nav-text">ngx_http_upstream_module</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">twoyang</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+
+  
+
+
+
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=0.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=0.5.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=0.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=0.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=0.5.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"twoyang"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+  
+
+
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>
