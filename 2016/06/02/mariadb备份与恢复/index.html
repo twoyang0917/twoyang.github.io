@@ -41,7 +41,7 @@
 <link href="/css/main.css?v=0.5.0" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="mariadb,mysqldump,xtrabackup," />
 
 
 
@@ -57,15 +57,28 @@
 
 
 
-<meta name="description" content="The quieter you become.The more you are able to hear.">
-<meta property="og:type" content="website">
-<meta property="og:title" content="TwOyAng'blog">
-<meta property="og:url" content="http://www.twoyang.net/index.html">
+<meta name="description" content="参考资料
+《MySQL备份与恢复的三种方法》
+《学会用各种姿势备份MySQL数据库》
+
+准备工作准备两台虚拟机, 均为CentOS-7-x86_64最小化安装, iptables与SELinux均处于关闭状态, 配置好yum源(base和epel). 做好快照, 以便每次实验后快速恢复.1234567891011HostAOS: CentOS-7-x86_64hostname: 80e54d87.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mariadb备份与恢复">
+<meta property="og:url" content="http://www.twoyang.net/2016/06/02/mariadb备份与恢复/index.html">
 <meta property="og:site_name" content="TwOyAng'blog">
-<meta property="og:description" content="The quieter you become.The more you are able to hear.">
+<meta property="og:description" content="参考资料
+《MySQL备份与恢复的三种方法》
+《学会用各种姿势备份MySQL数据库》
+
+准备工作准备两台虚拟机, 均为CentOS-7-x86_64最小化安装, iptables与SELinux均处于关闭状态, 配置好yum源(base和epel). 做好快照, 以便每次实验后快速恢复.1234567891011HostAOS: CentOS-7-x86_64hostname: 80e54d87.">
+<meta property="og:updated_time" content="2016-06-03T11:15:33.889Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="TwOyAng'blog">
-<meta name="twitter:description" content="The quieter you become.The more you are able to hear.">
+<meta name="twitter:title" content="mariadb备份与恢复">
+<meta name="twitter:description" content="参考资料
+《MySQL备份与恢复的三种方法》
+《学会用各种姿势备份MySQL数据库》
+
+准备工作准备两台虚拟机, 均为CentOS-7-x86_64最小化安装, iptables与SELinux均处于关闭状态, 配置好yum源(base和epel). 做好快照, 以便每次实验后快速恢复.1234567891011HostAOS: CentOS-7-x86_64hostname: 80e54d87.">
 
 
 
@@ -83,7 +96,7 @@
   };
 </script>
 
-  <title> TwOyAng'blog </title>
+  <title> mariadb备份与恢复 | TwOyAng'blog </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -113,9 +126,7 @@
     
   
 
-  <div class="container one-collumn sidebar-position-left 
-   page-home 
- ">
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -202,9 +213,9 @@
         <div class="content-wrap">
           <div id="content" class="content">
             
-  <section id="posts" class="posts-expand">
+
+  <div id="posts" class="posts-expand">
     
-      
 
   
   
@@ -224,10 +235,7 @@
             
             
               
-                
-                <a class="post-title-link" href="/2016/06/02/mariadb备份与恢复/" itemprop="url">
-                  mariadb备份与恢复
-                </a>
+                mariadb备份与恢复
               
             
           </h1>
@@ -292,9 +300,7 @@
       
 
       
-        
-          
-            <h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><ul>
+        <h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><ul>
 <li><a href="http://laoguang.blog.51cto.com/6013350/1078820" target="_blank" rel="external">《MySQL备份与恢复的三种方法》</a></li>
 <li><a href="http://www.178linux.com/15423" target="_blank" rel="external">《学会用各种姿势备份MySQL数据库》</a></li>
 </ul>
@@ -332,507 +338,74 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 拿到备份集</span></span><br><span class="line">[root@b9cf468b ~]<span class="comment"># scp -r root@172.18.71.101:/backup/ /</span></span><br><span class="line"><span class="comment"># 若是直接恢复至完整备份集</span></span><br><span class="line"><span class="comment"># 因为是热备份, 备份的数据中可能会包含尚未提交的事务或已经提交但尚未同步至数据文件中的事务.</span></span><br><span class="line"><span class="comment"># --apply-log 先将日志应用至数据文件上, 来回滚未提交事务及同步已经提交的事务.</span></span><br><span class="line">[root@b9cf468b ~]<span class="comment"># innobackupex --apply-log /backup/2016-06-04_01-02-58/</span></span><br><span class="line"><span class="comment"># 这里有个问题, 就是应用完日志后会产生两个大log文件, 导致服务起不起来, 删掉就好了.</span></span><br><span class="line">[root@b9cf468b ~]<span class="comment"># rm -f /data/mysql/ib_logfile*</span></span><br><span class="line">[root@b9cf468b ~]<span class="comment"># innobackupex --copy-back /backup/2016-06-04_01-02-58/</span></span><br><span class="line">[root@b9cf468b ~]<span class="comment"># chown -R mysql:mysql /data/*</span></span><br><span class="line">[root@b9cf468b ~]<span class="comment"># systemctl start mariadb.service</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 若是要恢复至增量备份集, 恢复过程有一些差异.</span></span><br><span class="line"><span class="comment"># --apply-log要联合--redo-only使用, 意为仅同步已提交事务而不回滚未提交事务.</span></span><br><span class="line"><span class="comment"># 因为当前备份集的未提交事务可能在下一个增量备份集中提交了, 所以只能在最后一个增量备份集回滚未提交事务.</span></span><br><span class="line">[root@b9cf468b ~]<span class="comment"># innobackupex --apply-log --redo-only /backup/2016-06-04_01-02-58/</span></span><br><span class="line">[root@b9cf468b ~]<span class="comment"># innobackupex --apply-log --redo-only /backup/2016-06-04_01-02-58/ --incremental-dir=/backup/2016-06-04_01-29-04</span></span><br><span class="line">[root@b9cf468b ~]<span class="comment"># innobackupex --apply-log /backup/2016-06-04_01-02-58/ --incremental-dir=/backup/2016-06-04_02-09-16</span></span><br><span class="line">[root@b9cf468b ~]<span class="comment"># innobackupex --copy-back /backup/2016-06-04_01-02-58/</span></span><br><span class="line">[root@b9cf468b ~]<span class="comment"># chown -R mysql:mysql /data/*</span></span><br><span class="line">[root@b9cf468b ~]<span class="comment"># systemctl start mariadb.service</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 可以看到增量数据也恢复了.</span></span><br><span class="line">MariaDB [hellodb]&gt; select * from students <span class="built_in">where</span> Name=<span class="string">'susan'</span> or Name=<span class="string">'alice'</span>;</span><br><span class="line">+-------+-------+-----+--------+---------+-----------+</span><br><span class="line">| StuID | Name  | Age | Gender | ClassID | TeacherID |</span><br><span class="line">+-------+-------+-----+--------+---------+-----------+</span><br><span class="line">|    26 | susan |  22 | F      |      18 |         1 |</span><br><span class="line">|    27 | alice |  20 | F      |      19 |         2 |</span><br><span class="line">+-------+-------+-----+--------+---------+-----------+</span><br><span class="line">2 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
 <p>至于最后一次增量到数据库崩溃中间的数据变化, 就只能通过二进制日志重放来恢复了. 以上不论哪种备份恢复方式都是如此, 所以二进制日志至关重要.</p>
 
-          
-        
       
     </div>
 
     <div>
       
+        
+      
     </div>
 
     <footer class="post-footer">
       
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/05/30/nginx常用配置/" itemprop="url">
-                  nginx常用配置
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-05-30T09:46:04+08:00" content="2016-05-30">
-              2016-05-30
-            </time>
-          </span>
-
+        <div class="post-tags">
           
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Server/" itemprop="url" rel="index">
-                    <span itemprop="name">Server</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
+            <a href="/tags/mariadb/" rel="tag">#mariadb</a>
           
-
+            <a href="/tags/mysqldump/" rel="tag">#mysqldump</a>
           
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2016/05/30/nginx常用配置/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/30/nginx常用配置/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
+            <a href="/tags/xtrabackup/" rel="tag">#xtrabackup</a>
           
-
-          
-
-          
-          
-
         </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
       
 
       
-        
-          <h1 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h1><p><code>nginx</code>的配置是非常丰富的, 本文仅是对常用配置举出一些实例. <code>nginx</code>的配置项和变量均是由模块引入的, 所以本文的结构是按照模块来分的. 并没有介绍全部的模块, 提到的模块里也并没有介绍全部的配置项和变量, 而是仅介绍了经常会用到的, 需更了解更多技术细节请参照<a href="http://nginx.org/en/docs/">官方文档</a>.</p>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2016/05/30/nginx常用配置/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/05/30/nginx常用配置/" rel="next" title="nginx常用配置">
+                <i class="fa fa-chevron-left"></i> nginx常用配置
+              </a>
+            
           </div>
-        
-      
-    </div>
 
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
+          <div class="post-nav-prev post-nav-item">
             
-            
-              
-                
-                <a class="post-title-link" href="/2016/05/27/基于corosync+pacemaker的ldirectord高可用方案/" itemprop="url">
-                  基于corosync&pacemaker的ldirectord高可用方案
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-05-27T21:24:12+08:00" content="2016-05-27">
-              2016-05-27
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Cluster/" itemprop="url" rel="index">
-                    <span itemprop="name">Cluster</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2016/05/27/基于corosync+pacemaker的ldirectord高可用方案/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/27/基于corosync+pacemaker的ldirectord高可用方案/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
+          </div>
         </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
       
 
       
-        
-          <h1 id="规划"><a href="#规划" class="headerlink" title="规划"></a>规划</h1><p>准备四台虚拟机, 均为<code>CentOS-7-x86_64</code>最小化安装, <code>iptables</code>与<code>SELinux</code>均处于关闭状态, 配置好<code>yum</code>源.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">HostA</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: 80e54d87.twoyang.com</span><br><span class="line">eno16777736: 172.18.71.101/16</span><br><span class="line">gateway: 172.18.0.1</span><br><span class="line"></span><br><span class="line">HostB</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: b9cf468b.twoyang.com</span><br><span class="line">eno16777736: 172.18.71.102/16</span><br><span class="line">gateway: 172.18.0.1</span><br><span class="line"></span><br><span class="line">HostC</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: 1f5fafa6.twoyang.com</span><br><span class="line">eno16777736: 172.18.71.103/16</span><br><span class="line">gateway: 172.18.0.1</span><br><span class="line"></span><br><span class="line">HostD</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: fcc0d070.twoyang.com</span><br><span class="line">eno16777736: 172.18.71.135/16</span><br><span class="line">gateway: 172.18.0.1</span><br></pre></td></tr></table></figure></p>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2016/05/27/基于corosync+pacemaker的ldirectord高可用方案/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
       
     </footer>
   </article>
 
 
-    
+
+    <div class="post-spread">
       
+        <div class="ds-share flat" data-thread-key="2016/06/02/mariadb备份与恢复/"
+     data-title="mariadb备份与恢复"
+     data-content=""
+     data-url="http://www.twoyang.net/2016/06/02/mariadb备份与恢复/">
+  <div class="ds-share-inline">
+    <ul  class="ds-share-icons-16">
 
-  
-  
+      <li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
+      <li><a class="ds-weibo" href="javascript:void(0);" data-service="weibo">微博</a></li>
+      <li><a class="ds-qzone" href="javascript:void(0);" data-service="qzone">QQ空间</a></li>
+      <li><a class="ds-qqt" href="javascript:void(0);" data-service="qqt">腾讯微博</a></li>
+      <li><a class="ds-wechat" href="javascript:void(0);" data-service="wechat">微信</a></li>
 
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/05/27/基于corosync+pacemaker的mariadb高可用方案/" itemprop="url">
-                  基于corosync&pacemaker的mariadb高可用方案
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-05-27T13:04:18+08:00" content="2016-05-27">
-              2016-05-27
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Cluster/" itemprop="url" rel="index">
-                    <span itemprop="name">Cluster</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2016/05/27/基于corosync+pacemaker的mariadb高可用方案/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/27/基于corosync+pacemaker的mariadb高可用方案/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h1 id="规划"><a href="#规划" class="headerlink" title="规划"></a>规划</h1><p>准备三台虚拟机, 均为<code>CentOS-7-x86_64</code>最小化安装, <code>iptables</code>与<code>SELinux</code>均处于关闭状态, 配置好<code>yum</code>源.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">HostA</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: 80e54d87.twoyang.com</span><br><span class="line">eno16777736: 172.18.71.101/16</span><br><span class="line">gateway: 172.18.0.1</span><br><span class="line"></span><br><span class="line">HostB</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: b9cf468b.twoyang.com</span><br><span class="line">eno16777736: 172.18.71.102/16</span><br><span class="line">gateway: 172.18.0.1</span><br><span class="line"></span><br><span class="line">HostC</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: 1f5fafa6.twoyang.com</span><br><span class="line">eno16777736: 172.18.71.103/16</span><br><span class="line">gateway: 172.18.0.1</span><br></pre></td></tr></table></figure></p>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2016/05/27/基于corosync+pacemaker的mariadb高可用方案/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
+    </ul>
+    <div class="ds-share-icons-more">
+    </div>
+  </div>
+</div>
       
     </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/05/25/基于haproxy实现资源分离/" itemprop="url">
-                  基于haproxy实现资源分离
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-05-25T19:16:45+08:00" content="2016-05-25">
-              2016-05-25
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Cluster/" itemprop="url" rel="index">
-                    <span itemprop="name">Cluster</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2016/05/25/基于haproxy实现资源分离/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/25/基于haproxy实现资源分离/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h1 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h1><p><a href="http://xuding.blog.51cto.com/4890434/1747722">《haproxy负载均衡代理服务详解》</a>, 这是某位师兄写的博客, 基本上马哥讲到的知识点都覆盖到了.</p>
-<p>官方文档并不在<a href="https://www.haproxy.com/">haproxy</a>官方站点上面, 而是放在了<code>github</code>代码托管站点, 地址是<a href="http://cbonte.github.io/haproxy-dconv/">HAProxy Documentation Converter</a>.</p>
-<p>目前有<code>1.7/1.6/1.5/1.4</code>这么几个版本分支, 其中<code>1.7</code>为开发版, 其余为稳定版.<code>CentOS-7-x86_64</code>上<code>yum</code>源中提供的是<code>1.5</code>版的, 所以文档也要看对应版本的, 因为配置项有增删改.</p>
-<h1 id="规划"><a href="#规划" class="headerlink" title="规划"></a>规划</h1><p>准备五台虚拟机, 均为<code>CentOS-7-x86_64</code>最小化安装, <code>iptables</code>与<code>SELinux</code>均处于关闭状态, 配置好<code>yum</code>源.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">HostA(haproxy)</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: 1478a474.twoyang.com</span><br><span class="line">eno16777736: 172.18.71.130/16</span><br><span class="line">gateway: 172.18.0.1</span><br><span class="line"></span><br><span class="line">HostB(RS1)</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: fcc0d070.twoyang.com</span><br><span class="line">eno16777736: 172.18.71.135/16</span><br><span class="line">gateway: 172.18.0.1</span><br><span class="line"></span><br><span class="line">HostC(RS2)</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: 1f5fafa6.twoyang.com</span><br><span class="line">eno16777736: 172.18.71.103/16</span><br><span class="line">gateway: 172.18.0.1</span><br><span class="line"></span><br><span class="line">HostD(RS3)</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: b9cf468b.twoyang.com</span><br><span class="line">eno16777736: 172.18.71.102/16</span><br><span class="line">gateway: 172.18.0.1</span><br><span class="line"></span><br><span class="line">HostE(RS4)</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: 80e54d87.twoyang.com</span><br><span class="line">eno16777736: 172.18.71.101/16</span><br><span class="line">gateway: 172.18.0.1</span><br></pre></td></tr></table></figure></p>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2016/05/25/基于haproxy实现资源分离/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-  </section>
-
-  
-  <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
-  </nav>
-
+  </div>
 
 
           </div>
@@ -840,6 +413,14 @@
 
 
           
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/06/02/mariadb备份与恢复/"
+           data-title="mariadb备份与恢复" data-url="http://www.twoyang.net/2016/06/02/mariadb备份与恢复/">
+      </div>
+    
+  </div>
+
 
         </div>
         
@@ -859,8 +440,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview sidebar-panel  sidebar-panel-active ">
+      <section class="site-overview sidebar-panel ">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="http://7xltax.com1.z0.glb.clouddn.com/twoyang.jpg"
@@ -933,6 +523,17 @@
 
       </section>
 
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#参考资料"><span class="nav-number">1.</span> <span class="nav-text">参考资料</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#准备工作"><span class="nav-number">2.</span> <span class="nav-text">准备工作</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#cp备份与恢复"><span class="nav-number">3.</span> <span class="nav-text">cp备份与恢复</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#lvm2-binlog"><span class="nav-number">4.</span> <span class="nav-text">lvm2+binlog</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#mysqldump-binlog"><span class="nav-number">5.</span> <span class="nav-text">mysqldump+binlog</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#MyISAM"><span class="nav-number">5.1.</span> <span class="nav-text">MyISAM</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#InnoDB"><span class="nav-number">5.2.</span> <span class="nav-text">InnoDB</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#xtrabackup"><span class="nav-number">6.</span> <span class="nav-text">xtrabackup</span></a></li></ol></div>
+            
+          </div>
+        </section>
       
 
     </div>
@@ -1017,6 +618,10 @@
   
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=0.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=0.5.0"></script>
+
+
 
   
 

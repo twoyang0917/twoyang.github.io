@@ -63,7 +63,7 @@
 <meta property="og:url" content="http://www.twoyang.net/2016/05/30/nginx常用配置/index.html">
 <meta property="og:site_name" content="TwOyAng'blog">
 <meta property="og:description" content="说明nginx的配置是非常丰富的, 本文仅是对常用配置举出一些实例. nginx的配置项和变量均是由模块引入的, 所以本文的结构是按照模块来分的. 并没有介绍全部的模块, 提到的模块里也并没有介绍全部的配置项和变量, 而是仅介绍了经常会用到的, 需更了解更多技术细节请参照官方文档.">
-<meta property="og:updated_time" content="2016-06-01T03:31:28.485Z">
+<meta property="og:updated_time" content="2016-06-01T08:14:50.792Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="nginx常用配置">
 <meta name="twitter:description" content="说明nginx的配置是非常丰富的, 本文仅是对常用配置举出一些实例. nginx的配置项和变量均是由模块引入的, 所以本文的结构是按照模块来分的. 并没有介绍全部的模块, 提到的模块里也并没有介绍全部的配置项和变量, 而是仅介绍了经常会用到的, 需更了解更多技术细节请参照官方文档.">
@@ -307,7 +307,7 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 指定反向代理至后端主机URL</span></span><br><span class="line">Syntax:	proxy_pass URL;</span><br><span class="line">Default:	—</span><br><span class="line">Context:	location, <span class="keyword">if</span> <span class="keyword">in</span> location, <span class="built_in">limit</span>_except</span><br><span class="line"></span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># vim /etc/nginx/nginx.conf</span></span><br><span class="line">location / &#123;</span><br><span class="line">    proxy_pass http://172.18.71.102;</span><br><span class="line">&#125;</span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># systemctl reload nginx.service</span></span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># curl http://172.18.71.103</span></span><br><span class="line">Real Server</span><br></pre></td></tr></table></figure>
 <p>反向代理时也可以设置缓存, 与<code>fastcgi</code>类似, 就不展开说了.</p>
 <h1 id="ngx-http-headers-module"><a href="#ngx-http-headers-module" class="headerlink" title="ngx_http_headers_module"></a>ngx_http_headers_module</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 给客户端响应的报文中增加一些首部信息.</span></span><br><span class="line">Syntax:	add_header name value [always];</span><br><span class="line">Default:	—</span><br><span class="line">Context:	http, server, location, <span class="keyword">if</span> <span class="keyword">in</span> location</span><br><span class="line"></span><br><span class="line"><span class="comment"># 比如调试反向代理时, 增加后端主机信息.</span></span><br><span class="line"><span class="comment"># 正常情况下, 出于安全考虑不应直接暴露后端主机信息.</span></span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># vim /etc/nginx/nginx.conf</span></span><br><span class="line">location / &#123;</span><br><span class="line">    proxy_pass http://172.18.71.102;</span><br><span class="line">    add_header X-Real-Server <span class="variable">$upstream_addr</span>;</span><br><span class="line">&#125;</span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># systemctl reload nginx.service </span></span><br><span class="line">[root@1f5fafa6 ~]<span class="comment"># curl -I http://172.18.71.103</span></span><br><span class="line">HTTP/1.1 200 OK</span><br><span class="line">Server: nginx/1.6.3</span><br><span class="line">Date: Wed, 01 Jun 2016 11:11:43 GMT</span><br><span class="line">Content-Type: text/html</span><br><span class="line">Content-Length: 12</span><br><span class="line">Connection: keep-alive</span><br><span class="line">Last-Modified: Wed, 01 Jun 2016 02:16:13 GMT</span><br><span class="line">ETag: <span class="string">"574e456d-c"</span></span><br><span class="line">Accept-Ranges: bytes</span><br><span class="line">X-Real-Server: 172.18.71.102:80</span><br></pre></td></tr></table></figure>
-<h1 id="ngx-http-upstream-module"><a href="#ngx-http-upstream-module" class="headerlink" title="ngx_http_upstream_module"></a>ngx_http_upstream_module</h1><p>此模块是<code>nginx</code>的一个重要模块, 用来定义上游服务器组成的负载均衡集群. 不过在这里不准备展开, 一是这个属于集群的内容, 在其它介绍集群的文章中提到过一些了; 二是内容比较多不说, 还有一些配置项属于企业版才有的功能. 还是参照官方文档把.</p>
+<h1 id="ngx-http-upstream-module"><a href="#ngx-http-upstream-module" class="headerlink" title="ngx_http_upstream_module"></a>ngx_http_upstream_module</h1><p>此模块是<code>nginx</code>的一个重要模块, 用来定义上游服务器组成的负载均衡集群. 不过在这里不准备展开, 一是这个属于集群的内容, 在其它介绍集群的文章中提到过一些了; 二是内容比较多不说, 还有一些配置项属于企业版才有的功能. 还是参照官方文档吧.</p>
 
       
     </div>
@@ -338,6 +338,10 @@
           </div>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/06/02/mariadb备份与恢复/" rel="prev" title="mariadb备份与恢复">
+                mariadb备份与恢复 <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -428,7 +432,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">23</span>
+              <span class="site-state-item-count">24</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -445,7 +449,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">25</span>
+                <span class="site-state-item-count">27</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
