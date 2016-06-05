@@ -225,6 +225,129 @@
             
               
                 
+                <a class="post-title-link" href="/2016/04/20/LAMP-CentOS-7平台双机module模型/" itemprop="url">
+                  LAMP--CentOS-7平台双机module模型
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-04-20T10:31:56+08:00" content="2016-04-20">
+              2016-04-20
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Server/" itemprop="url" rel="index">
+                    <span itemprop="name">Server</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/04/20/LAMP-CentOS-7平台双机module模型/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/04/20/LAMP-CentOS-7平台双机module模型/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h1 id="需求"><a href="#需求" class="headerlink" title="需求"></a>需求</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">CentOS-7平台上搭建LAMP，其中php作为httpd的一个module工作；</span><br><span class="line">(1) 三者分离于两台主机；</span><br><span class="line">(2) 一个虚拟主机用于提供phpMyAdmin；另一个虚拟主机用于提供wordpress；</span><br><span class="line">(3) 安装xcache，为php提供加速；</span><br><span class="line">(4) 为phpMyAdmin提供https虚拟主机；</span><br></pre></td></tr></table></figure>
+<h1 id="解析"><a href="#解析" class="headerlink" title="解析"></a>解析</h1><ul>
+<li>由于<code>httpd</code>是<code>cpu</code>密集型应用，<code>php</code>是<code>io</code>密集型应用，而<code>mariadb</code>既是<code>cpu</code>密集型又是<code>io</code>密集型。所以将<code>httpd+php</code>部署在一台主机上，<code>mariadb</code>部署在另一台主机上。</li>
+<li>由于<code>CentOS-7</code>平台提供了以上各应用的<code>rpm</code>安装包，且均包含了各应用的新特性，所以各应用程序可以直接使用<code>yum</code>源安装，而无需通过编译源码来安装。</li>
+<li><code>xcache</code>为<code>EPEL</code>源中提供的应用程序，因此需要配置启用<code>EPEL</code>源。</li>
+<li>因为需要为<code>phpMyAdmin</code>提供<code>https</code>虚拟主机，而<code>ssl</code>协议是基于<code>IP</code>地址的，所以部署<code>httpd+php</code>的主机必须为两个虚拟主机分别提供<code>IP</code>地址。</li>
+</ul>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2016/04/20/LAMP-CentOS-7平台双机module模型/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2016/04/17/CentOS-6上安装二进制版Mariadb/" itemprop="url">
                   CentOS-6上安装二进制版Mariadb
                 </a>
@@ -732,7 +855,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">24</span>
+              <span class="site-state-item-count">25</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -749,7 +872,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">27</span>
+                <span class="site-state-item-count">28</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

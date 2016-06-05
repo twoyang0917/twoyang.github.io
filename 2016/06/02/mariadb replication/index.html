@@ -1,0 +1,658 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
+
+
+
+
+  <link href="//fonts.googleapis.com/css?family=Lato:300,400,700,400italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=0.5.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="mariadb,repication," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=0.5.0" />
+
+
+
+
+
+
+<meta name="description" content="参考资料
+《初识 MySQL 5.5 半同步复制》
+《MySQL（MariaDB）的 SSL 加密复制》
+
+准备工作准备两台虚拟机, 均为CentOS-7-x86_64最小化安装, iptables与SELinux均处于关闭状态, 配置好yum源(base和epel). 做好快照, 以便每次实验后快速恢复.1234567891011HostAOS: CentOS-7-x86_64hostname:">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mariadb repication">
+<meta property="og:url" content="http://www.twoyang.net/2016/06/02/mariadb replication/index.html">
+<meta property="og:site_name" content="TwOyAng'blog">
+<meta property="og:description" content="参考资料
+《初识 MySQL 5.5 半同步复制》
+《MySQL（MariaDB）的 SSL 加密复制》
+
+准备工作准备两台虚拟机, 均为CentOS-7-x86_64最小化安装, iptables与SELinux均处于关闭状态, 配置好yum源(base和epel). 做好快照, 以便每次实验后快速恢复.1234567891011HostAOS: CentOS-7-x86_64hostname:">
+<meta property="og:updated_time" content="2016-06-05T10:43:30.180Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="mariadb repication">
+<meta name="twitter:description" content="参考资料
+《初识 MySQL 5.5 半同步复制》
+《MySQL（MariaDB）的 SSL 加密复制》
+
+准备工作准备两台虚拟机, 均为CentOS-7-x86_64最小化安装, iptables与SELinux均处于关闭状态, 配置好yum源(base和epel). 做好快照, 以便每次实验后快速恢复.1234567891011HostAOS: CentOS-7-x86_64hostname:">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+  <title> mariadb repication | TwOyAng'blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=55583792";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">TwOyAng'blog</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-th fa-fw"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                mariadb repication
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-06-02T20:25:31+08:00" content="2016-06-02">
+              2016-06-02
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Cluster/" itemprop="url" rel="index">
+                    <span itemprop="name">Cluster</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/06/02/mariadb replication/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/06/02/mariadb replication/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><ul>
+<li><a href="http://www.cnblogs.com/zhoujinyi/archive/2012/12/11/2811699.html" target="_blank" rel="external">《初识 MySQL 5.5 半同步复制》</a></li>
+<li><a href="http://www.cnblogs.com/zhoujinyi/p/4191096.html" target="_blank" rel="external">《MySQL（MariaDB）的 SSL 加密复制》</a></li>
+</ul>
+<h1 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h1><p>准备两台虚拟机, 均为<code>CentOS-7-x86_64</code>最小化安装, <code>iptables</code>与<code>SELinux</code>均处于关闭状态, 配置好<code>yum</code>源(<code>base</code>和<code>epel</code>). 做好快照, 以便每次实验后快速恢复.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">HostA</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: 80e54d87.twoyang.com</span><br><span class="line">eno16777736: 172.18.71.101/16</span><br><span class="line">gateway: 172.18.0.1</span><br><span class="line"></span><br><span class="line">HostB</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: b9cf468b.twoyang.com</span><br><span class="line">eno16777736: 172.18.71.102/16</span><br><span class="line">gateway: 172.18.0.1</span><br></pre></td></tr></table></figure></p>
+<a id="more"></a>
+<h1 id="主从复制"><a href="#主从复制" class="headerlink" title="主从复制"></a>主从复制</h1><h2 id="HostA-Master"><a href="#HostA-Master" class="headerlink" title="HostA(Master)"></a>HostA(Master)</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">[root@80e54d87 ~]<span class="comment"># yum install -y mariadb-server</span></span><br><span class="line"></span><br><span class="line">sed -i <span class="string">'/\[server\]/a\character-set-server=utf8'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[server\]/a\collation-server=utf8_general_ci'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[server\]/a\default-storage-engine=InnoDB'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[server\]/a\innodb-file-per-table=TRUE'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[server\]/a\skip-name-resolve=TRUE'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line"><span class="comment"># 启用二进制日志</span></span><br><span class="line">sed -i <span class="string">'/\[server\]/a\log_bin=master-binlog'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line"><span class="comment"># 设置serverid, 其值在集群中必须唯一.</span></span><br><span class="line">sed -i <span class="string">'/\[server\]/a\server_id=1'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line"></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># systemctl start mariadb.service</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># mysql</span></span><br><span class="line">...</span><br><span class="line"><span class="comment"># 授权用户'repl'@'172.18.71.%'可以复制数据</span></span><br><span class="line">MariaDB [(none)]&gt; GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO <span class="string">'repl'</span>@<span class="string">'172.18.71.%'</span> IDENTIFIED BY <span class="string">'magedu'</span>;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记下此时的日志文件和位置</span></span><br><span class="line">MariaDB [(none)]&gt; SHOW MASTER STATUS;</span><br><span class="line">+----------------------+----------+--------------+------------------+</span><br><span class="line">| File                 | Position | Binlog_Do_DB | Binlog_Ignore_DB |</span><br><span class="line">+----------------------+----------+--------------+------------------+</span><br><span class="line">| master-binlog.000003 |      417 |              |                  |</span><br><span class="line">+----------------------+----------+--------------+------------------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h2 id="HostB-Slave"><a href="#HostB-Slave" class="headerlink" title="HostB(Slave)"></a>HostB(Slave)</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line">[root@b9cf468b ~]<span class="comment"># yum install -y mariadb-server</span></span><br><span class="line"></span><br><span class="line">sed -i <span class="string">'/\[server\]/a\character-set-server=utf8'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[server\]/a\collation-server=utf8_general_ci'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[server\]/a\default-storage-engine=InnoDB'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[server\]/a\innodb-file-per-table=TRUE'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[server\]/a\skip-name-resolve=TRUE'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line"><span class="comment"># 启用中继日志</span></span><br><span class="line">sed -i <span class="string">'/\[server\]/a\relay_log=relaylog'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line"><span class="comment"># 设置从节点为只读(此设置对均有SUPER权限的用户无效, 若想要使任何用户都有效, 只能加全局读锁.)</span></span><br><span class="line">sed -i <span class="string">'/\[server\]/a\read-only=ON'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line"><span class="comment"># 设置serverid, 其值在集群中必须唯一.</span></span><br><span class="line">sed -i <span class="string">'/\[server\]/a\server_id=5'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line"></span><br><span class="line">[root@b9cf468b ~]<span class="comment"># systemctl start mariadb.service</span></span><br><span class="line">[root@b9cf468b ~]<span class="comment"># mysql</span></span><br><span class="line">...</span><br><span class="line"><span class="comment"># 指向HostA将其作为主节点</span></span><br><span class="line">MariaDB [(none)]&gt; CHANGE MASTER TO MASTER_HOST=<span class="string">'172.18.71.101'</span>, MASTER_USER=<span class="string">'repl'</span>, MASTER_PASSWORD=<span class="string">'magedu'</span>, MASTER_LOG_FILE=<span class="string">'master-binlog.000003'</span>, MASTER_LOG_POS=417;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line">MariaDB [(none)]&gt; SHOW SLAVE STATUS\G</span><br><span class="line">*************************** 1. row ***************************</span><br><span class="line">               Slave_IO_State: </span><br><span class="line">                  Master_Host: 172.18.71.101</span><br><span class="line">                  Master_User: repl</span><br><span class="line">                  Master_Port: 3306</span><br><span class="line">                Connect_Retry: 60</span><br><span class="line">              Master_Log_File: master-binlog.000003 <span class="comment"># 当前读到的主节点二进制日志文件</span></span><br><span class="line">          Read_Master_Log_Pos: 417 <span class="comment"># 当前读到的主节点二进制日志文件的位置</span></span><br><span class="line">               Relay_Log_File: relaylog.000001 <span class="comment"># 当前记录的中继日志文件</span></span><br><span class="line">                Relay_Log_Pos: 4 <span class="comment"># 当前记录的中继日志文件的位置</span></span><br><span class="line">        Relay_Master_Log_File: master-binlog.000003 <span class="comment"># 当前重放的主节点二进制日志文件</span></span><br><span class="line">             Slave_IO_Running: No <span class="comment"># IO_thread(负责接收主节点上的二进制日志文件存为本地中继日志文件)进程未启动</span></span><br><span class="line">            Slave_SQL_Running: No <span class="comment"># SQL_thread(负责读取本地中继日志文件并重放)进程未启动</span></span><br><span class="line">......</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动从节点, 即启动IO_thread和SQL_thread进程, 开始复制.</span></span><br><span class="line">MariaDB [(none)]&gt; START SLAVE;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line">MariaDB [(none)]&gt; SHOW SLAVE STATUS\G</span><br><span class="line">*************************** 1. row ***************************</span><br><span class="line">               Slave_IO_State: Waiting <span class="keyword">for</span> master to send event</span><br><span class="line">                  Master_Host: 172.18.71.101</span><br><span class="line">                  Master_User: repl</span><br><span class="line">                  Master_Port: 3306</span><br><span class="line">                Connect_Retry: 60</span><br><span class="line">              Master_Log_File: master-binlog.000003</span><br><span class="line">          Read_Master_Log_Pos: 417</span><br><span class="line">               Relay_Log_File: relaylog.000002</span><br><span class="line">                Relay_Log_Pos: 533</span><br><span class="line">        Relay_Master_Log_File: master-binlog.000003</span><br><span class="line">             Slave_IO_Running: Yes <span class="comment"># IO_thread进程已启动</span></span><br><span class="line">            Slave_SQL_Running: Yes <span class="comment"># SQL_thread进程已启动</span></span><br><span class="line">......</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h2 id="测试验证"><a href="#测试验证" class="headerlink" title="测试验证"></a>测试验证</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在HostA上做增删改数据的动作.</span></span><br><span class="line">MariaDB [(none)]&gt; CREATE TABLE test.demo (id INT UNSIGNED PRIMARY KEY, account VARCHAR(20), email VARCHAR(20));</span><br><span class="line">Query OK, 0 rows affected (0.01 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 二进制日志位置发生了滚动.</span></span><br><span class="line">MariaDB [(none)]&gt; SHOW MASTER STATUS;</span><br><span class="line">+----------------------+----------+--------------+------------------+</span><br><span class="line">| File                 | Position | Binlog_Do_DB | Binlog_Ignore_DB |</span><br><span class="line">+----------------------+----------+--------------+------------------+</span><br><span class="line">| master-binlog.000003 |      568 |              |                  |</span><br><span class="line">+----------------------+----------+--------------+------------------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在HostB上检查复制结果</span></span><br><span class="line">MariaDB [(none)]&gt; SHOW SLAVE STATUS\G</span><br><span class="line">*************************** 1. row ***************************</span><br><span class="line">               Slave_IO_State: Waiting <span class="keyword">for</span> master to send event</span><br><span class="line">                  Master_Host: 172.18.71.101</span><br><span class="line">                  Master_User: repl</span><br><span class="line">                  Master_Port: 3306</span><br><span class="line">                Connect_Retry: 60</span><br><span class="line">              Master_Log_File: master-binlog.000003</span><br><span class="line">          Read_Master_Log_Pos: 568 <span class="comment"># 当前读到的主节点二进制日志文件的位置发生了变化</span></span><br><span class="line">               Relay_Log_File: relaylog.000002</span><br><span class="line">                Relay_Log_Pos: 684 <span class="comment"># 当前记录的中继日志文件的位置发生了变化</span></span><br><span class="line">        Relay_Master_Log_File: master-binlog.000003</span><br><span class="line">             Slave_IO_Running: Yes</span><br><span class="line">            Slave_SQL_Running: Yes</span><br><span class="line">......</span><br><span class="line"></span><br><span class="line"><span class="comment"># 改动的数据确实复制过来了.</span></span><br><span class="line">MariaDB [(none)]&gt; DESC test.demo;</span><br><span class="line">+---------+------------------+------+-----+---------+-------+</span><br><span class="line">| Field   | Type             | Null | Key | Default | Extra |</span><br><span class="line">+---------+------------------+------+-----+---------+-------+</span><br><span class="line">| id      | int(10) unsigned | NO   | PRI | NULL    |       |</span><br><span class="line">| account | varchar(20)      | YES  |     | NULL    |       |</span><br><span class="line">| email   | varchar(20)      | YES  |     | NULL    |       |</span><br><span class="line">+---------+------------------+------+-----+---------+-------+</span><br><span class="line">3 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h1 id="主主复制"><a href="#主主复制" class="headerlink" title="主主复制"></a>主主复制</h1><p>主主复制其实就是节点与节点间互为主从.</p>
+<h2 id="HostA-Master-1"><a href="#HostA-Master-1" class="headerlink" title="HostA(Master)"></a>HostA(Master)</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">[root@80e54d87 ~]<span class="comment"># yum install -y mariadb-server</span></span><br><span class="line"></span><br><span class="line">sed -i <span class="string">'/\[server\]/a\character-set-server=utf8'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[server\]/a\collation-server=utf8_general_ci'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[server\]/a\default-storage-engine=InnoDB'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[server\]/a\innodb-file-per-table=TRUE'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[server\]/a\skip-name-resolve=TRUE'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line"><span class="comment"># 启用二进制日志</span></span><br><span class="line">sed -i <span class="string">'/\[server\]/a\log_bin=master-binlog'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line"><span class="comment"># 同时启用中继日志</span></span><br><span class="line">sed -i <span class="string">'/\[server\]/a\relay_log=relaylog'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line"><span class="comment"># 设置serverid, 其值在集群中必须唯一.</span></span><br><span class="line">sed -i <span class="string">'/\[server\]/a\server_id=1'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line"></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># systemctl start mariadb.service</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># mysql</span></span><br><span class="line">...</span><br><span class="line"><span class="comment"># 授权用户'repl'@'172.18.71.%'可以复制数据</span></span><br><span class="line">MariaDB [(none)]&gt; GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO <span class="string">'repl'</span>@<span class="string">'172.18.71.%'</span> IDENTIFIED BY <span class="string">'magedu'</span>;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记下此时的日志文件和位置</span></span><br><span class="line">MariaDB [(none)]&gt; SHOW MASTER STATUS;</span><br><span class="line">+----------------------+----------+--------------+------------------+</span><br><span class="line">| File                 | Position | Binlog_Do_DB | Binlog_Ignore_DB |</span><br><span class="line">+----------------------+----------+--------------+------------------+</span><br><span class="line">| master-binlog.000003 |      417 |              |                  |</span><br><span class="line">+----------------------+----------+--------------+------------------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h2 id="HostB-Master"><a href="#HostB-Master" class="headerlink" title="HostB(Master)"></a>HostB(Master)</h2><p><code>HostB</code>与<code>HostA</code>做相同配置, 仅<code>server_id</code>不可以一致.</p>
+<h2 id="HostA-Master-2"><a href="#HostA-Master-2" class="headerlink" title="HostA(Master)"></a>HostA(Master)</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 指向HostB将其作为主节点</span></span><br><span class="line">MariaDB [(none)]&gt; CHANGE MASTER TO MASTER_HOST=<span class="string">'172.18.71.102'</span>, MASTER_USER=<span class="string">'repl'</span>, MASTER_PASSWORD=<span class="string">'magedu'</span>, MASTER_LOG_FILE=<span class="string">'master-binlog.000003'</span>, MASTER_LOG_POS=417;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动从节点, 即启动IO_thread和SQL_thread进程, 开始复制.</span></span><br><span class="line">MariaDB [(none)]&gt; START SLAVE;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line">MariaDB [(none)]&gt; SHOW SLAVE STATUS\G</span><br><span class="line">*************************** 1. row ***************************</span><br><span class="line">               Slave_IO_State: Waiting <span class="keyword">for</span> master to send event</span><br><span class="line">                  Master_Host: 172.18.71.102</span><br><span class="line">                  Master_User: repl</span><br><span class="line">                  Master_Port: 3306</span><br><span class="line">                Connect_Retry: 60</span><br><span class="line">              Master_Log_File: master-binlog.000003</span><br><span class="line">          Read_Master_Log_Pos: 417</span><br><span class="line">               Relay_Log_File: relaylog.000002</span><br><span class="line">                Relay_Log_Pos: 533</span><br><span class="line">        Relay_Master_Log_File: master-binlog.000003</span><br><span class="line">             Slave_IO_Running: Yes <span class="comment"># IO_thread进程已启动</span></span><br><span class="line">            Slave_SQL_Running: Yes <span class="comment"># SQL_thread进程已启动</span></span><br><span class="line">......</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h2 id="HostB-Master-1"><a href="#HostB-Master-1" class="headerlink" title="HostB(Master)"></a>HostB(Master)</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 指向HostA将其作为主节点</span></span><br><span class="line">MariaDB [(none)]&gt; CHANGE MASTER TO MASTER_HOST=<span class="string">'172.18.71.101'</span>, MASTER_USER=<span class="string">'repl'</span>, MASTER_PASSWORD=<span class="string">'magedu'</span>, MASTER_LOG_FILE=<span class="string">'master-binlog.000003'</span>, MASTER_LOG_POS=417;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动从节点, 即启动IO_thread和SQL_thread进程, 开始复制.</span></span><br><span class="line">MariaDB [(none)]&gt; START SLAVE;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line">MariaDB [(none)]&gt; SHOW SLAVE STATUS\G</span><br><span class="line">*************************** 1. row ***************************</span><br><span class="line">               Slave_IO_State: Waiting <span class="keyword">for</span> master to send event</span><br><span class="line">                  Master_Host: 172.18.71.101</span><br><span class="line">                  Master_User: repl</span><br><span class="line">                  Master_Port: 3306</span><br><span class="line">                Connect_Retry: 60</span><br><span class="line">              Master_Log_File: master-binlog.000003</span><br><span class="line">          Read_Master_Log_Pos: 417</span><br><span class="line">               Relay_Log_File: relaylog.000002</span><br><span class="line">                Relay_Log_Pos: 533</span><br><span class="line">        Relay_Master_Log_File: master-binlog.000003</span><br><span class="line">             Slave_IO_Running: Yes <span class="comment"># IO_thread进程已启动</span></span><br><span class="line">            Slave_SQL_Running: Yes <span class="comment"># SQL_thread进程已启动</span></span><br><span class="line">......</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h2 id="测试验证-1"><a href="#测试验证-1" class="headerlink" title="测试验证"></a>测试验证</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在HostA上做增删改数据的动作.</span></span><br><span class="line">MariaDB [(none)]&gt; CREATE TABLE test.demo (id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT, account VARCHAR(20), email VARCHAR(20));</span><br><span class="line">Query OK, 0 rows affected (0.01 sec)</span><br><span class="line"></span><br><span class="line">MariaDB [(none)]&gt; INSERT INTO test.demo (account, email) VALUES (<span class="string">'13919491001'</span>, <span class="string">'twoyang@magedu.com'</span>);</span><br><span class="line">Query OK, 1 row affected (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在HostB上查询数据</span></span><br><span class="line">MariaDB [(none)]&gt; SELECT * FROM test.demo;</span><br><span class="line">+----+-------------+--------------------+</span><br><span class="line">| id | account     | email              |</span><br><span class="line">+----+-------------+--------------------+</span><br><span class="line">|  1 | 13919491001 | twoyang@magedu.com |</span><br><span class="line">+----+-------------+--------------------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在HostB上做增删改数据的动作</span></span><br><span class="line">MariaDB [(none)]&gt; INSERT INTO test.demo (account, email) VALUES (<span class="string">'18619450814'</span>, <span class="string">'knfprex@magedu.com'</span>);</span><br><span class="line">Query OK, 1 row affected (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在HostA上查询数据</span></span><br><span class="line">MariaDB [(none)]&gt; SELECT * FROM test.demo;</span><br><span class="line">+----+-------------+--------------------+</span><br><span class="line">| id | account     | email              |</span><br><span class="line">+----+-------------+--------------------+</span><br><span class="line">|  1 | 13919491001 | twoyang@magedu.com |</span><br><span class="line">|  2 | 18619450814 | knfprex@magedu.com |</span><br><span class="line">+----+-------------+--------------------+</span><br><span class="line">2 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h1 id="半同步复制"><a href="#半同步复制" class="headerlink" title="半同步复制"></a>半同步复制</h1><p><code>MySQL5.5</code>之前的复制都是异步复制，在服务器崩溃时丢失事务是使用异步复制不可避免的结果。而<code>5.5</code>的一项新功能：半同步复制可以限制事务丢失的数量。半同步复制的原理是：提交事务的线程会被锁定，直到至少一个<code>Slave</code>收到这个事务，由于事务的事件在被提交到存储引擎之后才被发送到<code>Slave</code>上，所以事务的丢失数量可以下降到最多每线程一个。</p>
+<p>半同步复制模式必须在主服务器和从服务器端同时启用，否则主服务器默认使用异步复制模式。启用半同步复制模式, 主服务器和从服务器要分别加载对应的插件.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">rpm -ql mariadb-server | grep semi</span><br><span class="line">/usr/lib64/mysql/plugin/semisync_master.so</span><br><span class="line">/usr/lib64/mysql/plugin/semisync_slave.so</span><br></pre></td></tr></table></figure></p>
+<h2 id="HostA-Master-3"><a href="#HostA-Master-3" class="headerlink" title="HostA(Master)"></a>HostA(Master)</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line">[root@80e54d87 ~]<span class="comment"># yum install -y mariadb-server</span></span><br><span class="line"></span><br><span class="line">sed -i <span class="string">'/\[server\]/a\character-set-server=utf8'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[server\]/a\collation-server=utf8_general_ci'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[server\]/a\default-storage-engine=InnoDB'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[server\]/a\innodb-file-per-table=TRUE'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[server\]/a\skip-name-resolve=TRUE'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line"><span class="comment"># 启用二进制日志</span></span><br><span class="line">sed -i <span class="string">'/\[server\]/a\log_bin=master-binlog'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line"><span class="comment"># 设置serverid, 其值在集群中必须唯一.</span></span><br><span class="line">sed -i <span class="string">'/\[server\]/a\server_id=1'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line"></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># systemctl start mariadb.service</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># mysql</span></span><br><span class="line">...</span><br><span class="line"><span class="comment"># 授权用户'repl'@'172.18.71.%'可以复制数据</span></span><br><span class="line">MariaDB [(none)]&gt; GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO <span class="string">'repl'</span>@<span class="string">'172.18.71.%'</span> IDENTIFIED BY <span class="string">'magedu'</span>;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记下此时的日志文件和位置</span></span><br><span class="line">MariaDB [(none)]&gt; SHOW MASTER STATUS;</span><br><span class="line">+----------------------+----------+--------------+------------------+</span><br><span class="line">| File                 | Position | Binlog_Do_DB | Binlog_Ignore_DB |</span><br><span class="line">+----------------------+----------+--------------+------------------+</span><br><span class="line">| master-binlog.000003 |      417 |              |                  |</span><br><span class="line">+----------------------+----------+--------------+------------------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 加载半同步复制主节点插件</span></span><br><span class="line">MariaDB [(none)]&gt; INSTALL PLUGIN rpl_semi_sync_master SONAME <span class="string">'semisync_master.so'</span>;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 加载此插件后引入几个变量</span></span><br><span class="line">MariaDB [(none)]&gt; SHOW GLOBAL VARIABLES LIKE <span class="string">'%semi%'</span>;</span><br><span class="line">+------------------------------------+-------+</span><br><span class="line">| Variable_name                      | Value |</span><br><span class="line">+------------------------------------+-------+</span><br><span class="line">| rpl_semi_sync_master_enabled       | OFF   |</span><br><span class="line">| rpl_semi_sync_master_timeout       | 10000 |</span><br><span class="line">| rpl_semi_sync_master_trace_level   | 32    |</span><br><span class="line">| rpl_semi_sync_master_<span class="built_in">wait</span>_no_slave | ON    |</span><br><span class="line">+------------------------------------+-------+</span><br><span class="line">4 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动主节点半同步功能</span></span><br><span class="line">MariaDB [(none)]&gt; SET GLOBAL rpl_semi_sync_master_enabled=1;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 等待半同步从节点响应最长5秒钟, 超时则降级为异步复制.</span></span><br><span class="line">MariaDB [(none)]&gt; SET GLOBAL rpl_semi_sync_master_timeout=5000;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h2 id="HostB-Slave-1"><a href="#HostB-Slave-1" class="headerlink" title="HostB(Slave)"></a>HostB(Slave)</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line">[root@b9cf468b ~]<span class="comment"># yum install -y mariadb-server</span></span><br><span class="line"></span><br><span class="line">sed -i <span class="string">'/\[server\]/a\character-set-server=utf8'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[server\]/a\collation-server=utf8_general_ci'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[server\]/a\default-storage-engine=InnoDB'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[server\]/a\innodb-file-per-table=TRUE'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[server\]/a\skip-name-resolve=TRUE'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line"><span class="comment"># 启用中继日志</span></span><br><span class="line">sed -i <span class="string">'/\[server\]/a\relay_log=relaylog'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line"><span class="comment"># 设置从节点为只读(此设置对均有SUPER权限的用户无效, 若想要使任何用户都有效, 只能加全局读锁.)</span></span><br><span class="line">sed -i <span class="string">'/\[server\]/a\read-only=ON'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line"><span class="comment"># 设置serverid, 其值在集群中必须唯一.</span></span><br><span class="line">sed -i <span class="string">'/\[server\]/a\server_id=5'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line"></span><br><span class="line">[root@b9cf468b ~]<span class="comment"># systemctl start mariadb.service</span></span><br><span class="line">[root@b9cf468b ~]<span class="comment"># mysql</span></span><br><span class="line">...</span><br><span class="line"><span class="comment"># 指向HostA将其作为主节点</span></span><br><span class="line">MariaDB [(none)]&gt; CHANGE MASTER TO MASTER_HOST=<span class="string">'172.18.71.101'</span>, MASTER_USER=<span class="string">'repl'</span>, MASTER_PASSWORD=<span class="string">'magedu'</span>, MASTER_LOG_FILE=<span class="string">'master-binlog.000003'</span>, MASTER_LOG_POS=417;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 加载半同步复制主节点插件</span></span><br><span class="line">MariaDB [(none)]&gt; INSTALL PLUGIN rpl_semi_sync_slave SONAME <span class="string">'semisync_slave.so'</span>;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 加载此插件后引入几个变量</span></span><br><span class="line">MariaDB [(none)]&gt; SHOW GLOBAL VARIABLES LIKE <span class="string">'%semi%'</span>;</span><br><span class="line">+---------------------------------+-------+</span><br><span class="line">| Variable_name                   | Value |</span><br><span class="line">+---------------------------------+-------+</span><br><span class="line">| rpl_semi_sync_slave_enabled     | OFF   |</span><br><span class="line">| rpl_semi_sync_slave_trace_level | 32    |</span><br><span class="line">+---------------------------------+-------+</span><br><span class="line">2 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动从节点半同步功能</span></span><br><span class="line">MariaDB [(none)]&gt; SET GLOBAL rpl_semi_sync_slave_enabled=1;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动从节点, 即启动IO_thread和SQL_thread进程, 开始复制.</span></span><br><span class="line">MariaDB [(none)]&gt; START SLAVE;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line">MariaDB [(none)]&gt; SHOW SLAVE STATUS\G</span><br><span class="line">*************************** 1. row ***************************</span><br><span class="line">               Slave_IO_State: Waiting <span class="keyword">for</span> master to send event</span><br><span class="line">                  Master_Host: 172.18.71.101</span><br><span class="line">                  Master_User: repl</span><br><span class="line">                  Master_Port: 3306</span><br><span class="line">                Connect_Retry: 60</span><br><span class="line">              Master_Log_File: master-binlog.000003</span><br><span class="line">          Read_Master_Log_Pos: 417</span><br><span class="line">               Relay_Log_File: relaylog.000002</span><br><span class="line">                Relay_Log_Pos: 533</span><br><span class="line">        Relay_Master_Log_File: master-binlog.000003</span><br><span class="line">             Slave_IO_Running: Yes <span class="comment"># IO_thread进程已启动</span></span><br><span class="line">            Slave_SQL_Running: Yes <span class="comment"># SQL_thread进程已启动</span></span><br><span class="line">......</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h2 id="测试验证-2"><a href="#测试验证-2" class="headerlink" title="测试验证"></a>测试验证</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在HostA上做增删改数据的动作.</span></span><br><span class="line">MariaDB [(none)]&gt; CREATE TABLE test.demo (id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT, account VARCHAR(20), email VARCHAR(20));</span><br><span class="line">Query OK, 0 rows affected (0.01 sec)</span><br><span class="line"></span><br><span class="line">MariaDB [(none)]&gt; INSERT INTO test.demo (account, email) VALUES (<span class="string">'13919491001'</span>, <span class="string">'twoyang@magedu.com'</span>);</span><br><span class="line">Query OK, 1 row affected (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在HostB上查询数据.</span></span><br><span class="line">MariaDB [(none)]&gt; SELECT * FROM test.demo;</span><br><span class="line">+----+-------------+--------------------+</span><br><span class="line">| id | account     | email              |</span><br><span class="line">+----+-------------+--------------------+</span><br><span class="line">|  1 | 13919491001 | twoyang@magedu.com |</span><br><span class="line">+----+-------------+--------------------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.01 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 这个自然没有问题, 主从复制就能做到, 来看同步的含义.</span></span><br><span class="line"><span class="comment"># 我们关闭HostB的复制开关, 让其不再复制. 这个过程没法完成, HostA就会阻塞直至超时降级.</span></span><br><span class="line">MariaDB [(none)]&gt; STOP SLAVE;</span><br><span class="line">Query OK, 0 rows affected (0.01 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在HostA再上做增删改数据的动作, 看到操作被阻塞, 5秒后完成.</span></span><br><span class="line">MariaDB [(none)]&gt; INSERT INTO test.demo (account, email) VALUES (<span class="string">'18619450814'</span>, <span class="string">'knfprex@magedu.com'</span>);</span><br><span class="line">Query OK, 1 row affected (5.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 再来看同步复制状态, Rpl_semi_sync_master_status已经是OFF状态了.</span></span><br><span class="line">MariaDB [(none)]&gt; SHOW GLOBAL STATUS LIKE <span class="string">'rpl_semi%'</span>;</span><br><span class="line">+--------------------------------------------+-------+</span><br><span class="line">| Variable_name                              | Value |</span><br><span class="line">+--------------------------------------------+-------+</span><br><span class="line">| Rpl_semi_sync_master_clients               | 1     |</span><br><span class="line">| Rpl_semi_sync_master_net_avg_<span class="built_in">wait</span>_time     | 530   |</span><br><span class="line">| Rpl_semi_sync_master_net_<span class="built_in">wait</span>_time         | 2121  |</span><br><span class="line">| Rpl_semi_sync_master_net_waits             | 4     |</span><br><span class="line">| Rpl_semi_sync_master_no_<span class="built_in">times</span>              | 1     |</span><br><span class="line">| Rpl_semi_sync_master_no_tx                 | 1     |</span><br><span class="line">| Rpl_semi_sync_master_status                | OFF   |</span><br><span class="line">| Rpl_semi_sync_master_timefunc_failures     | 0     |</span><br><span class="line">| Rpl_semi_sync_master_tx_avg_<span class="built_in">wait</span>_time      | 638   |</span><br><span class="line">| Rpl_semi_sync_master_tx_<span class="built_in">wait</span>_time          | 1916  |</span><br><span class="line">| Rpl_semi_sync_master_tx_waits              | 3     |</span><br><span class="line">| Rpl_semi_sync_master_<span class="built_in">wait</span>_pos_backtraverse | 0     |</span><br><span class="line">| Rpl_semi_sync_master_<span class="built_in">wait</span>_sessions         | 0     |</span><br><span class="line">| Rpl_semi_sync_master_yes_tx                | 3     |</span><br><span class="line">+--------------------------------------------+-------+</span><br><span class="line">14 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h1 id="基于SSL的主从复制"><a href="#基于SSL的主从复制" class="headerlink" title="基于SSL的主从复制"></a>基于SSL的主从复制</h1><h2 id="HostA-Master-4"><a href="#HostA-Master-4" class="headerlink" title="HostA(Master)"></a>HostA(Master)</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 建立CA. 当然也可以使用单独服务器作为CA服务器, 我这里就直接在HostA上搭建CA了.</span></span><br><span class="line"><span class="comment"># 写了个脚本自动搭建一个CA,</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># curl -sL https://raw.githubusercontent.com/twoyang0917/LearnInMagedu/master/shell/ca_build.sh | bash</span></span><br><span class="line"><span class="comment"># 另外生成HostA服务器的私钥.</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># (umask 077; openssl genrsa -out /etc/my.cnf.d/mysql.key 2048)</span></span><br><span class="line"><span class="comment"># 生成签证申请文件</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># openssl req -new -key /etc/my.cnf.d/mysql.key -out /etc/my.cnf.d/mysql.csr</span></span><br><span class="line">You are about to be asked to enter information that will be incorporated</span><br><span class="line">into your certificate request.</span><br><span class="line">What you are about to enter is what is called a Distinguished Name or a DN.</span><br><span class="line">There are quite a few fields but you can leave some blank</span><br><span class="line">For some fields there will be a default value,</span><br><span class="line">If you enter <span class="string">'.'</span>, the field will be left blank.</span><br><span class="line">-----</span><br><span class="line">Country Name (2 letter code) [XX]:CN</span><br><span class="line">State or Province Name (full name) []:Beijing</span><br><span class="line">Locality Name (eg, city) [Default City]:Beijing</span><br><span class="line">Organization Name (eg, company) [Default Company Ltd]:MageEdu   </span><br><span class="line">Organizational Unit Name (eg, section) []:DevOps   </span><br><span class="line">Common Name (eg, your name or your server<span class="string">'s hostname) []:80e54d87.twoyang.com</span><br><span class="line">Email Address []:admin@twoyang.com</span><br><span class="line"></span><br><span class="line">Please enter the following '</span>extra<span class="string">' attributes</span><br><span class="line">to be sent with your certificate request</span><br><span class="line">A challenge password []:</span><br><span class="line">An optional company name []:</span><br><span class="line"># 签署证书</span><br><span class="line">[root@80e54d87 ~]# openssl ca -in /etc/my.cnf.d/mysql.csr -out /etc/my.cnf.d/mysql.crt</span><br><span class="line">Using configuration from /etc/pki/tls/openssl.cnf</span><br><span class="line">Check that the request matches the signature</span><br><span class="line">Signature ok</span><br><span class="line">Certificate Details:</span><br><span class="line">        Serial Number: 1 (0x1)</span><br><span class="line">        Validity</span><br><span class="line">            Not Before: Jun  5 09:16:15 2016 GMT</span><br><span class="line">            Not After : Jun  5 09:16:15 2017 GMT</span><br><span class="line">        Subject:</span><br><span class="line">            countryName               = CN</span><br><span class="line">            stateOrProvinceName       = Beijing</span><br><span class="line">            organizationName          = MageEdu</span><br><span class="line">            organizationalUnitName    = DevOps</span><br><span class="line">            commonName                = 80e54d87.twoyang.com</span><br><span class="line">            emailAddress              = admin@twoyang.com</span><br><span class="line">        X509v3 extensions:</span><br><span class="line">            X509v3 Basic Constraints: </span><br><span class="line">                CA:FALSE</span><br><span class="line">            Netscape Comment: </span><br><span class="line">                OpenSSL Generated Certificate</span><br><span class="line">            X509v3 Subject Key Identifier: </span><br><span class="line">                63:41:90:94:F6:80:F6:80:90:4C:B6:9D:CF:13:10:75:C0:52:59:14</span><br><span class="line">            X509v3 Authority Key Identifier: </span><br><span class="line">                keyid:BE:07:4B:EE:28:E4:67:EF:0B:04:61:8E:3B:43:71:C0:7F:94:2A:03</span><br><span class="line"></span><br><span class="line">Certificate is to be certified until Jun  5 09:16:15 2017 GMT (365 days)</span><br><span class="line">Sign the certificate? [y/n]:y</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">1 out of 1 certificate requests certified, commit? [y/n]y</span><br><span class="line">Write out database with 1 new entries</span><br><span class="line">Data Base Updated</span></span><br></pre></td></tr></table></figure>
+<h2 id="HostB-Slave-2"><a href="#HostB-Slave-2" class="headerlink" title="HostB(Slave)"></a>HostB(Slave)</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 生成HostB服务器的私钥.</span></span><br><span class="line">[root@b9cf468b ~]<span class="comment"># (umask 077; openssl genrsa -out /etc/my.cnf.d/mysql.key 2048)</span></span><br><span class="line"><span class="comment"># 生成签证申请文件</span></span><br><span class="line">[root@b9cf468b ~]<span class="comment"># openssl req -new -key /etc/my.cnf.d/mysql.key -out /etc/my.cnf.d/mysql.csr</span></span><br><span class="line">You are about to be asked to enter information that will be incorporated</span><br><span class="line">into your certificate request.</span><br><span class="line">What you are about to enter is what is called a Distinguished Name or a DN.</span><br><span class="line">There are quite a few fields but you can leave some blank</span><br><span class="line">For some fields there will be a default value,</span><br><span class="line">If you enter <span class="string">'.'</span>, the field will be left blank.</span><br><span class="line">-----</span><br><span class="line">Country Name (2 letter code) [XX]:CN</span><br><span class="line">State or Province Name (full name) []:Beijing</span><br><span class="line">Locality Name (eg, city) [Default City]:Beijing</span><br><span class="line">Organization Name (eg, company) [Default Company Ltd]:MageEdu </span><br><span class="line">Organizational Unit Name (eg, section) []:DevOps</span><br><span class="line">Common Name (eg, your name or your server<span class="string">'s hostname) []:b9cf468b.twoyang.com</span><br><span class="line">Email Address []:admin@twoyang.com</span><br><span class="line"></span><br><span class="line">Please enter the following '</span>extra<span class="string">' attributes</span><br><span class="line">to be sent with your certificate request</span><br><span class="line">A challenge password []:</span><br><span class="line">An optional company name []:</span><br><span class="line"># 将签证申请文件交给CA, 由CA签证.</span><br><span class="line"># CA签署完成后, HostB拿到证书, 放在/etc/my.cnf.d/目录下, 并修改权限为600.</span><br><span class="line">[root@b9cf468b ~]# chmod 600 /etc/my.cnf.d/mysql.crt</span><br><span class="line"># 同时拿到CA的证书, 放在/etc/pki/CA/目录下</span><br><span class="line">[root@b9cf468b ~]# ls -al /etc/pki/CA/ | grep cacert.pem</span><br><span class="line">-rw-r--r--   1 root root 2130 Jun  5 17:30 cacert.pem</span></span><br></pre></td></tr></table></figure>
+<h2 id="HostA-Master-5"><a href="#HostA-Master-5" class="headerlink" title="HostA(Master)"></a>HostA(Master)</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">[root@80e54d87 ~]<span class="comment"># yum install -y mariadb-server</span></span><br><span class="line"><span class="comment"># 改变密钥文件属主</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># chown mysql:mysql /etc/my.cnf.d/mysql.*</span></span><br><span class="line"></span><br><span class="line">sed -i <span class="string">'/\[server\]/a\character-set-server=utf8'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[server\]/a\collation-server=utf8_general_ci'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[server\]/a\default-storage-engine=InnoDB'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[server\]/a\innodb-file-per-table=TRUE'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[server\]/a\skip-name-resolve=TRUE'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line"><span class="comment"># 启用二进制日志</span></span><br><span class="line">sed -i <span class="string">'/\[server\]/a\log_bin=master-binlog'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line"><span class="comment"># 设置serverid, 其值在集群中必须唯一.</span></span><br><span class="line">sed -i <span class="string">'/\[server\]/a\server_id=1'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[server\]/a\ssl_ca=/etc/pki/CA/cacert.pem'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[server\]/a\ssl_key=/etc/my.cnf.d/mysql.key'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[server\]/a\ssl_cert=/etc/my.cnf.d/mysql.crt'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line"></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># systemctl start mariadb.service</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># mysql</span></span><br><span class="line">...</span><br><span class="line"><span class="comment"># 可以看到ssl功能被启用了.</span></span><br><span class="line">MariaDB [(none)]&gt; SHOW VARIABLES LIKE <span class="string">'%ssl%'</span>;</span><br><span class="line">+---------------+-------------------------+</span><br><span class="line">| Variable_name | Value                   |</span><br><span class="line">+---------------+-------------------------+</span><br><span class="line">| have_openssl  | YES                     |</span><br><span class="line">| have_ssl      | YES                     |</span><br><span class="line">| ssl_ca        | /etc/pki/CA/cacert.pem  |</span><br><span class="line">| ssl_capath    |                         |</span><br><span class="line">| ssl_cert      | /etc/my.cnf.d/mysql.crt |</span><br><span class="line">| ssl_cipher    |                         |</span><br><span class="line">| ssl_key       | /etc/my.cnf.d/mysql.key |</span><br><span class="line">+---------------+-------------------------+</span><br><span class="line">7 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 授权用户'repl'@'172.18.71.%'可以复制数据, 但必须以SSL方式连接.</span></span><br><span class="line">MariaDB [(none)]&gt; GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO <span class="string">'repl'</span>@<span class="string">'172.18.71.%'</span> IDENTIFIED BY <span class="string">'magedu'</span> REQUIRE SSL;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记下此时的日志文件和位置</span></span><br><span class="line">MariaDB [(none)]&gt; SHOW MASTER STATUS;</span><br><span class="line">+----------------------+----------+--------------+------------------+</span><br><span class="line">| File                 | Position | Binlog_Do_DB | Binlog_Ignore_DB |</span><br><span class="line">+----------------------+----------+--------------+------------------+</span><br><span class="line">| master-binlog.000003 |      429 |              |                  |</span><br><span class="line">+----------------------+----------+--------------+------------------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h2 id="HostB-Slave-3"><a href="#HostB-Slave-3" class="headerlink" title="HostB(Slave)"></a>HostB(Slave)</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line">[root@b9cf468b ~]<span class="comment"># yum install -y mariadb-server</span></span><br><span class="line"><span class="comment"># 改变密钥文件属主</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># chown mysql:mysql /etc/my.cnf.d/mysql.*</span></span><br><span class="line"></span><br><span class="line">sed -i <span class="string">'/\[server\]/a\character-set-server=utf8'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[server\]/a\collation-server=utf8_general_ci'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[server\]/a\default-storage-engine=InnoDB'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[server\]/a\innodb-file-per-table=TRUE'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[server\]/a\skip-name-resolve=TRUE'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line"><span class="comment"># 启用中继日志</span></span><br><span class="line">sed -i <span class="string">'/\[server\]/a\relay_log=relaylog'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line"><span class="comment"># 设置从节点为只读(此设置对均有SUPER权限的用户无效, 若想要使任何用户都有效, 只能加全局读锁.)</span></span><br><span class="line">sed -i <span class="string">'/\[server\]/a\read-only=ON'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line"><span class="comment"># 设置serverid, 其值在集群中必须唯一.</span></span><br><span class="line">sed -i <span class="string">'/\[server\]/a\server_id=5'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line"></span><br><span class="line">[root@b9cf468b ~]<span class="comment"># systemctl start mariadb.service</span></span><br><span class="line">[root@b9cf468b ~]<span class="comment"># mysql</span></span><br><span class="line">...</span><br><span class="line"><span class="comment"># 指向HostA将其作为主节点, 并指定SSL相关配置项.</span></span><br><span class="line">MariaDB [(none)]&gt; CHANGE MASTER TO MASTER_HOST=<span class="string">'172.18.71.101'</span>, MASTER_USER=<span class="string">'repl'</span>, MASTER_PASSWORD=<span class="string">'magedu'</span>, MASTER_LOG_FILE=<span class="string">'master-binlog.000003'</span>, MASTER_LOG_POS=429, MASTER_SSL=1, MASTER_SSL_CA=<span class="string">'/etc/pki/CA/cacert.pem'</span>, MASTER_SSL_CERT=<span class="string">'/etc/my.cnf.d/mysql.crt'</span>, MASTER_SSL_KEY=<span class="string">'/etc/my.cnf.d/mysql.key'</span>;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动从节点, 即启动IO_thread和SQL_thread进程, 开始复制.</span></span><br><span class="line">MariaDB [(none)]&gt; START SLAVE;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line">MariaDB [(none)]&gt; SHOW SLAVE STATUS\G</span><br><span class="line">*************************** 1. row ***************************</span><br><span class="line">               Slave_IO_State: Waiting <span class="keyword">for</span> master to send event</span><br><span class="line">                  Master_Host: 172.18.71.101</span><br><span class="line">                  Master_User: repl</span><br><span class="line">                  Master_Port: 3306</span><br><span class="line">                Connect_Retry: 60</span><br><span class="line">              Master_Log_File: master-binlog.000004</span><br><span class="line">          Read_Master_Log_Pos: 245</span><br><span class="line">               Relay_Log_File: relaylog.000003</span><br><span class="line">                Relay_Log_Pos: 533</span><br><span class="line">        Relay_Master_Log_File: master-binlog.000004</span><br><span class="line">             Slave_IO_Running: Yes</span><br><span class="line">            Slave_SQL_Running: Yes</span><br><span class="line">              Replicate_Do_DB: </span><br><span class="line">          Replicate_Ignore_DB: </span><br><span class="line">           Replicate_Do_Table: </span><br><span class="line">       Replicate_Ignore_Table: </span><br><span class="line">      Replicate_Wild_Do_Table: </span><br><span class="line">  Replicate_Wild_Ignore_Table: </span><br><span class="line">                   Last_Errno: 0</span><br><span class="line">                   Last_Error: </span><br><span class="line">                 Skip_Counter: 0</span><br><span class="line">          Exec_Master_Log_Pos: 245</span><br><span class="line">              Relay_Log_Space: 1108</span><br><span class="line">              Until_Condition: None</span><br><span class="line">               Until_Log_File: </span><br><span class="line">                Until_Log_Pos: 0</span><br><span class="line">           Master_SSL_Allowed: Yes</span><br><span class="line">           Master_SSL_CA_File: /etc/pki/CA/cacert.pem</span><br><span class="line">           Master_SSL_CA_Path: </span><br><span class="line">              Master_SSL_Cert: /etc/my.cnf.d/mysql.crt</span><br><span class="line">            Master_SSL_Cipher: </span><br><span class="line">               Master_SSL_Key: /etc/my.cnf.d/mysql.key</span><br><span class="line">        Seconds_Behind_Master: 0</span><br><span class="line">Master_SSL_Verify_Server_Cert: No</span><br><span class="line">                Last_IO_Errno: 0</span><br><span class="line">                Last_IO_Error: </span><br><span class="line">               Last_SQL_Errno: 0</span><br><span class="line">               Last_SQL_Error: </span><br><span class="line">  Replicate_Ignore_Server_Ids: </span><br><span class="line">             Master_Server_Id: 1</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h2 id="测试验证-3"><a href="#测试验证-3" class="headerlink" title="测试验证"></a>测试验证</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在HostA上做增删改数据的动作.</span></span><br><span class="line">MariaDB [(none)]&gt; CREATE TABLE test.demo (id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT, account VARCHAR(20), email VARCHAR(20));</span><br><span class="line">Query OK, 0 rows affected (0.01 sec)</span><br><span class="line"></span><br><span class="line">MariaDB [(none)]&gt; INSERT INTO test.demo (account, email) VALUES (<span class="string">'13919491001'</span>, <span class="string">'twoyang@magedu.com'</span>);</span><br><span class="line">Query OK, 1 row affected (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在HostB上查询数据.</span></span><br><span class="line">MariaDB [(none)]&gt; SELECT * FROM test.demo;</span><br><span class="line">+----+-------------+--------------------+</span><br><span class="line">| id | account     | email              |</span><br><span class="line">+----+-------------+--------------------+</span><br><span class="line">|  1 | 13919491001 | twoyang@magedu.com |</span><br><span class="line">+----+-------------+--------------------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.01 sec)</span><br></pre></td></tr></table></figure>
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/mariadb/" rel="tag">#mariadb</a>
+          
+            <a href="/tags/repication/" rel="tag">#repication</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/05/30/nginx常用配置/" rel="next" title="nginx常用配置">
+                <i class="fa fa-chevron-left"></i> nginx常用配置
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/06/02/mariadb备份与恢复/" rel="prev" title="mariadb备份与恢复">
+                mariadb备份与恢复 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <div class="ds-share flat" data-thread-key="2016/06/02/mariadb replication/"
+     data-title="mariadb repication"
+     data-content=""
+     data-url="http://www.twoyang.net/2016/06/02/mariadb replication/">
+  <div class="ds-share-inline">
+    <ul  class="ds-share-icons-16">
+
+      <li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
+      <li><a class="ds-weibo" href="javascript:void(0);" data-service="weibo">微博</a></li>
+      <li><a class="ds-qzone" href="javascript:void(0);" data-service="qzone">QQ空间</a></li>
+      <li><a class="ds-qqt" href="javascript:void(0);" data-service="qqt">腾讯微博</a></li>
+      <li><a class="ds-wechat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+
+    </ul>
+    <div class="ds-share-icons-more">
+    </div>
+  </div>
+</div>
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/06/02/mariadb replication/"
+           data-title="mariadb repication" data-url="http://www.twoyang.net/2016/06/02/mariadb replication/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xltax.com1.z0.glb.clouddn.com/twoyang.jpg"
+               alt="twoyang" />
+          <p class="site-author-name" itemprop="name">twoyang</p>
+          <p class="site-description motion-element" itemprop="description">The quieter you become.The more you are able to hear.</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">25</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">28</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        <div class="links-of-blogroll motion-element">
+          
+            <div class="links-of-blogroll-title">友情链接</div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.magedu.com/" target="_blank">马哥教育</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="https://shadowsocks.be/9.html" target="_blank">科学上网</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.isetsuna.com/hexo/introduction/" target="_blank">Hexo博客系列</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://mrchen.org/" target="_blank">Mrchen</a>
+                </li>
+              
+            </ul>
+          
+        </div>
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#参考资料"><span class="nav-number">1.</span> <span class="nav-text">参考资料</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#准备工作"><span class="nav-number">2.</span> <span class="nav-text">准备工作</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#主从复制"><span class="nav-number">3.</span> <span class="nav-text">主从复制</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#HostA-Master"><span class="nav-number">3.1.</span> <span class="nav-text">HostA(Master)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HostB-Slave"><span class="nav-number">3.2.</span> <span class="nav-text">HostB(Slave)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#测试验证"><span class="nav-number">3.3.</span> <span class="nav-text">测试验证</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#主主复制"><span class="nav-number">4.</span> <span class="nav-text">主主复制</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#HostA-Master-1"><span class="nav-number">4.1.</span> <span class="nav-text">HostA(Master)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HostB-Master"><span class="nav-number">4.2.</span> <span class="nav-text">HostB(Master)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HostA-Master-2"><span class="nav-number">4.3.</span> <span class="nav-text">HostA(Master)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HostB-Master-1"><span class="nav-number">4.4.</span> <span class="nav-text">HostB(Master)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#测试验证-1"><span class="nav-number">4.5.</span> <span class="nav-text">测试验证</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#半同步复制"><span class="nav-number">5.</span> <span class="nav-text">半同步复制</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#HostA-Master-3"><span class="nav-number">5.1.</span> <span class="nav-text">HostA(Master)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HostB-Slave-1"><span class="nav-number">5.2.</span> <span class="nav-text">HostB(Slave)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#测试验证-2"><span class="nav-number">5.3.</span> <span class="nav-text">测试验证</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#基于SSL的主从复制"><span class="nav-number">6.</span> <span class="nav-text">基于SSL的主从复制</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#HostA-Master-4"><span class="nav-number">6.1.</span> <span class="nav-text">HostA(Master)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HostB-Slave-2"><span class="nav-number">6.2.</span> <span class="nav-text">HostB(Slave)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HostA-Master-5"><span class="nav-number">6.3.</span> <span class="nav-text">HostA(Master)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HostB-Slave-3"><span class="nav-number">6.4.</span> <span class="nav-text">HostB(Slave)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#测试验证-3"><span class="nav-number">6.5.</span> <span class="nav-text">测试验证</span></a></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">twoyang</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+
+  
+
+
+
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=0.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=0.5.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=0.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=0.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=0.5.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"twoyang"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+  
+
+
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>
