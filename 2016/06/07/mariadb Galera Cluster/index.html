@@ -61,7 +61,7 @@
 《Galera Cluster Documentation》
 《MySQL复制: Galera》
 
-准备工作准备三台虚拟机, 均为CentOS-7-x86_64最小化安装, iptables与SELinux均处于关闭状态, 配置好yum源(base和epel). 做好快照, 以便每次实验后快速恢复.1234567891011121314151617HostA(Master)OS: Cen">
+准备工作准备三台虚拟机, 均为CentOS-7-x86_64最小化安装, iptables与SELinux均处于关闭状态, 配置好yum源(base和epel). 做好快照, 以便每次实验后快速恢复.1234567891011121314151617HostAOS: CentOS-7-x8">
 <meta property="og:type" content="article">
 <meta property="og:title" content="mariadb Galera Cluster">
 <meta property="og:url" content="http://www.twoyang.net/2016/06/07/mariadb Galera Cluster/index.html">
@@ -70,15 +70,15 @@
 《Galera Cluster Documentation》
 《MySQL复制: Galera》
 
-准备工作准备三台虚拟机, 均为CentOS-7-x86_64最小化安装, iptables与SELinux均处于关闭状态, 配置好yum源(base和epel). 做好快照, 以便每次实验后快速恢复.1234567891011121314151617HostA(Master)OS: Cen">
-<meta property="og:updated_time" content="2016-06-07T13:45:18.666Z">
+准备工作准备三台虚拟机, 均为CentOS-7-x86_64最小化安装, iptables与SELinux均处于关闭状态, 配置好yum源(base和epel). 做好快照, 以便每次实验后快速恢复.1234567891011121314151617HostAOS: CentOS-7-x8">
+<meta property="og:updated_time" content="2016-06-07T14:17:27.218Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="mariadb Galera Cluster">
 <meta name="twitter:description" content="参考资料
 《Galera Cluster Documentation》
 《MySQL复制: Galera》
 
-准备工作准备三台虚拟机, 均为CentOS-7-x86_64最小化安装, iptables与SELinux均处于关闭状态, 配置好yum源(base和epel). 做好快照, 以便每次实验后快速恢复.1234567891011121314151617HostA(Master)OS: Cen">
+准备工作准备三台虚拟机, 均为CentOS-7-x86_64最小化安装, iptables与SELinux均处于关闭状态, 配置好yum源(base和epel). 做好快照, 以便每次实验后快速恢复.1234567891011121314151617HostAOS: CentOS-7-x8">
 
 
 
@@ -304,7 +304,7 @@
 <li><a href="http://galeracluster.com/documentation-webpages/" target="_blank" rel="external">《Galera Cluster Documentation》</a></li>
 <li><a href="http://www.178linux.com/15709" target="_blank" rel="external">《MySQL复制: Galera》</a></li>
 </ul>
-<h1 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h1><p>准备三台虚拟机, 均为<code>CentOS-7-x86_64</code>最小化安装, <code>iptables</code>与<code>SELinux</code>均处于关闭状态, 配置好<code>yum</code>源(<code>base</code>和<code>epel</code>). 做好快照, 以便每次实验后快速恢复.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">HostA(Master)</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: 80e54d87.twoyang.com</span><br><span class="line">eno16777736: 172.18.71.101/16</span><br><span class="line">gateway: 172.18.0.1</span><br><span class="line"></span><br><span class="line">HostB(Slave)</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: b9cf468b.twoyang.com</span><br><span class="line">eno16777736: 172.18.71.102/16</span><br><span class="line">gateway: 172.18.0.1</span><br><span class="line"></span><br><span class="line">HostC(Slave)</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: 1f5fafa6.twoyang.com</span><br><span class="line">eno16777736: 172.18.71.103/16</span><br><span class="line">gateway: 172.18.0.1</span><br></pre></td></tr></table></figure></p>
+<h1 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h1><p>准备三台虚拟机, 均为<code>CentOS-7-x86_64</code>最小化安装, <code>iptables</code>与<code>SELinux</code>均处于关闭状态, 配置好<code>yum</code>源(<code>base</code>和<code>epel</code>). 做好快照, 以便每次实验后快速恢复.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">HostA</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: 80e54d87.twoyang.com</span><br><span class="line">eno16777736: 172.18.71.101/16</span><br><span class="line">gateway: 172.18.0.1</span><br><span class="line"></span><br><span class="line">HostB</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: b9cf468b.twoyang.com</span><br><span class="line">eno16777736: 172.18.71.102/16</span><br><span class="line">gateway: 172.18.0.1</span><br><span class="line"></span><br><span class="line">HostC</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: 1f5fafa6.twoyang.com</span><br><span class="line">eno16777736: 172.18.71.103/16</span><br><span class="line">gateway: 172.18.0.1</span><br></pre></td></tr></table></figure></p>
 <a id="more"></a>
 <h1 id="集群初始化"><a href="#集群初始化" class="headerlink" title="集群初始化"></a>集群初始化</h1><p>建立主机信任, 时间同步, 统一增加<code>yum</code>源. 这一步其实在哪个节点上做都可以, 我这里选择<code>HostA</code>.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 写了个脚本来做这个事情</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># wget https://raw.githubusercontent.com/twoyang0917/LearnInMagedu/master/shell/sshtrust.sh</span></span><br><span class="line"><span class="comment"># 将集群中所有节点IP地址(包括本机)都加入这个主机列表数组</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># vim sshtrust.sh</span></span><br><span class="line">HOSTS=(<span class="string">"172.18.71.101"</span> <span class="string">"172.18.71.102"</span> <span class="string">"172.18.71.103"</span>)</span><br><span class="line"><span class="comment"># 分发密钥, 建立主机信任.</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># bash sshtrust.sh --key</span></span><br><span class="line"><span class="comment"># 同步时间</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># bash sshtrust.sh "ntpdate 172.18.0.1"</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># bash sshtrust.sh "hwclock --systohc"</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># bash sshtrust.sh date</span></span><br><span class="line">Tue Jun  7 21:02:58 CST 2016</span><br><span class="line">Tue Jun  7 21:02:58 CST 2016</span><br><span class="line">Tue Jun  7 21:02:58 CST 2016</span><br></pre></td></tr></table></figure></p>
 <p>因为<code>Galera Cluster</code>中的重要组件是<code>Write-Set REPlication API</code>, 简称为<code>WSREP API</code>, 而这个组件是<code>centos</code>官方<code>yum</code>源提供的<code>mairadb</code>安装包中没有的. 所以需要安装集成了<code>WSREP API</code>版本的<code>mairadb</code>, 这个可以去<a href="http://galeracluster.com/" target="_blank" rel="external"><code>Galera Cluster OfficialSite</code></a>去下载. 我这里下载好了<code>rpm</code>包, 做成了本地<code>yum</code>源.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 为集群中每个节点都添加yum源配置文件.</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># bash sshtrust.sh "yum-config-manager --add-repo=http://172.18.71.254/templates/twoyang-c7.repo"</span></span><br><span class="line"><span class="comment"># 安装上Galera版的mairadb</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># bash sshtrust.sh "yum install -y MariaDB-Galera-server MairaDB-client"</span></span><br></pre></td></tr></table></figure></p>
@@ -441,7 +441,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">28</span>
+              <span class="site-state-item-count">29</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -458,7 +458,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">32</span>
+                <span class="site-state-item-count">33</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

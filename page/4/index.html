@@ -225,6 +225,128 @@
             
               
                 
+                <a class="post-title-link" href="/2016/05/10/keepalived_lvs-dr实现discuz负载均衡和高可用/" itemprop="url">
+                  keepalived_lvs-dr实现discuz负载均衡和高可用
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-05-10T20:25:34+08:00" content="2016-05-10">
+              2016-05-10
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Cluster/" itemprop="url" rel="index">
+                    <span itemprop="name">Cluster</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/05/10/keepalived_lvs-dr实现discuz负载均衡和高可用/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/10/keepalived_lvs-dr实现discuz负载均衡和高可用/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h1 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h1><p>前一篇博文<a href="http://twoyang0917.github.io/2016/05/09/%E5%9F%BA%E4%BA%8Elvs-dr%E6%A8%A1%E5%9E%8B%E7%9A%84discuz%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E5%AE%9E%E7%8E%B0/">《基于lvs-dr模型的discuz负载均衡实现》</a>中由于前端调度器由于只有一台,如果损坏整个系统将无法对外提供服务.因此它成为了系统的<code>SPOF(Single Point Of Failure)</code>,需要对其进行高可用.此时暂不考虑后端存储故障的情况.</p>
+<h2 id="单主模型与双主模型"><a href="#单主模型与双主模型" class="headerlink" title="单主模型与双主模型"></a>单主模型与双主模型</h2><ul>
+<li>单主模型(主/备模型),即一台主机为<code>MASTER</code>,另一台主机为<code>BACKUP</code>.作为<code>BACKUP</code>的主机不会工作,只有当<code>MASTER</code>主机宕机,这时<code>BACKUP</code>主机取而代之成为<code>MASTER</code>才会开始工作.因此在单主模型始终有一个主机不工作,会造成资源浪费.</li>
+<li>双主模型无非就是两个单主模型叠加,两台主机互为主备.这样再在前端<code>DNS</code>解析时加上双<code>A</code>记录,即可实现两台主机同时工作,既实现了高可用同时还兼具负载均衡.</li>
+</ul>
+<h1 id="规划"><a href="#规划" class="headerlink" title="规划"></a>规划</h1><p>再增加一台服务器作为前端调度器,与之前已有的一台前端调度器一起做<code>keepalived</code>高可用.其它部分基本可以沿用之前的方案.需要改变的是<code>VIP</code>不再直接配置在<code>VS</code>上,而是基于<code>keepalived</code>的<code>VRRP</code>协议在两台<code>VS</code>上动态漂移,但是后端的两台<code>RS</code>还是要在网口别名<code>lo:0</code>上配置<code>VIP</code>.因为准备做双主模型,所以需要配置两个<code>VIP</code>.<br>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2016/05/10/keepalived_lvs-dr实现discuz负载均衡和高可用/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2016/05/09/基于lvs-dr模型的discuz负载均衡实现/" itemprop="url">
                   基于lvs-dr模型的discuz负载均衡实现
                 </a>
@@ -683,124 +805,6 @@
 
 
     
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/04/22/CentOS-7平台上基于NFS的LAMP搭建/" itemprop="url">
-                  CentOS-7平台上基于NFS的LAMP搭建
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-04-22T20:46:06+08:00" content="2016-04-22">
-              2016-04-22
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Server/" itemprop="url" rel="index">
-                    <span itemprop="name">Server</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2016/04/22/CentOS-7平台上基于NFS的LAMP搭建/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/04/22/CentOS-7平台上基于NFS的LAMP搭建/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h1 id="规划准备"><a href="#规划准备" class="headerlink" title="规划准备"></a>规划准备</h1><p>两台机器均为<code>CentOS-7-x86_64</code>最小化安装，均关闭<code>iptables</code>和<code>SELinux</code>。其中一台<code>HostA</code>作为<code>NFS</code>服务器，提供后端数据库<code>mariadb</code>的存储和前端页面代码文件的存储，另外一台<code>HostB</code>作为<code>LAMP</code>应用平台。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">HostA</span><br><span class="line">IP地址：172.18.71.130</span><br><span class="line">FQDN：1478a474.twoyang.com</span><br><span class="line"></span><br><span class="line">HostB</span><br><span class="line">IP地址：172.18.71.202</span><br><span class="line">FQDN：ef352be0.twoyang.com</span><br></pre></td></tr></table></figure>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2016/04/22/CentOS-7平台上基于NFS的LAMP搭建/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -846,7 +850,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">28</span>
+              <span class="site-state-item-count">29</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -863,7 +867,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">32</span>
+                <span class="site-state-item-count">33</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
