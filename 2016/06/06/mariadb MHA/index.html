@@ -1,0 +1,648 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
+
+
+
+
+  <link href="//fonts.googleapis.com/css?family=Lato:300,400,700,400italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=0.5.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="mariadb,MHA," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=0.5.0" />
+
+
+
+
+
+
+<meta name="description" content="参考资料
+《MySQL主从复制: MHA》
+
+准备工作准备四台虚拟机, 均为CentOS-7-x86_64最小化安装, iptables与SELinux均处于关闭状态, 配置好yum源(base和epel). 做好快照, 以便每次实验后快速恢复.1234567891011121314151617181920212223HostA(Master)OS: CentOS-7-x86_64hostname">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mariadb MHA">
+<meta property="og:url" content="http://www.twoyang.net/2016/06/06/mariadb MHA/index.html">
+<meta property="og:site_name" content="TwOyAng'blog">
+<meta property="og:description" content="参考资料
+《MySQL主从复制: MHA》
+
+准备工作准备四台虚拟机, 均为CentOS-7-x86_64最小化安装, iptables与SELinux均处于关闭状态, 配置好yum源(base和epel). 做好快照, 以便每次实验后快速恢复.1234567891011121314151617181920212223HostA(Master)OS: CentOS-7-x86_64hostname">
+<meta property="og:updated_time" content="2016-06-07T13:01:41.024Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="mariadb MHA">
+<meta name="twitter:description" content="参考资料
+《MySQL主从复制: MHA》
+
+准备工作准备四台虚拟机, 均为CentOS-7-x86_64最小化安装, iptables与SELinux均处于关闭状态, 配置好yum源(base和epel). 做好快照, 以便每次实验后快速恢复.1234567891011121314151617181920212223HostA(Master)OS: CentOS-7-x86_64hostname">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+  <title> mariadb MHA | TwOyAng'blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=55583792";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">TwOyAng'blog</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-th fa-fw"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                mariadb MHA
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-06-06T20:18:26+08:00" content="2016-06-06">
+              2016-06-06
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Cluster/" itemprop="url" rel="index">
+                    <span itemprop="name">Cluster</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/06/06/mariadb MHA/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/06/06/mariadb MHA/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><ul>
+<li><a href="http://www.178linux.com/15698" target="_blank" rel="external">《MySQL主从复制: MHA》</a></li>
+</ul>
+<h1 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h1><p>准备四台虚拟机, 均为<code>CentOS-7-x86_64</code>最小化安装, <code>iptables</code>与<code>SELinux</code>均处于关闭状态, 配置好<code>yum</code>源(<code>base</code>和<code>epel</code>). 做好快照, 以便每次实验后快速恢复.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">HostA(Master)</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: 80e54d87.twoyang.com</span><br><span class="line">eno16777736: 172.18.71.101/16</span><br><span class="line">gateway: 172.18.0.1</span><br><span class="line"></span><br><span class="line">HostB(Slave)</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: b9cf468b.twoyang.com</span><br><span class="line">eno16777736: 172.18.71.102/16</span><br><span class="line">gateway: 172.18.0.1</span><br><span class="line"></span><br><span class="line">HostC(Slave)</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: 1f5fafa6.twoyang.com</span><br><span class="line">eno16777736: 172.18.71.103/16</span><br><span class="line">gateway: 172.18.0.1</span><br><span class="line"></span><br><span class="line">HostD(MHA Manager)</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: 1478a474.twoyang.com</span><br><span class="line">eno16777736: 172.18.71.130/16</span><br><span class="line">gateway: 172.18.0.1</span><br></pre></td></tr></table></figure></p>
+<a id="more"></a>
+<p>先不管<code>MHA</code>, 按照主从复制模型搭建好集群.</p>
+<h1 id="主从复制"><a href="#主从复制" class="headerlink" title="主从复制"></a>主从复制</h1><h2 id="HostA-Master"><a href="#HostA-Master" class="headerlink" title="HostA(Master)"></a>HostA(Master)</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">[root@80e54d87 ~]<span class="comment"># yum install -y mariadb-server</span></span><br><span class="line"></span><br><span class="line">sed -i <span class="string">'/\[server\]/a\character-set-server=utf8'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[server\]/a\collation-server=utf8_general_ci'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[server\]/a\default-storage-engine=InnoDB'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[server\]/a\innodb-file-per-table=TRUE'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[server\]/a\skip-name-resolve=TRUE'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[server\]/a\log_bin=master-binlog'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line"><span class="comment"># 注意server_id为集群内的唯一标识.</span></span><br><span class="line">sed -i <span class="string">'/\[server\]/a\server_id=1'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line"></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># systemctl start mariadb.service</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># mysql</span></span><br><span class="line">...</span><br><span class="line"><span class="comment"># 创建用户前记录下二进制日志文件位置, 一会儿让从节点从此处开始复制, 就会自动创建此用户了.</span></span><br><span class="line"><span class="comment"># 因为主节点宕机时, 从节点有可能会被MHA管理节点提升为主节点供其它从节点复制.</span></span><br><span class="line">MariaDB [(none)]&gt; SHOW MASTER STATUS;</span><br><span class="line">+----------------------+----------+--------------+------------------+</span><br><span class="line">| File                 | Position | Binlog_Do_DB | Binlog_Ignore_DB |</span><br><span class="line">+----------------------+----------+--------------+------------------+</span><br><span class="line">| master-binlog.000003 |      245 |              |                  |</span><br><span class="line">+----------------------+----------+--------------+------------------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br><span class="line"><span class="comment"># 授权用户'repl'@'172.18.71.%'可以复制数据</span></span><br><span class="line">MariaDB [(none)]&gt; GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO <span class="string">'repl'</span>@<span class="string">'172.18.71.%'</span> IDENTIFIED BY <span class="string">'magedu'</span>;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"><span class="comment"># 另外还得创建一个SUPER权限的用户用于MHA管理节点来控制.</span></span><br><span class="line">MariaDB [(none)]&gt; GRANT ALL PRIVILEGES ON *.* TO <span class="string">'mha'</span>@<span class="string">'%'</span> IDENTIFIED BY <span class="string">'magedu'</span>;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line">MariaDB [(none)]&gt; FLUSH PRIVILEGES;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h2 id="HostB-Slave"><a href="#HostB-Slave" class="headerlink" title="HostB(Slave)"></a>HostB(Slave)</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">[root@b9cf468b ~]<span class="comment"># yum install -y mariadb-server</span></span><br><span class="line"></span><br><span class="line">sed -i <span class="string">'/\[server\]/a\character-set-server=utf8'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[server\]/a\collation-server=utf8_general_ci'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[server\]/a\default-storage-engine=InnoDB'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[server\]/a\innodb-file-per-table=TRUE'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[server\]/a\skip-name-resolve=TRUE'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line"><span class="comment"># 从节点也要开启二进制日志, 因为可能会被提升为主节点.</span></span><br><span class="line">sed -i <span class="string">'/\[server\]/a\log_bin=master-binlog'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[server\]/a\relay_log=relaylog'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line"><span class="comment"># 对于某些滞后从库的恢复依赖于其他从库的relay_log，因此采取禁用自动删除功能以及定期清理的办法.</span></span><br><span class="line">sed -i <span class="string">'/\[server\]/a\relay_log_purge=OFF'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line">sed -i <span class="string">'/\[server\]/a\read-only=ON'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line"><span class="comment"># 注意server_id为集群内的唯一标识.</span></span><br><span class="line">sed -i <span class="string">'/\[server\]/a\server_id=5'</span> /etc/my.cnf.d/server.cnf</span><br><span class="line"></span><br><span class="line">[root@b9cf468b ~]<span class="comment"># systemctl start mariadb.service</span></span><br><span class="line">[root@b9cf468b ~]<span class="comment"># mysql</span></span><br><span class="line">...</span><br><span class="line"><span class="comment"># 指向HostA将其作为主节点</span></span><br><span class="line">MariaDB [(none)]&gt; CHANGE MASTER TO MASTER_HOST=<span class="string">'172.18.71.101'</span>, MASTER_USER=<span class="string">'repl'</span>, MASTER_PASSWORD=<span class="string">'magedu'</span>, MASTER_LOG_FILE=<span class="string">'master-binlog.000003'</span>, MASTER_LOG_POS=245;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动从节点, 即启动IO_thread和SQL_thread进程, 开始复制.</span></span><br><span class="line">MariaDB [(none)]&gt; START SLAVE;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line">MariaDB [(none)]&gt; SHOW SLAVE STATUS\G</span><br><span class="line">*************************** 1. row ***************************</span><br><span class="line">               Slave_IO_State: Waiting <span class="keyword">for</span> master to send event</span><br><span class="line">                  Master_Host: 172.18.71.101</span><br><span class="line">                  Master_User: repl</span><br><span class="line">                  Master_Port: 3306</span><br><span class="line">                Connect_Retry: 60</span><br><span class="line">              Master_Log_File: master-binlog.000003</span><br><span class="line">          Read_Master_Log_Pos: 555</span><br><span class="line">               Relay_Log_File: relaylog.000002</span><br><span class="line">                Relay_Log_Pos: 843</span><br><span class="line">        Relay_Master_Log_File: master-binlog.000003</span><br><span class="line">             Slave_IO_Running: Yes</span><br><span class="line">            Slave_SQL_Running: Yes</span><br><span class="line">......</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h2 id="HostC-Slave"><a href="#HostC-Slave" class="headerlink" title="HostC(Slave)"></a>HostC(Slave)</h2><p><code>HostC</code>与<code>HostB</code>做相同配置, 仅<code>server_id</code>必须不同.</p>
+<h1 id="MHA"><a href="#MHA" class="headerlink" title="MHA"></a>MHA</h1><h2 id="集群初始化"><a href="#集群初始化" class="headerlink" title="集群初始化"></a>集群初始化</h2><p>建立主机信任, 时间同步, 统一增加<code>yum</code>源. 这一步其实在哪个节点上做都可以, 我这里选择<code>HostA</code>.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 写了个脚本来做这个事情</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># wget https://raw.githubusercontent.com/twoyang0917/LearnInMagedu/master/shell/sshtrust.sh</span></span><br><span class="line"><span class="comment"># 有效代码是这个样子的</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># cat sshtrust.sh</span></span><br><span class="line">...</span><br><span class="line">HOSTS=(<span class="string">"172.18.71.101"</span> <span class="string">"172.18.71.102"</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> ! [ <span class="variable">$#</span> <span class="_">-eq</span> 1 ]; <span class="keyword">then</span></span><br><span class="line">   <span class="built_in">echo</span> <span class="string">"<span class="variable">$0</span> --key"</span></span><br><span class="line">   <span class="built_in">echo</span> <span class="string">"<span class="variable">$0</span> \"COMMAND\""</span></span><br><span class="line">   <span class="built_in">exit</span> 1</span><br><span class="line"><span class="keyword">fi</span> </span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> [ <span class="string">"<span class="variable">$1</span>"</span> = <span class="string">"--key"</span> ]; <span class="keyword">then</span></span><br><span class="line">    [ <span class="_">-f</span> ~/.ssh/id_rsa ] || ssh-keygen -t rsa <span class="_">-f</span> ~/.ssh/id_rsa -N <span class="string">''</span></span><br><span class="line">    [ <span class="_">-f</span> ~/.ssh/id_rsa.pub ] &amp;&amp; cat ~/.ssh/id_rsa.pub &gt; ~/.ssh/authorized_keys &amp;&amp; chmod 600 ~/.ssh/authorized_keys</span><br><span class="line">    <span class="keyword">for</span> host <span class="keyword">in</span> <span class="variable">$&#123;HOSTS[*]&#125;</span>; <span class="keyword">do</span></span><br><span class="line">        <span class="comment"># 因为其它节点上都没有~/.ssh这么一个目录, 还得远程创建, 这导致分发密钥时要输两次密码还挺烦的.</span></span><br><span class="line">        ssh root@<span class="variable">$host</span> <span class="string">"[ -d ~/.ssh ] || mkdir ~/.ssh"</span></span><br><span class="line">        scp -p ~/.ssh/&#123;id_rsa,authorized_keys&#125; root@<span class="variable">$host</span>:~/.ssh/</span><br><span class="line">    <span class="keyword">done</span></span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">    <span class="keyword">for</span> host <span class="keyword">in</span> <span class="variable">$&#123;HOSTS[*]&#125;</span>; <span class="keyword">do</span></span><br><span class="line">        ssh root@<span class="variable">$host</span> <span class="variable">$1</span></span><br><span class="line">    <span class="keyword">done</span></span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"><span class="comment"># 将集群中所有节点IP地址(包括本机)都加入这个主机列表数组</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># vim sshtrust.sh</span></span><br><span class="line">HOSTS=(<span class="string">"172.18.71.101"</span> <span class="string">"172.18.71.102"</span> <span class="string">"172.18.71.103"</span> <span class="string">"172.18.71.130"</span>)</span><br><span class="line"><span class="comment"># 分发密钥, 两两节点间均建立主机信任.</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># bash sshtrust.sh --key</span></span><br><span class="line">Generating public/private rsa key pair.</span><br><span class="line">Created directory <span class="string">'/root/.ssh'</span>.</span><br><span class="line">Your identification has been saved <span class="keyword">in</span> /root/.ssh/id_rsa.</span><br><span class="line">Your public key has been saved <span class="keyword">in</span> /root/.ssh/id_rsa.pub.</span><br><span class="line">The key fingerprint is:</span><br><span class="line">02:de:f2:86:5b:4b:3d:2b:70:cc:1c:c9:d2:65:5d:0b root@80e54d87.twoyang.com</span><br><span class="line">The key<span class="string">'s randomart image is:</span><br><span class="line">+--[ RSA 2048]----+</span><br><span class="line">|         .E..    |</span><br><span class="line">|        o .. .   |</span><br><span class="line">|    .o +    .    |</span><br><span class="line">|   ..o=          |</span><br><span class="line">|    o=o.S        |</span><br><span class="line">|    .+=o         |</span><br><span class="line">|    .o= o        |</span><br><span class="line">|     =.. o       |</span><br><span class="line">|    . ...        |</span><br><span class="line">+-----------------+</span><br><span class="line">The authenticity of host '</span>172.18.71.101 (172.18.71.101)<span class="string">' can'</span>t be established.</span><br><span class="line">ECDSA key fingerprint is 2d:37:94:8b:81:ea:57:bc:93:18:44:d6:f6:97:6c:5b.</span><br><span class="line">Are you sure you want to <span class="built_in">continue</span> connecting (yes/no)? yes</span><br><span class="line">Warning: Permanently added <span class="string">'172.18.71.101'</span> (ECDSA) to the list of known hosts.</span><br><span class="line">The authenticity of host <span class="string">'172.18.71.102 (172.18.71.102)'</span> can<span class="string">'t be established.</span><br><span class="line">ECDSA key fingerprint is 07:d0:4c:77:32:95:bc:df:8b:c1:b0:41:d6:af:66:59.</span><br><span class="line">Are you sure you want to continue connecting (yes/no)? yes</span><br><span class="line">Warning: Permanently added '</span>172.18.71.102<span class="string">' (ECDSA) to the list of known hosts.</span><br><span class="line">root@172.18.71.102'</span>s password: </span><br><span class="line">root@172.18.71.102<span class="string">'s password: </span><br><span class="line">id_rsa                                                                        100% 1679     1.6KB/s   00:00    </span><br><span class="line">authorized_keys                                                               100%  407     0.4KB/s   00:00    </span><br><span class="line">The authenticity of host '</span>172.18.71.103 (172.18.71.103)<span class="string">' can'</span>t be established.</span><br><span class="line">ECDSA key fingerprint is e5:49:95:0f:18:ac:e8:e3:22:6a:7e:09:ae:f9:61:55.</span><br><span class="line">Are you sure you want to <span class="built_in">continue</span> connecting (yes/no)? yes</span><br><span class="line">Warning: Permanently added <span class="string">'172.18.71.103'</span> (ECDSA) to the list of known hosts.</span><br><span class="line">root@172.18.71.103<span class="string">'s password: </span><br><span class="line">root@172.18.71.103'</span>s password: </span><br><span class="line">id_rsa                                                                        100% 1679     1.6KB/s   00:00    </span><br><span class="line">authorized_keys                                                               100%  407     0.4KB/s   00:00    </span><br><span class="line">The authenticity of host <span class="string">'172.18.71.130 (172.18.71.130)'</span> can<span class="string">'t be established.</span><br><span class="line">ECDSA key fingerprint is 6d:01:30:42:82:4a:ae:5a:ec:7e:62:7c:7e:31:64:b9.</span><br><span class="line">Are you sure you want to continue connecting (yes/no)? yes</span><br><span class="line">Warning: Permanently added '</span>172.18.71.130<span class="string">' (ECDSA) to the list of known hosts.</span><br><span class="line">root@172.18.71.130'</span>s password: </span><br><span class="line">root@172.18.71.130<span class="string">'s password: </span><br><span class="line">id_rsa                                                                        100% 1679     1.6KB/s   00:00    </span><br><span class="line">authorized_keys                                                               100%  407     </span><br><span class="line">0.4KB/s   00:00</span><br><span class="line"># 同步时间</span><br><span class="line">[root@80e54d87 ~]# bash sshtrust.sh "ntpdate 172.18.0.1"</span><br><span class="line"> 6 Jun 20:55:36 ntpdate[3354]: step time server 172.18.0.1 offset 2644756.261973 sec</span><br><span class="line"> 6 Jun 20:53:30 ntpdate[11248]: step time server 172.18.0.1 offset 2640569.256399 sec</span><br><span class="line"> 6 Jun 20:53:36 ntpdate[40408]: step time server 172.18.0.1 offset -2.854146 sec</span><br><span class="line"> 6 Jun 20:53:42 ntpdate[3457]: step time server 172.18.0.1 offset 3975759.234646 sec</span><br><span class="line">[root@80e54d87 ~]# bash sshtrust.sh "hwclock --systohc"</span><br><span class="line">[root@80e54d87 ~]# bash sshtrust.sh date</span><br><span class="line">Mon Jun  6 20:56:25 CST 2016</span><br><span class="line">Mon Jun  6 20:56:25 CST 2016</span><br><span class="line">Mon Jun  6 20:56:25 CST 2016</span><br><span class="line">Mon Jun  6 20:56:25 CST 2016</span><br><span class="line"># 因为MHA在cenots官方yum源中没有提供, 所以从Google Driver上下载下来做成了yum源.</span><br><span class="line">[root@80e54d87 ~]# bash sshtrust.sh "yum-config-manager --add-repo=http://172.18.71.254/templates/twoyang-c7.repo"</span><br><span class="line">Loaded plugins: fastestmirror, langpacks</span><br><span class="line">adding repo from: http://172.18.71.254/templates/twoyang-c7.repo</span><br><span class="line">grabbing file http://172.18.71.254/templates/twoyang-c7.repo to /etc/yum.repos.d/twoyang-c7.repo</span><br><span class="line">repo saved to /etc/yum.repos.d/twoyang-c7.repo</span><br><span class="line">Loaded plugins: fastestmirror, langpacks</span><br><span class="line">adding repo from: http://172.18.71.254/templates/twoyang-c7.repo</span><br><span class="line">grabbing file http://172.18.71.254/templates/twoyang-c7.repo to /etc/yum.repos.d/twoyang-c7.repo</span><br><span class="line">repo saved to /etc/yum.repos.d/twoyang-c7.repo</span><br><span class="line">Loaded plugins: fastestmirror, langpacks</span><br><span class="line">adding repo from: http://172.18.71.254/templates/twoyang-c7.repo</span><br><span class="line">grabbing file http://172.18.71.254/templates/twoyang-c7.repo to /etc/yum.repos.d/twoyang-c7.repo</span><br><span class="line">repo saved to /etc/yum.repos.d/twoyang-c7.repo</span><br><span class="line">Loaded plugins: fastestmirror, langpacks</span><br><span class="line">adding repo from: http://172.18.71.254/templates/twoyang-c7.repo</span><br><span class="line">grabbing file http://172.18.71.254/templates/twoyang-c7.repo to /etc/yum.repos.d/twoyang-c7.repo</span><br><span class="line">repo saved to /etc/yum.repos.d/twoyang-c7.repo</span></span><br></pre></td></tr></table></figure></p>
+<h2 id="安装配置MHA"><a href="#安装配置MHA" class="headerlink" title="安装配置MHA"></a>安装配置MHA</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 集群内所有节点(包括管理节点)需要安装Node包</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># bash sshtrust.sh "yum install -y mha4mysql-node.noarch"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># HostD作为MHA管理节点需要安装Manager包</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># yum install -y mha4mysql-manager.noarch</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 默认是没有配置文件, 自己建立目录和配置文件.</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># mkdir /etc/masterha</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># vim /etc/masterha/app1.cnf</span></span><br><span class="line">[server default]</span><br><span class="line">user=mha	<span class="comment">#  被控节点授权给管理节点SUPER权限的用户</span></span><br><span class="line">password=magedu	<span class="comment">#  被控节点授权给管理节点SUPER权限用户的口令</span></span><br><span class="line">manager_workdir=/data/masterha/app1	<span class="comment"># 管理节点的工作目录, 会自动建立.</span></span><br><span class="line">manager_<span class="built_in">log</span>=/data/masterha/app1/manager.log	<span class="comment"># 管理节点的日志</span></span><br><span class="line">remote_workdir=/data/masterha/app1 <span class="comment"># 被控节点的工作目录, 会自动建立.</span></span><br><span class="line">ssh_user=root	<span class="comment"># 被控节点的ssh用户</span></span><br><span class="line">repl_user=repl	<span class="comment"># 用于数据库复制的用户</span></span><br><span class="line">repl_password=magedu <span class="comment"># 用于数据库复制的用户的口令</span></span><br><span class="line">ping_interval=1 <span class="comment"># 被控节点的健康检查时间间隔</span></span><br><span class="line"></span><br><span class="line">[server1]</span><br><span class="line">hostname=172.18.71.101</span><br><span class="line">candidate_master=1	<span class="comment"># 作为主节点候选</span></span><br><span class="line"></span><br><span class="line">[server2]</span><br><span class="line">hostname=172.18.71.102</span><br><span class="line">candidate_master=1</span><br><span class="line"></span><br><span class="line">[server3]</span><br><span class="line">hostname=172.18.71.103</span><br><span class="line">no_master=1	<span class="comment"># 永远不作为主节点</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 用mha提供的脚本做主机信任检查.</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># masterha_check_ssh --conf=/etc/masterha/app1.cnf</span></span><br><span class="line">Mon Jun  6 22:12:23 2016 - [warning] Global configuration file /etc/masterha_default.cnf not found. Skipping.</span><br><span class="line">Mon Jun  6 22:12:23 2016 - [info] Reading application default configuration from /etc/masterha/app1.cnf..</span><br><span class="line">Mon Jun  6 22:12:23 2016 - [info] Reading server configuration from /etc/masterha/app1.cnf..</span><br><span class="line">Mon Jun  6 22:12:23 2016 - [info] Starting SSH connection tests..</span><br><span class="line">Mon Jun  6 22:12:24 2016 - [debug] </span><br><span class="line">Mon Jun  6 22:12:24 2016 - [info] All SSH connection tests passed successfully.</span><br><span class="line"></span><br><span class="line"><span class="comment"># 用mha提供的脚本做数据库复制检查.</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># masterha_check_repl --conf=/etc/masterha/app1.cnf</span></span><br><span class="line">Mon Jun  6 22:19:40 2016 - [warning] Global configuration file /etc/masterha_default.cnf not found. Skipping.</span><br><span class="line">Mon Jun  6 22:19:40 2016 - [info] Reading application default configuration from /etc/masterha/app1.cnf..</span><br><span class="line">Mon Jun  6 22:19:40 2016 - [info] Reading server configuration from /etc/masterha/app1.cnf..</span><br><span class="line">Mon Jun  6 22:19:40 2016 - [info] MHA::MasterMonitor version 0.57.</span><br><span class="line">Mon Jun  6 22:19:40 2016 - [info] GTID failover mode = 0</span><br><span class="line">Mon Jun  6 22:19:40 2016 - [info] Dead Servers:</span><br><span class="line">Mon Jun  6 22:19:40 2016 - [info] Alive Servers:</span><br><span class="line">Mon Jun  6 22:19:40 2016 - [info]   172.18.71.101(172.18.71.101:3306)</span><br><span class="line">Mon Jun  6 22:19:40 2016 - [info]   172.18.71.102(172.18.71.102:3306)</span><br><span class="line">Mon Jun  6 22:19:40 2016 - [info]   172.18.71.103(172.18.71.103:3306)</span><br><span class="line">Mon Jun  6 22:19:40 2016 - [info] Alive Slaves:</span><br><span class="line">Mon Jun  6 22:19:40 2016 - [info]   172.18.71.102(172.18.71.102:3306)  Version=5.5.44-MariaDB-log (oldest major version between slaves) <span class="built_in">log</span>-bin:enabled</span><br><span class="line">Mon Jun  6 22:19:40 2016 - [info]     Replicating from 172.18.71.101(172.18.71.101:3306)</span><br><span class="line">Mon Jun  6 22:19:40 2016 - [info]     Primary candidate <span class="keyword">for</span> the new Master (candidate_master is <span class="built_in">set</span>)</span><br><span class="line">Mon Jun  6 22:19:40 2016 - [info]   172.18.71.103(172.18.71.103:3306)  Version=5.5.44-MariaDB-log (oldest major version between slaves) <span class="built_in">log</span>-bin:enabled</span><br><span class="line">Mon Jun  6 22:19:40 2016 - [info]     Replicating from 172.18.71.101(172.18.71.101:3306)</span><br><span class="line">Mon Jun  6 22:19:40 2016 - [info]     Not candidate <span class="keyword">for</span> the new Master (no_master is <span class="built_in">set</span>)</span><br><span class="line">Mon Jun  6 22:19:40 2016 - [info] Current Alive Master: 172.18.71.101(172.18.71.101:3306)</span><br><span class="line">Mon Jun  6 22:19:40 2016 - [info] Checking slave configurations..</span><br><span class="line">Mon Jun  6 22:19:40 2016 - [info] Checking replication filtering settings..</span><br><span class="line">Mon Jun  6 22:19:40 2016 - [info]  binlog_<span class="keyword">do</span>_db= , binlog_ignore_db= </span><br><span class="line">Mon Jun  6 22:19:40 2016 - [info]  Replication filtering check ok.</span><br><span class="line">Mon Jun  6 22:19:40 2016 - [info] GTID (with auto-pos) is not supported</span><br><span class="line">Mon Jun  6 22:19:40 2016 - [info] Starting SSH connection tests..</span><br><span class="line">Mon Jun  6 22:19:42 2016 - [info] All SSH connection tests passed successfully.</span><br><span class="line">Mon Jun  6 22:19:42 2016 - [info] Checking MHA Node version..</span><br><span class="line">Mon Jun  6 22:19:42 2016 - [info]  Version check ok.</span><br><span class="line">Mon Jun  6 22:19:42 2016 - [info] Checking SSH publickey authentication settings on the current master..</span><br><span class="line">Mon Jun  6 22:19:43 2016 - [info] HealthCheck: SSH to 172.18.71.101 is reachable.</span><br><span class="line">Mon Jun  6 22:19:43 2016 - [info] Master MHA Node version is 0.57.</span><br><span class="line">Mon Jun  6 22:19:43 2016 - [info] Checking recovery script configurations on 172.18.71.101(172.18.71.101:3306)..</span><br><span class="line">Mon Jun  6 22:19:43 2016 - [info]   Executing <span class="built_in">command</span>: save_binary_logs --command=<span class="built_in">test</span> --start_pos=4 --binlog_dir=/var/lib/mysql,/var/<span class="built_in">log</span>/mysql --output_file=/data/masterha/app1/save_binary_logs_<span class="built_in">test</span> --manager_version=0.57 --start_file=master-binlog.000003 </span><br><span class="line">Mon Jun  6 22:19:43 2016 - [info]   Connecting to root@172.18.71.101(172.18.71.101:22).. </span><br><span class="line">  Creating /data/masterha/app1 <span class="keyword">if</span> not exists.. Creating directory /data/masterha/app1.. done.</span><br><span class="line">   ok.</span><br><span class="line">  Checking output directory is accessible or not..</span><br><span class="line">   ok.</span><br><span class="line">  Binlog found at /var/lib/mysql, up to master-binlog.000003</span><br><span class="line">Mon Jun  6 22:19:43 2016 - [info] Binlog setting check done.</span><br><span class="line">Mon Jun  6 22:19:43 2016 - [info] Checking SSH publickey authentication and checking recovery script configurations on all alive slave servers..</span><br><span class="line">Mon Jun  6 22:19:43 2016 - [info]   Executing <span class="built_in">command</span> : apply_diff_relay_logs --command=<span class="built_in">test</span> --slave_user=<span class="string">'mha'</span> --slave_host=172.18.71.102 --slave_ip=172.18.71.102 --slave_port=3306 --workdir=/data/masterha/app1 --target_version=5.5.44-MariaDB-log --manager_version=0.57 --relay_<span class="built_in">log</span>_info=/var/lib/mysql/relay-log.info  --relay_dir=/var/lib/mysql/  --slave_pass=xxx</span><br><span class="line">Mon Jun  6 22:19:43 2016 - [info]   Connecting to root@172.18.71.102(172.18.71.102:22).. </span><br><span class="line">Creating directory /data/masterha/app1.. done.</span><br><span class="line">  Checking slave recovery environment settings..</span><br><span class="line">    Opening /var/lib/mysql/relay-log.info ... ok.</span><br><span class="line">    Relay <span class="built_in">log</span> found at /var/lib/mysql, up to relaylog.000006</span><br><span class="line">    Temporary relay <span class="built_in">log</span> file is /var/lib/mysql/relaylog.000006</span><br><span class="line">    Testing mysql connection and privileges.. done.</span><br><span class="line">    Testing mysqlbinlog output.. done.</span><br><span class="line">    Cleaning up <span class="built_in">test</span> file(s).. done.</span><br><span class="line">Mon Jun  6 22:19:43 2016 - [info]   Executing <span class="built_in">command</span> : apply_diff_relay_logs --command=<span class="built_in">test</span> --slave_user=<span class="string">'mha'</span> --slave_host=172.18.71.103 --slave_ip=172.18.71.103 --slave_port=3306 --workdir=/data/masterha/app1 --target_version=5.5.44-MariaDB-log --manager_version=0.57 --relay_<span class="built_in">log</span>_info=/var/lib/mysql/relay-log.info  --relay_dir=/var/lib/mysql/  --slave_pass=xxx</span><br><span class="line">Mon Jun  6 22:19:43 2016 - [info]   Connecting to root@172.18.71.103(172.18.71.103:22).. </span><br><span class="line">Creating directory /data/masterha/app1.. done.</span><br><span class="line">  Checking slave recovery environment settings..</span><br><span class="line">    Opening /var/lib/mysql/relay-log.info ... ok.</span><br><span class="line">    Relay <span class="built_in">log</span> found at /var/lib/mysql, up to relaylog.000004</span><br><span class="line">    Temporary relay <span class="built_in">log</span> file is /var/lib/mysql/relaylog.000004</span><br><span class="line">    Testing mysql connection and privileges.. done.</span><br><span class="line">    Testing mysqlbinlog output.. done.</span><br><span class="line">    Cleaning up <span class="built_in">test</span> file(s).. done.</span><br><span class="line">Mon Jun  6 22:19:43 2016 - [info] Slaves settings check done.</span><br><span class="line">Mon Jun  6 22:19:43 2016 - [info] </span><br><span class="line">172.18.71.101(172.18.71.101:3306) (current master)</span><br><span class="line"> +--172.18.71.102(172.18.71.102:3306)</span><br><span class="line"> +--172.18.71.103(172.18.71.103:3306)</span><br><span class="line"></span><br><span class="line">Mon Jun  6 22:19:43 2016 - [info] Checking replication health on 172.18.71.102..</span><br><span class="line">Mon Jun  6 22:19:43 2016 - [info]  ok.</span><br><span class="line">Mon Jun  6 22:19:43 2016 - [info] Checking replication health on 172.18.71.103..</span><br><span class="line">Mon Jun  6 22:19:43 2016 - [info]  ok.</span><br><span class="line"><span class="comment"># 这里已经提示了没有定义主节点故障VIP如何漂移的脚本.</span></span><br><span class="line">Mon Jun  6 22:19:43 2016 - [warning] master_ip_failover_script is not defined.</span><br><span class="line"><span class="comment"># 也没有定义STONITH脚本, 以防止集群脑裂.</span></span><br><span class="line">Mon Jun  6 22:19:43 2016 - [warning] shutdown_script is not defined.</span><br><span class="line">Mon Jun  6 22:19:43 2016 - [info] Got <span class="built_in">exit</span> code 0 (Not master dead).</span><br><span class="line"></span><br><span class="line">MySQL Replication Health is OK.</span><br><span class="line"></span><br><span class="line"><span class="comment"># 测试通过就可以启动MHA了</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># nohup masterha_manager --conf=/etc/masterha/app1.cnf &amp;&gt; /data/masterha/app1/manager.log &amp;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看状态</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># masterha_check_status --conf=/etc/masterha/app1.cnf</span></span><br><span class="line">app1 (pid:30255) is running(0:PING_OK), master:172.18.71.101</span><br><span class="line"></span><br><span class="line"><span class="comment"># 如需停止MHA, 执行以下命令.</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># masterha_stop --conf=/etc/masterha/app1.cnf</span></span><br><span class="line">Stopped app1 successfully.</span><br><span class="line">[1]+  Exit 1                  nohup masterha_manager --conf=/etc/masterha/app1.cnf &amp;&gt;/data/masterha/app1/manager.log</span><br></pre></td></tr></table></figure>
+<h1 id="测试验证"><a href="#测试验证" class="headerlink" title="测试验证"></a>测试验证</h1><p>关闭<code>HostA(Master)</code>的<code>mariadb</code>服务, 期望<code>MHA</code>能够检测到<code>HostA</code>故障, 将<code>HostB</code>提升为<code>Master</code>.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 杀死HostA上的mysqld和mysqld_safe进程</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># killall -9 mysqld mysqld_safe</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看MHA的日志, 可以看到故障转移报告.</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># less /data/masterha/app1/manager.log</span></span><br><span class="line">...</span><br><span class="line">----- Failover Report -----</span><br><span class="line"></span><br><span class="line">app1: MySQL Master failover 172.18.71.101(172.18.71.101:3306) to 172.18.71.102(172.18.71.102:3306) succeeded</span><br><span class="line"></span><br><span class="line">Master 172.18.71.101(172.18.71.101:3306) is down!</span><br><span class="line"></span><br><span class="line">Check MHA Manager logs at 1478a474.twoyang.com:/data/masterha/app1/manager.log <span class="keyword">for</span> details.</span><br><span class="line"></span><br><span class="line">Started automated(non-interactive) failover.</span><br><span class="line">The latest slave 172.18.71.102(172.18.71.102:3306) has all relay logs <span class="keyword">for</span> recovery.</span><br><span class="line">Selected 172.18.71.102(172.18.71.102:3306) as a new master.</span><br><span class="line">172.18.71.102(172.18.71.102:3306): OK: Applying all logs succeeded.</span><br><span class="line">172.18.71.103(172.18.71.103:3306): This host has the latest relay <span class="built_in">log</span> events.</span><br><span class="line">Generating relay diff files from the latest slave succeeded.</span><br><span class="line">172.18.71.103(172.18.71.103:3306): OK: Applying all logs succeeded. Slave started, replicating from 172.18.71.102(172.18.71.102:3306)</span><br><span class="line">172.18.71.102(172.18.71.102:3306): Resetting slave info succeeded.</span><br><span class="line">Master failover to 172.18.71.102(172.18.71.102:3306) completed successfully.</span><br><span class="line"></span><br><span class="line"><span class="comment"># 再看另一个从节点HostC上, MHA已经将其主节点由HostA修改为了HostB了.</span></span><br><span class="line">MariaDB [(none)]&gt; SHOW SLAVE STATUS\G</span><br><span class="line">*************************** 1. row ***************************</span><br><span class="line">               Slave_IO_State: Waiting <span class="keyword">for</span> master to send event</span><br><span class="line">                  Master_Host: 172.18.71.102</span><br><span class="line">                  Master_User: repl</span><br><span class="line">                  Master_Port: 3306</span><br><span class="line">                Connect_Retry: 60</span><br><span class="line">              Master_Log_File: master-binlog.000001</span><br><span class="line">          Read_Master_Log_Pos: 245</span><br><span class="line">               Relay_Log_File: relaylog.000002</span><br><span class="line">                Relay_Log_Pos: 533</span><br><span class="line">        Relay_Master_Log_File: master-binlog.000001</span><br><span class="line">             Slave_IO_Running: Yes</span><br><span class="line">            Slave_SQL_Running: Yes</span><br><span class="line">......</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 注意: 故障转移完成后, MHA将会自动停止进程.</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># masterha_check_status --conf=/etc/masterha/app1.cnf</span></span><br><span class="line">app1 is stopped(2:NOT_RUNNING).</span><br></pre></td></tr></table></figure></p>
+<h1 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h1><p>还有几个问题需要说明一下:</p>
+<ul>
+<li>因为主从异步复制时难免会出现从节点落后主节点的情况, 这样主机点宕机就会出现丢失数据的情况. 所以如果是做半同步复制情况就会好很多.</li>
+<li>这里没有考虑<code>VIP</code>和<code>STONITH</code>的问题, 其实前面用<code>MHA</code>做复制检查时已经警告过我们了. <code>VIP</code>地址漂移的问题可以通过脚本来实现, 也可以通过<code>keepalived</code>来实现. 而<code>STONITH</code>也可以通过脚本来实现, 不过既然是脑裂基本上就是联系不上对方, 那通过脚本来<code>STONITH</code>也就不太靠谱; 想靠谱基本上只有上硬件, 那可就贵了.</li>
+</ul>
+
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/mariadb/" rel="tag">#mariadb</a>
+          
+            <a href="/tags/MHA/" rel="tag">#MHA</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/06/05/mariadb replication/" rel="next" title="mariadb repication">
+                <i class="fa fa-chevron-left"></i> mariadb repication
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/06/07/mariadb Galera Cluster/" rel="prev" title="mariadb Galera Cluster">
+                mariadb Galera Cluster <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <div class="ds-share flat" data-thread-key="2016/06/06/mariadb MHA/"
+     data-title="mariadb MHA"
+     data-content=""
+     data-url="http://www.twoyang.net/2016/06/06/mariadb MHA/">
+  <div class="ds-share-inline">
+    <ul  class="ds-share-icons-16">
+
+      <li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
+      <li><a class="ds-weibo" href="javascript:void(0);" data-service="weibo">微博</a></li>
+      <li><a class="ds-qzone" href="javascript:void(0);" data-service="qzone">QQ空间</a></li>
+      <li><a class="ds-qqt" href="javascript:void(0);" data-service="qqt">腾讯微博</a></li>
+      <li><a class="ds-wechat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+
+    </ul>
+    <div class="ds-share-icons-more">
+    </div>
+  </div>
+</div>
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/06/06/mariadb MHA/"
+           data-title="mariadb MHA" data-url="http://www.twoyang.net/2016/06/06/mariadb MHA/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xltax.com1.z0.glb.clouddn.com/twoyang.jpg"
+               alt="twoyang" />
+          <p class="site-author-name" itemprop="name">twoyang</p>
+          <p class="site-description motion-element" itemprop="description">The quieter you become.The more you are able to hear.</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">28</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">32</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        <div class="links-of-blogroll motion-element">
+          
+            <div class="links-of-blogroll-title">友情链接</div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.magedu.com/" target="_blank">马哥教育</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="https://shadowsocks.be/9.html" target="_blank">科学上网</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.isetsuna.com/hexo/introduction/" target="_blank">Hexo博客系列</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://mrchen.org/" target="_blank">Mrchen</a>
+                </li>
+              
+            </ul>
+          
+        </div>
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#参考资料"><span class="nav-number">1.</span> <span class="nav-text">参考资料</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#准备工作"><span class="nav-number">2.</span> <span class="nav-text">准备工作</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#主从复制"><span class="nav-number">3.</span> <span class="nav-text">主从复制</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#HostA-Master"><span class="nav-number">3.1.</span> <span class="nav-text">HostA(Master)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HostB-Slave"><span class="nav-number">3.2.</span> <span class="nav-text">HostB(Slave)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HostC-Slave"><span class="nav-number">3.3.</span> <span class="nav-text">HostC(Slave)</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#MHA"><span class="nav-number">4.</span> <span class="nav-text">MHA</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#集群初始化"><span class="nav-number">4.1.</span> <span class="nav-text">集群初始化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装配置MHA"><span class="nav-number">4.2.</span> <span class="nav-text">安装配置MHA</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#测试验证"><span class="nav-number">5.</span> <span class="nav-text">测试验证</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#最后"><span class="nav-number">6.</span> <span class="nav-text">最后</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">twoyang</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+
+  
+
+
+
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=0.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=0.5.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=0.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=0.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=0.5.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"twoyang"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+  
+
+
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>
