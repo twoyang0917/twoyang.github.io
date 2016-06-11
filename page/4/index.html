@@ -225,6 +225,129 @@
             
               
                 
+                <a class="post-title-link" href="/2016/05/12/keepalived_nginx实现discuz负载均衡和高可用/" itemprop="url">
+                  keepalived_nginx实现discuz负载均衡和高可用
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-05-12T21:21:33+08:00" content="2016-05-12">
+              2016-05-12
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Cluster/" itemprop="url" rel="index">
+                    <span itemprop="name">Cluster</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/05/12/keepalived_nginx实现discuz负载均衡和高可用/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/12/keepalived_nginx实现discuz负载均衡和高可用/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h1 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h1><p><strong>此文需要配合下一篇博文<a href="http://twoyang0917.github.io/2016/05/14/keepalived_tengine%E5%AE%9E%E7%8E%B0discuz%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E5%92%8C%E9%AB%98%E5%8F%AF%E7%94%A8/">《keepalived_tengine实现discuz负载均衡和高可用》</a>一起服用,疗效更好.</strong></p>
+<p>此次实验使用<code>nginx</code>替代<code>lvs</code>作为前端调度器,使用<code>keepalived</code>对<code>nginx</code>做双主模型高可用向后做反向代理.中间的<code>RS</code>服务器使用<code>httpd+php</code>来处理<code>php</code>页面请求,<code>httpd</code>和<code>php</code>以模块方式结合.暂不考虑会话保存服务器问题和动静资源分离的问题.</p>
+<h2 id="单主模型与双主模型"><a href="#单主模型与双主模型" class="headerlink" title="单主模型与双主模型"></a>单主模型与双主模型</h2><ul>
+<li>单主模型(主/备模型),即一台主机为<code>MASTER</code>,另一台主机为<code>BACKUP</code>.作为<code>BACKUP</code>的主机不会工作,只有当<code>MASTER</code>主机宕机,这时<code>BACKUP</code>主机取而代之成为<code>MASTER</code>才会开始工作.因此在单主模型始终有一个主机不工作,会造成资源浪费.</li>
+<li>双主模型无非就是两个单主模型叠加,两台主机互为主备.这样再在前端<code>DNS</code>解析时加上双<code>A</code>记录,即可实现两台主机同时工作,既实现了高可用同时还兼具负载均衡.</li>
+</ul>
+<h1 id="规划"><a href="#规划" class="headerlink" title="规划"></a>规划</h1><p>前端使用两台<code>nginx</code>服务器作为前端调度器,使用<code>keepalived</code>对<code>nginx</code>做双主模型高可用.中间两台<code>httpd+php</code>服务器作为<code>RS</code>服务器,后端一台共享存储提供<code>mariadb</code>和<code>NFS</code>服务.因为不再使用<code>LVS</code>调度,而是通过<code>nginx</code>反向代理来实现,所以中间的<code>RS</code>服务器上不需要在本地回环网口的别名上配置<code>VIP</code>了.<br>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2016/05/12/keepalived_nginx实现discuz负载均衡和高可用/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2016/05/10/keepalived_lvs-dr实现discuz负载均衡和高可用/" itemprop="url">
                   keepalived_lvs-dr实现discuz负载均衡和高可用
                 </a>
@@ -688,123 +811,6 @@
 
 
     
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/05/07/iptables基本应用/" itemprop="url">
-                  iptables基本应用
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-05-07T10:17:39+08:00" content="2016-05-07">
-              2016-05-07
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Security/" itemprop="url" rel="index">
-                    <span itemprop="name">Security</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2016/05/07/iptables基本应用/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/07/iptables基本应用/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h1 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h1><p><code>iptables/netfilter</code>虽然只是<code>Linux</code>的一个基本组件，但是它基本涉及到了<code>Linux</code>全领域的知识，想要玩的溜，仅仅知道它是怎么工作的是远远不够的，还需要知道网络结构，协议报文封装格式，常见服务的监听端口和工作原理等等。要想深入浅出将其说明白恐怕需要单独开个文档类的项目，因此本文不打算介绍<code>iptables/netfilter</code>详细的工作流程，而是简单介绍一下实际使用时的基本应用。</p>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2016/05/07/iptables基本应用/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -850,7 +856,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">29</span>
+              <span class="site-state-item-count">30</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
