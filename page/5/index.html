@@ -225,6 +225,127 @@
             
               
                 
+                <a class="post-title-link" href="/2016/05/09/基于lvs-dr模型的discuz负载均衡实现/" itemprop="url">
+                  基于lvs-dr模型的discuz负载均衡实现
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-05-09T22:17:23+08:00" content="2016-05-09">
+              2016-05-09
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Cluster/" itemprop="url" rel="index">
+                    <span itemprop="name">Cluster</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/05/09/基于lvs-dr模型的discuz负载均衡实现/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/09/基于lvs-dr模型的discuz负载均衡实现/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h1 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h1><p>本文并不涉及<code>lvs</code>工作原理的介绍和论述,而仅是记录基于<code>lvs-dr</code>模型的负载均衡的实现过程.需要了解更多技术细节请参照博文<a href="http://www.178linux.com/14177">《VS的工作模型和调度算法介绍》</a></p>
+<h1 id="规划"><a href="#规划" class="headerlink" title="规划"></a>规划</h1><ul>
+<li><code>lvs-dr</code>模型与之前的<code>lvs-nat</code>模型基本情况差不多,只是网络拓扑结构不同.</li>
+</ul>
+<p>四台主机需要初始化成如下状态.它们都是同一台宿主机上的虚拟机,均是最小化安装,<code>iptables</code>和<code>SELinux</code>均处于关闭状态.四台主机均只有一个物理网口,原始<code>IP</code>地址均处于同一个网段<code>172.18.71.0/16</code>.其中<code>HostA</code>在网口别名<code>eth0:0</code>上配置<code>VIP</code>向用户提供服务,<code>HostB</code>和<code>HostC</code>在网口别名<code>lo:0</code>上需要关闭其<code>ARP</code>响应,然后也配置上<code>VIP</code>地址.<code>HostB</code>和<code>HostC</code>作为两台<code>RS</code>提供真实的<code>web</code>服务,<code>HostD</code>作为<code>HostB</code>和<code>HostC</code>的后端共享存储提供<code>mariadb</code>和<code>NFS</code>.<br>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2016/05/09/基于lvs-dr模型的discuz负载均衡实现/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2016/05/09/基于lvs-nat模型的discuz负载均衡实现/" itemprop="url">
                   基于lvs-nat模型的discuz负载均衡实现
                 </a>
@@ -680,124 +801,6 @@
 
 
     
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/04/22/CentOS-7平台上搭建vsftpd服务器/" itemprop="url">
-                  CentOS-7平台上搭建vsftpd服务器
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-04-22T15:31:05+08:00" content="2016-04-22">
-              2016-04-22
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Server/" itemprop="url" rel="index">
-                    <span itemprop="name">Server</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2016/04/22/CentOS-7平台上搭建vsftpd服务器/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/04/22/CentOS-7平台上搭建vsftpd服务器/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h1 id="实验环境"><a href="#实验环境" class="headerlink" title="实验环境"></a>实验环境</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">平台：CentOS-7-x86_64</span><br><span class="line">IP地址：172.18.71.130</span><br><span class="line">FQDN：1478a474.twoyang.com</span><br><span class="line">备注：iptables与SELinux均处于关闭状态</span><br></pre></td></tr></table></figure>
-<h1 id="最简应用"><a href="#最简应用" class="headerlink" title="最简应用"></a>最简应用</h1><p>安装并启动<code>vsftpd</code>服务<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@1478a474 ~]<span class="comment"># yum install -y vsftpd</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># systemctl start vsftpd</span></span><br><span class="line">[root@1478a474 ~]<span class="comment"># ss -tnlp | grep 21</span></span><br><span class="line">LISTEN     0      32          :::21                      :::*                   users:((<span class="string">"vsftpd"</span>,pid=2344,fd=3))</span><br></pre></td></tr></table></figure></p>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2016/04/22/CentOS-7平台上搭建vsftpd服务器/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -843,7 +846,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">32</span>
+              <span class="site-state-item-count">33</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -860,7 +863,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">35</span>
+                <span class="site-state-item-count">36</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
