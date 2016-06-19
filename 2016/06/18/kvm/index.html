@@ -1,0 +1,667 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
+
+
+
+
+  <link href="//fonts.googleapis.com/css?family=Lato:300,400,700,400italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=0.5.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="kvm," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=0.5.0" />
+
+
+
+
+
+
+<meta name="description" content="参考资料
+How to Create Virtual Machines in Linux Using KVM (Kernel-based Virtual Machine) – Part 1
+How to Deploy Multiple Virtual Machines using Network Install (HTTP, FTP and NFS) under KVM Environment –">
+<meta property="og:type" content="article">
+<meta property="og:title" content="kvm">
+<meta property="og:url" content="http://www.twoyang.net/2016/06/18/kvm/index.html">
+<meta property="og:site_name" content="TwOyAng'blog">
+<meta property="og:description" content="参考资料
+How to Create Virtual Machines in Linux Using KVM (Kernel-based Virtual Machine) – Part 1
+How to Deploy Multiple Virtual Machines using Network Install (HTTP, FTP and NFS) under KVM Environment –">
+<meta property="og:image" content="http://7xltax.com1.z0.glb.clouddn.com/00b7a188-1d8b-4a89-a976-3704d240a94a.png">
+<meta property="og:image" content="http://7xltax.com1.z0.glb.clouddn.com/ea938758-2580-4593-8066-4e0f68009197.png">
+<meta property="og:image" content="http://7xltax.com1.z0.glb.clouddn.com/094748aa-167d-4079-ab9c-dd69b601c521.png">
+<meta property="og:image" content="http://7xltax.com1.z0.glb.clouddn.com/666f3fcd-a2eb-4bf4-8967-f093c37a74ed.png">
+<meta property="og:image" content="http://7xltax.com1.z0.glb.clouddn.com/e8bbee10-cfce-4b89-8723-abf3b20905eb.png">
+<meta property="og:image" content="http://7xltax.com1.z0.glb.clouddn.com/ba6cfe56-fade-470f-8bc2-ef011f2c19e8.png">
+<meta property="og:image" content="http://7xltax.com1.z0.glb.clouddn.com/4c49931a-36c8-4dfc-a54b-39f9cd68fd7f.png">
+<meta property="og:image" content="http://7xltax.com1.z0.glb.clouddn.com/d6828137-854b-40ca-857a-d751d67b4925.png">
+<meta property="og:image" content="http://7xltax.com1.z0.glb.clouddn.com/f488bf65-bb22-4d92-aa7e-4d772d92c9cb.png">
+<meta property="og:image" content="http://7xltax.com1.z0.glb.clouddn.com/573c2bee-61e2-4e0a-8c08-6bcaea6a9f17.png">
+<meta property="og:image" content="http://7xltax.com1.z0.glb.clouddn.com/c1620b0d-86c7-4872-866f-52a76c60fcf9.png">
+<meta property="og:updated_time" content="2016-06-19T12:11:55.037Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="kvm">
+<meta name="twitter:description" content="参考资料
+How to Create Virtual Machines in Linux Using KVM (Kernel-based Virtual Machine) – Part 1
+How to Deploy Multiple Virtual Machines using Network Install (HTTP, FTP and NFS) under KVM Environment –">
+<meta name="twitter:image" content="http://7xltax.com1.z0.glb.clouddn.com/00b7a188-1d8b-4a89-a976-3704d240a94a.png">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+  <title> kvm | TwOyAng'blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=55583792";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">TwOyAng'blog</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-th fa-fw"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                kvm
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-06-18T20:37:19+08:00" content="2016-06-18">
+              2016-06-18
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Virtualization/" itemprop="url" rel="index">
+                    <span itemprop="name">Virtualization</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/06/18/kvm/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/06/18/kvm/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><ul>
+<li><a href="http://www.tecmint.com/install-and-configure-kvm-in-linux/" target="_blank" rel="external">How to Create Virtual Machines in Linux Using KVM (Kernel-based Virtual Machine) – Part 1</a></li>
+<li><a href="http://www.tecmint.com/multiple-virtual-machine-installation-using-network-install-kvm/" target="_blank" rel="external">How to Deploy Multiple Virtual Machines using Network Install (HTTP, FTP and NFS) under KVM Environment – Part 2</a></li>
+<li><a href="http://www.178linux.com/6891" target="_blank" rel="external">基于Cobbler实现多版本操作系统自动部署</a></li>
+<li><a href="http://www.178linux.com/6380" target="_blank" rel="external">KVM虚拟化平台部署及管理</a></li>
+</ul>
+<h1 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h1><p>准备一台虚拟机, 均为<code>CentOS-7-x86_64</code>最小化安装, <code>iptables</code>与<code>SELinux</code>均处于关闭状态, 配置好<code>yum</code>源(<code>base</code>和<code>epel</code>). 做好快照, 以便每次实验后快速恢复.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">HostA</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: 1478a474.twoyang.com</span><br><span class="line">eno16777736: 172.18.71.101/16</span><br><span class="line">gateway: 172.18.0.1</span><br></pre></td></tr></table></figure></p>
+<a id="more"></a>
+<p><code>kvm</code>虚拟化要求<code>CPU</code>必须支持硬件虚拟化技术.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vmx对应Intel VT-x, svm对应AMD-V.</span></span><br><span class="line"><span class="comment"># 有内容输出, 说明CPU支持虚拟化技术.</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># egrep --color '(vmx|svm)' /proc/cpuinfo</span></span><br><span class="line"><span class="comment"># 检查内核模块</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># lsmod | grep kvm</span></span><br><span class="line">kvm_intel             162153  0 </span><br><span class="line">kvm                   525259  1 kvm_intel</span><br><span class="line"><span class="comment"># 如果没有, 需要手动装载.</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># modprobe kvm</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># modprobe kvm_intel</span></span><br></pre></td></tr></table></figure></p>
+<p>使用虚拟机做实验需要开启以下选项.<br><img src="http://7xltax.com1.z0.glb.clouddn.com/00b7a188-1d8b-4a89-a976-3704d240a94a.png" alt="kvm"></p>
+<p>安装<code>kvm</code>虚拟化的各组件.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@80e54d87 ~]<span class="comment"># yum install -y qemu-kvm libvirt</span></span><br></pre></td></tr></table></figure></p>
+<p>创建桥接网络, 一般情况下都是使用桥接类型的网络.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 桥接网络NetworkManager无法管理, 关闭NetworkManager服务, 使用network服务.</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># systemctl stop NetworkManager.service</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># systemctl disable NetworkManager.service</span></span><br><span class="line">Removed symlink /etc/systemd/system/multi-user.target.wants/NetworkManager.service.</span><br><span class="line">Removed symlink /etc/systemd/system/dbus-org.freedesktop.NetworkManager.service.</span><br><span class="line">Removed symlink /etc/systemd/system/dbus-org.freedesktop.nm-dispatcher.service.</span><br><span class="line"><span class="comment"># 创建桥接网卡br0, 将eno16777736桥接至br0.</span></span><br><span class="line"><span class="comment"># 此步骤似乎必然会造成网络中断, 请务必不要使用远程连接执行.</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># virsh iface-bridge eno16777736 br0 --no-start</span></span><br><span class="line">Created bridge br0 with attached device eno16777736</span><br><span class="line">[root@80e54d87 ~]<span class="comment"># systemctl restart network.service</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># brctl show | grep "\&lt;br0\&gt;"</span></span><br><span class="line">br0		8000.000c293af445	yes		eno16777736</span><br></pre></td></tr></table></figure></p>
+<p><code>kvm</code>管理工具如下图所示, 有通过<code>libvirt</code>协议来管理的<code>virt-manager</code>, <code>virtinst</code>和<code>virsh</code>, 也可以直接通过<code>qemu</code>来管理. 通过<code>qemu</code>直接管理的更底层一些, 也就复杂一些. 通过<code>libvirt</code>协议来管理的则是封装较好的, 更简单易用一些. 其中<code>virt-manger</code>是<code>GUI</code>接口, 类似<code>vmware workstation</code>的管理界面.<br><img src="http://7xltax.com1.z0.glb.clouddn.com/ea938758-2580-4593-8066-4e0f68009197.png" alt="kvm"></p>
+<h1 id="virt-manager"><a href="#virt-manager" class="headerlink" title="virt-manager"></a>virt-manager</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@80e54d87 ~]<span class="comment"># yum install -y virt-manager</span></span><br><span class="line"><span class="comment"># 将图形化界面转发至xmanager显示, 需要安装X图形化认证包.</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># yum install -y xorg-x11-xauth</span></span><br><span class="line"><span class="comment"># virt-manager用了个什么鬼特殊字体, 不安装会显示方格乱码.</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># yum install dejavu-lgc-sans-fonts</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># systemctl start libvirtd.service</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># virt-manager &amp;</span></span><br></pre></td></tr></table></figure>
+<p>新建一个虚拟机, 我这里选择网络安装. 我参照<a href="http://www.tecmint.com/multiple-virtual-machine-installation-using-network-install-kvm/" target="_blank" rel="external">How to Deploy Multiple Virtual Machines using Network Install (HTTP, FTP and NFS) under KVM Environment – Part 2</a>搭了一个<code>HTTP</code>的网络安装服务器.<br><img src="http://7xltax.com1.z0.glb.clouddn.com/094748aa-167d-4079-ab9c-dd69b601c521.png" alt="kvm"></p>
+<p>如果希望通过<code>kickstart</code>方式自动安装, 这里可以填写<code>Kickstart URL</code>.<br><img src="http://7xltax.com1.z0.glb.clouddn.com/666f3fcd-a2eb-4bf4-8967-f093c37a74ed.png" alt="kvm"></p>
+<p>这里可以选择网络接口, 就是之前创建的网桥<code>br0</code>. 然后勾选上<code>Customize configuration before install</code>, 可以在正式开始安装前, 对一些配置再做修改.<br><img src="http://7xltax.com1.z0.glb.clouddn.com/e8bbee10-cfce-4b89-8723-abf3b20905eb.png" alt="kvm"></p>
+<p><code>Display Spice</code>需要改一下, 由<code>Spice</code>改为<code>VNC</code>, <code>Keymap</code>设置为<code>en-us</code>. <a href="http://blog.csdn.net/weiyuanke/article/details/8985722" target="_blank" rel="external"><code>spice</code>对比<code>vnc</code></a>可能更强大一些, 但似乎依赖更多东西(实测使用<code>spice</code>时, 键盘无法使用, 应该是需要装<code>spice</code>驱动或是专用的客户端.), 需要使用<code>GuestOS</code>的图形化桌面环境的场景下才需要使用. 而我们的<code>GuestOS</code>多数情况下都是拿来当作服务器的, 只是装系统或是网络出现问题等情况下才需要用一下图形化, 这时<code>VNC</code>兼容性更好.<br><img src="http://7xltax.com1.z0.glb.clouddn.com/ba6cfe56-fade-470f-8bc2-ef011f2c19e8.png" alt="kvm"></p>
+<p><code>Video QXL</code>需要改为<code>VGA</code>, <code>QXL</code>一般是配合<code>Spice</code>使用的, <code>VGA</code>兼容性更好.<br><img src="http://7xltax.com1.z0.glb.clouddn.com/4c49931a-36c8-4dfc-a54b-39f9cd68fd7f.png" alt="kvm"></p>
+<p>这是没有使用<code>kickstart</code>自动安装的结果, 后面就是正常的安装操作系统的步骤.<br><img src="http://7xltax.com1.z0.glb.clouddn.com/d6828137-854b-40ca-857a-d751d67b4925.png" alt="kvm"></p>
+<p>这是使用<code>kickstart</code>自动安装的结果, 整个安装过程都不再需要人工参与.<br><img src="http://7xltax.com1.z0.glb.clouddn.com/f488bf65-bb22-4d92-aa7e-4d772d92c9cb.png" alt="kvm"></p>
+<p>其实也可以搭一个<code>cobbler</code>网络安装服务器, 然后在一开始创建虚拟机时选择<code>Network Boot(PXE)</code>安装方式.<br><img src="http://7xltax.com1.z0.glb.clouddn.com/573c2bee-61e2-4e0a-8c08-6bcaea6a9f17.png" alt="kvm"></p>
+<p>除了<code>virt-manger</code>之外, <code>libvirt</code>还提供了另外的一组<code>CLI</code>工具:<code>virt-install</code>, <code>virsh</code>…<br>其中<code>virt-install</code>是用来创建虚拟机的, <code>virsh</code>则是用来管理虚拟机的. 它们有众多的子命令或是选项, 提供了极高的灵活度, 但同时也使得其学习曲线比较陡峭. 不过这是实现自动化创建和管理的必由之路, 是<code>GUI</code>工具无法提供的.<br>不过<code>virt-install</code>可以看作是对更底层的<code>CLI</code>工具<code>qemu-kvm</code>的封装, 所以先来说<code>qemu-kvm</code>.</p>
+<h1 id="qemu-kvm"><a href="#qemu-kvm" class="headerlink" title="qemu-kvm"></a>qemu-kvm</h1><p>首先使用<code>qemu-img</code>命令创建虚拟机磁盘<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用参数preallocation="metadata"创建出来的是稀疏格式的磁盘</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># qemu-img create -f qcow2 -o size=20G,preallocation="metadata" /var/lib/libvirt/images/demo.qcow2</span></span><br><span class="line">Formatting <span class="string">'/var/lib/libvirt/images/demo.qcow2'</span>, fmt=qcow2 size=21474836480 encryption=off cluster_size=65536 preallocation=<span class="string">'metadata'</span> lazy_refcounts=off</span><br><span class="line"><span class="comment"># 这种磁盘文件大小会骗过ls命令</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># ls -lh /var/lib/libvirt/images/demo.qcow2 </span></span><br><span class="line">-rw-r--r-- 1 root root 21G Jun 19 20:04 /var/lib/libvirt/images/demo.qcow2</span><br><span class="line"><span class="comment"># 但是实际占用大小其实很小</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># du -sh /var/lib/libvirt/images/demo.qcow2 </span></span><br><span class="line">4.1M	/var/lib/libvirt/images/demo.qcow2</span><br></pre></td></tr></table></figure></p>
+<p>然后提供网络配置脚本<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">[root@80e54d87 ~]<span class="comment"># vim /etc/qemu-ifup</span></span><br><span class="line"><span class="meta">#!/bin/bash </span></span><br><span class="line">bridge=br0</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> [ -n <span class="string">"<span class="variable">$1</span>"</span> ]; <span class="keyword">then</span></span><br><span class="line">    ip link <span class="built_in">set</span> <span class="variable">$1</span> up</span><br><span class="line">    sleep 1</span><br><span class="line">    brctl addif <span class="variable">$bridge</span> <span class="variable">$1</span></span><br><span class="line">    <span class="built_in">exit</span> 0</span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># vim /etc/qemu-ifdown</span></span><br><span class="line"><span class="meta">#!/bin/bash </span></span><br><span class="line">bridge=br0</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> [ -n <span class="string">"<span class="variable">$1</span>"</span> ]; <span class="keyword">then</span></span><br><span class="line">    brctl delif <span class="variable">$bridge</span> <span class="variable">$1</span></span><br><span class="line">    sleep 1</span><br><span class="line">    ip link <span class="built_in">set</span> <span class="variable">$1</span> down</span><br><span class="line">    <span class="built_in">exit</span> 0</span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># chmod +x /etc/qemu-if*</span></span><br><span class="line"><span class="comment"># 确保安装了bridge-utils</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># yum install -y bridge-utils</span></span><br></pre></td></tr></table></figure></p>
+<p>使用测试镜像<code>cirros</code>来启动虚拟机<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@80e54d87 ~]<span class="comment"># /usr/libexec/qemu-kvm -name cirros \</span></span><br><span class="line">    -m 512 \</span><br><span class="line">    -smp 2 \</span><br><span class="line">    -drive file=/var/lib/libvirt/images/cirros-no_cloud-0.3.0-x86_64-disk.img \</span><br><span class="line">    -net tap,ifname=veth0,script=/etc/qemu-ifup,downscript=/etc/qemu-ifdown -net nic,model=virtio \</span><br><span class="line">    -vnc :1 $</span><br><span class="line">[root@80e54d87 ~]<span class="comment"># yum install -y tigervnc</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># vncviewer :1</span></span><br></pre></td></tr></table></figure></p>
+<p>可以看到系统正常启动, 且从局域网内的<code>DHCP</code>服务器获取到了<code>IP</code>地址, 说明工作于桥接模式.<br><img src="http://7xltax.com1.z0.glb.clouddn.com/c1620b0d-86c7-4872-866f-52a76c60fcf9.png" alt="kvm"></p>
+<p>通过<code>qemu-kvm</code>命令直接启动虚拟机无法被<code>virsh</code>或是<code>virt-manager</code>管理工具所发现, 需要关闭时只能<code>kill</code>进程.</p>
+<h1 id="virt-install"><a href="#virt-install" class="headerlink" title="virt-install"></a>virt-install</h1><p><code>virt-install</code>可以看作是对更底层的<code>CLI</code>工具<code>qemu-kvm</code>的封装, 不过它并不仅仅只支持<code>kvm</code>, 还能够为<code>Xen</code>或其它支持<code>libvrit API</code>的<code>hypervisor</code>创建虚拟机并完成<code>GuestOS</code>安装.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@80e54d87 ~]<span class="comment"># yum install -y virt-install</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># chown qemu:qemu /var/lib/libvirt/images/cirros-no_cloud-0.3.0-x86_64-disk.img</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># virt-install --name cirros \</span></span><br><span class="line">    --memory=512 \</span><br><span class="line">	--vcpus=2 \</span><br><span class="line">	--import \</span><br><span class="line">	--disk path=/var/lib/libvirt/images/cirros-no_cloud-0.3.0-x86_64-disk.img,bus=virtio \</span><br><span class="line">	--network bridge=br0,model=virtio \</span><br><span class="line">	--graphics vnc,port=5901 &amp;</span><br></pre></td></tr></table></figure>
+<p>通过<code>virt-install</code>创建的虚拟机, 一旦创建成功就会被<code>virsh</code>或是<code>virt-manager</code>管理工具自动识别, 纳如管理范畴.</p>
+<h1 id="virsh"><a href="#virsh" class="headerlink" title="virsh"></a>virsh</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">[root@80e54d87 ~]<span class="comment"># virsh list</span></span><br><span class="line"> Id    Name                           State</span><br><span class="line">----------------------------------------------------</span><br><span class="line"> 9     cirros                         running</span><br><span class="line"><span class="comment"># 关闭虚拟机, 但是这是对有着正常操作系统的虚拟机有效, 因为是要发送关机信号给操作系统.</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># virsh shutdown cirros</span></span><br><span class="line">Domain cirros is being shutdown</span><br><span class="line"><span class="comment"># cirros接收了关机信号却没有做出相应关机动作.</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># virsh list</span></span><br><span class="line"> Id    Name                           State</span><br><span class="line">----------------------------------------------------</span><br><span class="line"> 9     cirros                         running</span><br><span class="line"><span class="comment"># 因此只能强制关机了, 相当于直接关闭电源.</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># virsh destroy cirros</span></span><br><span class="line">Domain cirros destroyed</span><br><span class="line"><span class="comment"># 被关闭的虚拟机使用virsh list是看不到的, 必须加上--all参数.</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># virsh list --all</span></span><br><span class="line"> Id    Name                           State</span><br><span class="line">----------------------------------------------------</span><br><span class="line"> -     cirros                         shut off</span><br><span class="line"><span class="comment"># 从virsh管理列表中删除虚拟机, 不过这样其实只是删除了cirros虚拟机的配置文件, 你可以先将其备份出来.</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># virsh undefine cirros</span></span><br><span class="line">Domain cirros has been undefined</span><br><span class="line"><span class="comment"># 默认的配置文件是放在/etc/libvirt/qemu/目录下</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># cp /etc/libvirt/qemu/cirros.xml .</span></span><br><span class="line"><span class="comment"># 你也可以是用dumpxml子命令备份配置文件</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># virsh dumpxml cirros &gt; /tmp/cirros.xml</span></span><br><span class="line"><span class="comment"># 真的要彻底删除, 需要将配置文件和磁盘镜像文件都删除, 磁盘镜像文件一般放置在/var/lib/libvirt/images/目录下.</span></span><br><span class="line"><span class="comment"># 需要还原时, 使用define子命令指定虚拟机配置文件即可.</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># virsh define cirros.xml </span></span><br><span class="line">Domain cirros defined from cirros.xml</span><br><span class="line"><span class="comment"># 然后别可以启动虚拟机</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># virsh start cirros</span></span><br><span class="line">Domain cirros started</span><br><span class="line"><span class="comment"># 可以看到底层确实调用的qemu-kvm</span></span><br><span class="line">[root@80e54d87 ~]<span class="comment"># ps aux | grep cirros</span></span><br><span class="line">qemu      37161  3.5 10.3 1039004 103804 ?      Sl   00:35   0:05 /usr/libexec/qemu-kvm -name cirros -S -machine ...</span><br></pre></td></tr></table></figure>
+<p>更多用法, 请参照帮助信息.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@80e54d87 ~]<span class="comment"># virsh help</span></span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/kvm/" rel="tag">#kvm</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/06/16/git/" rel="next" title="git服务器搭建">
+                <i class="fa fa-chevron-left"></i> git服务器搭建
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <div class="ds-share flat" data-thread-key="2016/06/18/kvm/"
+     data-title="kvm"
+     data-content=""
+     data-url="http://www.twoyang.net/2016/06/18/kvm/">
+  <div class="ds-share-inline">
+    <ul  class="ds-share-icons-16">
+
+      <li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
+      <li><a class="ds-weibo" href="javascript:void(0);" data-service="weibo">微博</a></li>
+      <li><a class="ds-qzone" href="javascript:void(0);" data-service="qzone">QQ空间</a></li>
+      <li><a class="ds-qqt" href="javascript:void(0);" data-service="qqt">腾讯微博</a></li>
+      <li><a class="ds-wechat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+
+    </ul>
+    <div class="ds-share-icons-more">
+    </div>
+  </div>
+</div>
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/06/18/kvm/"
+           data-title="kvm" data-url="http://www.twoyang.net/2016/06/18/kvm/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xltax.com1.z0.glb.clouddn.com/twoyang.jpg"
+               alt="twoyang" />
+          <p class="site-author-name" itemprop="name">twoyang</p>
+          <p class="site-description motion-element" itemprop="description">The quieter you become.The more you are able to hear.</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">34</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">37</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        <div class="links-of-blogroll motion-element">
+          
+            <div class="links-of-blogroll-title">友情链接</div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.magedu.com/" target="_blank">马哥教育</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="https://shadowsocks.be/9.html" target="_blank">科学上网</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.isetsuna.com/hexo/introduction/" target="_blank">Hexo博客系列</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://mrchen.org/" target="_blank">Mrchen</a>
+                </li>
+              
+            </ul>
+          
+        </div>
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#参考资料"><span class="nav-number">1.</span> <span class="nav-text">参考资料</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#准备工作"><span class="nav-number">2.</span> <span class="nav-text">准备工作</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#virt-manager"><span class="nav-number">3.</span> <span class="nav-text">virt-manager</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#qemu-kvm"><span class="nav-number">4.</span> <span class="nav-text">qemu-kvm</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#virt-install"><span class="nav-number">5.</span> <span class="nav-text">virt-install</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#virsh"><span class="nav-number">6.</span> <span class="nav-text">virsh</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">twoyang</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+
+  
+
+
+
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=0.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=0.5.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=0.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=0.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=0.5.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"twoyang"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+  
+
+
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>
