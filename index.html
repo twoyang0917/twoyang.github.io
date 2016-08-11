@@ -225,6 +225,127 @@
             
               
                 
+                <a class="post-title-link" href="/2016/08/11/pyenv--python虚拟开发环境/" itemprop="url">
+                  pyenv--python虚拟开发环境
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-08-11T17:45:10+08:00" content="2016-08-11">
+              2016-08-11
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/python/" itemprop="url" rel="index">
+                    <span itemprop="name">python</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/08/11/pyenv--python虚拟开发环境/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/08/11/pyenv--python虚拟开发环境/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>主要步骤可参照此文章<a href="http://www.cnblogs.com/npumenglei/p/3719412.html" target="_blank" rel="external">用pyenv 和 virtualenv 搭建单机多版本python 虚拟开发环境</a>, 补充一些自己填的坑.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装开发编译环境</span></span><br><span class="line">sudo apt install -y gcc g++ make build-essential</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装python编译过程依赖的开发库, 解决如下问题.</span></span><br><span class="line">sudo apt install -y libbz2-dev libreadline-dev libsqlite3-dev libssl-dev</span><br><span class="line"></span><br><span class="line">WARNING: The Python bz2 extension was not compiled. Missing the bzip2 lib?</span><br><span class="line">WARNING: The Python readline extension was not compiled. Missing the GNU readline lib?</span><br><span class="line">WARNING: The Python sqlite3 extension was not compiled. Missing the SQLite3 lib?</span><br><span class="line">ERROR: The Python ssl extension was not compiled. Missing the OpenSSL lib?</span><br></pre></td></tr></table></figure>
+<p><code>pyenv install &lt;version&gt;</code>时要去国外站点去下载<code>python</code>相应版本的源码包, 相当之慢. 可以使用国内七牛云存储自建一个镜像站点<a href="http://pyenv.qiniudn.com/pythons/" target="_blank" rel="external">The pyenv’s official mirror of Python archives</a>, 会快一些, 不过它仅提供稳定的版本, 太新的版本可能就没有, 不过一般也不会那么激进地上新版本.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 指定从七牛镜像站点下载python源码包</span></span><br><span class="line"><span class="built_in">export</span> PYTHON_BUILD_MIRROR_URL=<span class="string">"http://pyenv.qiniudn.com/pythons/"</span></span><br><span class="line">pyenv install &lt;version&gt;</span><br></pre></td></tr></table></figure>
+<p><strong>而且如果编译失败, 解决完错误, 再次执行<code>pyenv install &lt;version&gt;</code>, 不论你之前是否已经下载过源码包, 它会再次下载. 这个真是坑, 你给个可以指定本地安装包的选项也好啊(也可能有, 但是我没有发现, 知道的同学分享一下.).</strong><br>这个问题解决起来比较麻烦, 除了换快点的镜像源这种方式外, 可能就只能是自己改代码了. <code>pyenv</code>是用<code>shell</code>写的, 可以改. 不过这个过于复杂, 之前改过一次, 再次碰到时已经完全忘记怎么弄的了.</p>
+<p>不过刚刚发现了这么一个工具<a href="https://pypi.python.org/pypi/pyenv_mirror" target="_blank" rel="external">pyenv_mirror</a>, 现在想想可以这么解决, 就是搭一个本地的镜像站点. 网速实在太慢或者是公司里面需要重度使用<code>pyenv</code>的同学可以尝试自己搭一个, 我这里就不搞了.</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2016/06/18/kvm/" itemprop="url">
                   kvm
                 </a>
@@ -690,127 +811,6 @@
 
 
     
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/06/11/tomcat常用配置/" itemprop="url">
-                  tomcat常用配置
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-06-11T21:02:14+08:00" content="2016-06-11">
-              2016-06-11
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Server/" itemprop="url" rel="index">
-                    <span itemprop="name">Server</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2016/06/11/tomcat常用配置/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/06/11/tomcat常用配置/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><ul>
-<li><a href="http://ju.outofmemory.cn/entry/108996">JVM：32G以上的堆会发生什么</a></li>
-<li><a href="http://xuding.blog.51cto.com/4890434/1750550">Tomcat：Java Web服务器配置详解</a></li>
-</ul>
-<h1 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h1><p>准备一台虚拟机, 均为<code>CentOS-7-x86_64</code>最小化安装, <code>iptables</code>与<code>SELinux</code>均处于关闭状态, 配置好<code>yum</code>源(<code>base</code>和<code>epel</code>). 做好快照, 以便每次实验后快速恢复.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">HostA</span><br><span class="line">OS: CentOS-7-x86_64</span><br><span class="line">hostname: 1478a474.twoyang.com</span><br><span class="line">eno16777736: 172.18.71.130/16</span><br><span class="line">gateway: 172.18.0.1</span><br></pre></td></tr></table></figure></p>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2016/06/11/tomcat常用配置/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -856,7 +856,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">34</span>
+              <span class="site-state-item-count">35</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -864,7 +864,7 @@
           
             <div class="site-state-item site-state-categories">
               <a href="/categories">
-                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-count">6</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -873,7 +873,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">37</span>
+                <span class="site-state-item-count">39</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

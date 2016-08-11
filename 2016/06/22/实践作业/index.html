@@ -1,0 +1,622 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
+
+
+
+
+  <link href="//fonts.googleapis.com/css?family=Lato:300,400,700,400italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=0.5.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="project," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=0.5.0" />
+
+
+
+
+
+
+<meta name="description" content="基础环境准备123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354555657585960616263646566676869707172737475767778798081828384858687888990# 24核Intel(R) Xeon(R) C">
+<meta property="og:type" content="article">
+<meta property="og:title" content="实践作业">
+<meta property="og:url" content="http://www.twoyang.net/2016/06/22/实践作业/index.html">
+<meta property="og:site_name" content="TwOyAng'blog">
+<meta property="og:description" content="基础环境准备123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354555657585960616263646566676869707172737475767778798081828384858687888990# 24核Intel(R) Xeon(R) C">
+<meta property="og:updated_time" content="2016-06-24T14:59:31.975Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="实践作业">
+<meta name="twitter:description" content="基础环境准备123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354555657585960616263646566676869707172737475767778798081828384858687888990# 24核Intel(R) Xeon(R) C">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+  <title> 实践作业 | TwOyAng'blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=55583792";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">TwOyAng'blog</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-th fa-fw"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                实践作业
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-06-22T15:56:23+08:00" content="2016-06-22">
+              2016-06-22
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Project/" itemprop="url" rel="index">
+                    <span itemprop="name">Project</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/06/22/实践作业/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/06/22/实践作业/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="基础环境准备"><a href="#基础环境准备" class="headerlink" title="基础环境准备"></a>基础环境准备</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 24核Intel(R) Xeon(R) CPU           E5645  @ 2.40GHz</span></span><br><span class="line">[root@localhost ~]<span class="comment"># grep processor /proc/cpuinfo | wc -l</span></span><br><span class="line">24</span><br><span class="line"><span class="comment"># 32G内存</span></span><br><span class="line">[root@localhost ~]<span class="comment"># free -g</span></span><br><span class="line">             total       used       free     shared    buffers     cached</span><br><span class="line">Mem:            31          0         30          0          0          0</span><br><span class="line">-/+ buffers/cache:          0         31</span><br><span class="line">Swap:           15          0         15</span><br><span class="line"><span class="comment"># 给了个CentOS 6.5的系统</span></span><br><span class="line">[root@localhost ~]<span class="comment"># cat /etc/redhat-release </span></span><br><span class="line">CentOS release 6.5 (Final)</span><br><span class="line"><span class="comment"># 升一下级</span></span><br><span class="line">[root@localhost ~]<span class="comment"># yum upgrade -y</span></span><br><span class="line">[root@localhost ~]<span class="comment"># cat /etc/redhat-release </span></span><br><span class="line">CentOS release 6.7 (Final)</span><br><span class="line"><span class="comment"># 关闭NetworkManager服务, 使用network服务.</span></span><br><span class="line">[root@localhost ~]<span class="comment"># /etc/init.d/NetworkManager stop</span></span><br><span class="line">Stopping NetworkManager daemon:                            [  OK  ]</span><br><span class="line">[root@localhost ~]<span class="comment"># chkconfig NetworkManager off</span></span><br><span class="line">[root@localhost ~]<span class="comment"># chkconfig NetworkManager --list</span></span><br><span class="line">NetworkManager 	0:off	1:off	2:off	3:off	4:off	5:off	6:off</span><br><span class="line">[root@localhost network-scripts]<span class="comment"># chkconfig network --list</span></span><br><span class="line">network        	0:off	1:off	2:on	3:on	4:on	5:on	6:off</span><br><span class="line"><span class="comment"># 增加桥接网口</span></span><br><span class="line">[root@localhost ~]<span class="comment"># virsh iface-bridge eno16777736 br0</span></span><br><span class="line">[root@localhost ~]<span class="comment"># yum install -y bridge-utils</span></span><br><span class="line">[root@localhost ~]<span class="comment"># brctl show</span></span><br><span class="line">bridge name	bridge id		STP enabled	interfaces</span><br><span class="line">br0		8000.782bcb64a825	yes		em1</span><br><span class="line">virbr0		8000.525400da82ec	yes		virbr0-nic</span><br><span class="line"><span class="comment"># 安装kvm</span></span><br><span class="line">[root@localhost ~]<span class="comment"># yum install -y qemu-kvm libvirt tigervnc</span></span><br><span class="line">[root@localhost ~]<span class="comment"># /etc/init.d/libvirtd start</span></span><br><span class="line">Starting libvirtd daemon: </span><br><span class="line">[root@localhost ~]<span class="comment"># /etc/init.d/libvirtd status</span></span><br><span class="line">libvirtd (pid  7629) is running...</span><br><span class="line">[root@localhost ~]<span class="comment"># chkconfig libvirtd on</span></span><br><span class="line">[root@localhost ~]<span class="comment"># chkconfig libvirtd --list</span></span><br><span class="line">libvirtd       	0:off	1:off	2:on	3:on	4:on	5:on	6:off</span><br><span class="line">[root@localhost ~]<span class="comment"># ln -s /usr/libexec/qemu-kvm /usr/bin/qemu-kvm</span></span><br><span class="line"><span class="comment"># /home目录的空间比较大, 虚拟机磁盘文件都放在/home所在的磁盘上.</span></span><br><span class="line">[root@localhost ~]<span class="comment"># df -h</span></span><br><span class="line">Filesystem            Size  Used Avail Use% Mounted on</span><br><span class="line">/dev/mapper/VolGroup-lv_root</span><br><span class="line">                       50G   15G   33G  32% /</span><br><span class="line">tmpfs                  16G     0   16G   0% /dev/shm</span><br><span class="line">/dev/sda1             477M   68M  384M  15% /boot</span><br><span class="line">/dev/mapper/VolGroup-lv_home</span><br><span class="line">                      668G  4.0G  630G   1% /home</span><br><span class="line">[root@localhost ~]<span class="comment"># mkdir -p /home/data/kvm/origin</span></span><br><span class="line"><span class="comment"># 创建一个centos-6-x86_64虚拟机模版</span></span><br><span class="line">[root@localhost ~]<span class="comment"># curl -sL http://172.18.203.1/shell/virt-c6.sh | bash</span></span><br><span class="line">[root@localhost ~]<span class="comment"># vncviewer :5901</span></span><br><span class="line"><span class="comment"># 等待模版虚拟机安装完成, 确保虚拟机处于关闭状态.</span></span><br><span class="line">[root@localhost ~]<span class="comment"># virsh list --all | grep centos6</span></span><br><span class="line"> -     centos6                        shut off</span><br><span class="line"><span class="comment"># 压缩虚拟机磁盘大小, 让原始虚拟机磁盘更小一些, 方便克隆.</span></span><br><span class="line">[root@localhost ~]<span class="comment"># cd /home/data/kvm/origin/</span></span><br><span class="line">[root@localhost origin]<span class="comment"># qemu-img convert -c -O qcow2 centos6.img centos6.qcow2</span></span><br><span class="line"><span class="comment"># 压缩效果还是很明显的, 主要不要用ls命令查看, 稀疏格式虚拟磁盘大小会骗过ls.</span></span><br><span class="line">[root@localhost origin]<span class="comment"># du -h centos6.img </span></span><br><span class="line">1.9G	centos6.img</span><br><span class="line">[root@localhost origin]<span class="comment"># du -h centos6.qcow2 </span></span><br><span class="line">689M	centos6.qcow2</span><br><span class="line">[root@localhost origin]<span class="comment"># qemu-img info centos6.img </span></span><br><span class="line">image: centos6.img</span><br><span class="line">file format: qcow2</span><br><span class="line">virtual size: 50G (53687091200 bytes)</span><br><span class="line">disk size: 688M</span><br><span class="line">cluster_size: 65536</span><br><span class="line"><span class="comment"># 删掉原始虚拟磁盘, 并重命名压缩后虚拟磁盘为centos6.img</span></span><br><span class="line">[root@localhost origin]<span class="comment"># rm -f centos6.img &amp;&amp; mv centos6.qcow2 centos6.img</span></span><br><span class="line"><span class="comment"># 以此虚拟磁盘为模版, 克隆出50个虚拟机.</span></span><br><span class="line">[root@localhost ~]<span class="comment"># curl -sL http://172.18.203.1/shell/vmclone.sh | bash</span></span><br><span class="line">[root@localhost ~]<span class="comment"># virsh list</span></span><br><span class="line"> Id    Name                           State</span><br><span class="line">----------------------------------------------------</span><br><span class="line"> 2    vm1                            running</span><br><span class="line"> 3    vm2                            running</span><br><span class="line"> 4    vm3                            running</span><br><span class="line">...</span><br><span class="line"><span class="comment"># 所有虚拟机均可以通过vnc连接, 然后各自配置静态IP.</span></span><br><span class="line">[root@localhost ~]<span class="comment"># ss -tnl | grep 59</span></span><br><span class="line">LISTEN     0      1                         *:5917                     *:*     </span><br><span class="line">LISTEN     0      1                         *:5949                     *:*     </span><br><span class="line">LISTEN     0      1                         *:5918                     *:*     </span><br><span class="line">LISTEN     0      1                         *:5950                     *:*     </span><br><span class="line">LISTEN     0      1                         *:5919                     *:*     </span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<h1 id="Mariadb-MHA"><a href="#Mariadb-MHA" class="headerlink" title="Mariadb MHA"></a>Mariadb MHA</h1><p><code>MariaDB-5.5.46</code><br><code>mha4mysql-0.56</code></p>
+<h2 id="Master"><a href="#Master" class="headerlink" title="Master"></a>Master</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">[root@data-db1 ~]<span class="comment"># curl -sL http://172.18.203.1/shell/install_mariadb.sh | bash</span></span><br><span class="line">[root@data-db1 ~]<span class="comment"># vim /etc/my.cnf</span></span><br><span class="line"><span class="built_in">log</span>-bin=mysql-bin</span><br><span class="line">binlog_format=mixed</span><br><span class="line">server-id       = 1</span><br><span class="line"></span><br><span class="line">[root@data-db1 ~]<span class="comment"># /etc/init.d/mysqld start</span></span><br><span class="line">Starting MySQL SUCCESS! </span><br><span class="line">[root@data-db2 ~]<span class="comment"># chkconfig mysqld on</span></span><br><span class="line">[root@data-db2 ~]<span class="comment"># chkconfig mysqld --list</span></span><br><span class="line">mysqld         	0:off	1:off	2:on	3:on	4:on	5:on	6:off</span><br><span class="line"></span><br><span class="line">MariaDB [(none)]&gt; SHOW MASTER STATUS;</span><br><span class="line">+------------------+----------+--------------+------------------+</span><br><span class="line">| File             | Position | Binlog_Do_DB | Binlog_Ignore_DB |</span><br><span class="line">+------------------+----------+--------------+------------------+</span><br><span class="line">| mysql-bin.000003 |      245 |              |                  |</span><br><span class="line">+------------------+----------+--------------+------------------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br><span class="line"></span><br><span class="line">MariaDB [(none)]&gt; GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO <span class="string">'repl'</span>@<span class="string">'172.18.203.%'</span> IDENTIFIED BY <span class="string">'tycoon'</span>;</span><br><span class="line">MariaDB [(none)]&gt; GRANT ALL PRIVILEGES ON *.* TO <span class="string">'mha'</span>@<span class="string">'172.18.203.%'</span> IDENTIFIED BY <span class="string">'tycoon'</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 加载半同步复制主节点插件</span></span><br><span class="line">MariaDB [(none)]&gt; INSTALL PLUGIN rpl_semi_sync_master SONAME <span class="string">'semisync_master.so'</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 加载此插件后引入几个变量</span></span><br><span class="line">MariaDB [(none)]&gt; SHOW GLOBAL VARIABLES LIKE <span class="string">'%semi%'</span>;</span><br><span class="line">+------------------------------------+-------+</span><br><span class="line">| Variable_name                      | Value |</span><br><span class="line">+------------------------------------+-------+</span><br><span class="line">| rpl_semi_sync_master_enabled       | OFF   |</span><br><span class="line">| rpl_semi_sync_master_timeout       | 10000 |</span><br><span class="line">| rpl_semi_sync_master_trace_level   | 32    |</span><br><span class="line">| rpl_semi_sync_master_<span class="built_in">wait</span>_no_slave | ON    |</span><br><span class="line">+------------------------------------+-------+</span><br><span class="line">4 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动主节点半同步功能</span></span><br><span class="line">MariaDB [(none)]&gt; SET GLOBAL rpl_semi_sync_master_enabled=1;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 等待半同步从节点响应最长5秒钟, 超时则降级为异步复制.</span></span><br><span class="line">MariaDB [(none)]&gt; SET GLOBAL rpl_semi_sync_master_timeout=5000;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h2 id="Slave-1"><a href="#Slave-1" class="headerlink" title="Slave-1"></a>Slave-1</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">[root@data-db2 ~]<span class="comment"># curl -sL http://172.18.203.1/shell/install_mariadb.sh | bash</span></span><br><span class="line">[root@data-db2 ~]<span class="comment"># vim /etc/my.cnf</span></span><br><span class="line"><span class="built_in">log</span>-bin=mysql-bin</span><br><span class="line"></span><br><span class="line">binlog_format=mixed</span><br><span class="line">relay_<span class="built_in">log</span>=relay-log</span><br><span class="line">relay_<span class="built_in">log</span>_purge=OFF</span><br><span class="line"><span class="built_in">read</span>-only=ON</span><br><span class="line">server-id=7</span><br><span class="line"></span><br><span class="line">[root@data-db2 ~]<span class="comment"># /etc/init.d/mysqld start</span></span><br><span class="line">[root@data-db2 ~]<span class="comment"># chkconfig mysqld on</span></span><br><span class="line">[root@data-db2 ~]<span class="comment"># chkconfig mysqld --list</span></span><br><span class="line">mysqld         	0:off	1:off	2:on	3:on	4:on	5:on	6:off</span><br><span class="line"></span><br><span class="line">MariaDB [(none)]&gt; CHANGE MASTER TO MASTER_HOST=<span class="string">'172.18.203.115'</span>, MASTER_USER=<span class="string">'repl'</span>, MASTER_PASSWORD=<span class="string">'tycoon'</span>, MASTER_LOG_FILE=<span class="string">'mysql-bin.000003'</span>, MASTER_LOG_POS=245;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 加载半同步复制主节点插件</span></span><br><span class="line">MariaDB [(none)]&gt; INSTALL PLUGIN rpl_semi_sync_slave SONAME <span class="string">'semisync_slave.so'</span>;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 加载此插件后引入几个变量</span></span><br><span class="line">MariaDB [(none)]&gt; SHOW GLOBAL VARIABLES LIKE <span class="string">'%semi%'</span>;</span><br><span class="line">+---------------------------------+-------+</span><br><span class="line">| Variable_name                   | Value |</span><br><span class="line">+---------------------------------+-------+</span><br><span class="line">| rpl_semi_sync_slave_enabled     | OFF   |</span><br><span class="line">| rpl_semi_sync_slave_trace_level | 32    |</span><br><span class="line">+---------------------------------+-------+</span><br><span class="line">2 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动从节点半同步功能</span></span><br><span class="line">MariaDB [(none)]&gt; SET GLOBAL rpl_semi_sync_slave_enabled=1;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动从节点, 即启动IO_thread和SQL_thread进程, 开始复制.</span></span><br><span class="line">MariaDB [(none)]&gt; START SLAVE;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line">MariaDB [(none)]&gt; SHOW SLAVE STATUS\G</span><br><span class="line">*************************** 1. row ***************************</span><br><span class="line">               Slave_IO_State: Waiting <span class="keyword">for</span> master to send event</span><br><span class="line">                  Master_Host: 172.18.203.115</span><br><span class="line">                  Master_User: repl</span><br><span class="line">                  Master_Port: 3306</span><br><span class="line">                Connect_Retry: 60</span><br><span class="line">              Master_Log_File: mysql-bin.000003</span><br><span class="line">          Read_Master_Log_Pos: 567</span><br><span class="line">               Relay_Log_File: relay-log.000002</span><br><span class="line">                Relay_Log_Pos: 851</span><br><span class="line">        Relay_Master_Log_File: mysql-bin.000003</span><br><span class="line">             Slave_IO_Running: Yes</span><br><span class="line">            Slave_SQL_Running: Yes</span><br></pre></td></tr></table></figure>
+<h2 id="Slave-2"><a href="#Slave-2" class="headerlink" title="Slave-2"></a>Slave-2</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">[root@data-db2 ~]<span class="comment"># curl -sL http://172.18.203.1/shell/install_mariadb.sh | bash</span></span><br><span class="line">[root@data-db2 ~]<span class="comment"># vim /etc/my.cnf</span></span><br><span class="line"><span class="built_in">log</span>-bin=mysql-bin</span><br><span class="line"></span><br><span class="line">binlog_format=mixed</span><br><span class="line">relay_<span class="built_in">log</span>=relay-log</span><br><span class="line">relay_<span class="built_in">log</span>_purge=OFF</span><br><span class="line"><span class="built_in">read</span>-only=ON</span><br><span class="line">server-id=9</span><br><span class="line"></span><br><span class="line">[root@data-db2 ~]<span class="comment"># /etc/init.d/mysqld start</span></span><br><span class="line">[root@data-db2 ~]<span class="comment"># chkconfig mysqld on</span></span><br><span class="line">[root@data-db2 ~]<span class="comment"># chkconfig mysqld --list</span></span><br><span class="line">mysqld         	0:off	1:off	2:on	3:on	4:on	5:on	6:off</span><br><span class="line"></span><br><span class="line">MariaDB [(none)]&gt; CHANGE MASTER TO MASTER_HOST=<span class="string">'172.18.203.115'</span>, MASTER_USER=<span class="string">'repl'</span>, MASTER_PASSWORD=<span class="string">'tycoon'</span>, MASTER_LOG_FILE=<span class="string">'mysql-bin.000003'</span>, MASTER_LOG_POS=245;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 加载半同步复制主节点插件</span></span><br><span class="line">MariaDB [(none)]&gt; INSTALL PLUGIN rpl_semi_sync_slave SONAME <span class="string">'semisync_slave.so'</span>;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 加载此插件后引入几个变量</span></span><br><span class="line">MariaDB [(none)]&gt; SHOW GLOBAL VARIABLES LIKE <span class="string">'%semi%'</span>;</span><br><span class="line">+---------------------------------+-------+</span><br><span class="line">| Variable_name                   | Value |</span><br><span class="line">+---------------------------------+-------+</span><br><span class="line">| rpl_semi_sync_slave_enabled     | OFF   |</span><br><span class="line">| rpl_semi_sync_slave_trace_level | 32    |</span><br><span class="line">+---------------------------------+-------+</span><br><span class="line">2 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动从节点半同步功能</span></span><br><span class="line">MariaDB [(none)]&gt; SET GLOBAL rpl_semi_sync_slave_enabled=1;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动从节点, 即启动IO_thread和SQL_thread进程, 开始复制.</span></span><br><span class="line">MariaDB [(none)]&gt; START SLAVE;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line">MariaDB [(none)]&gt; SHOW SLAVE STATUS\G</span><br><span class="line">*************************** 1. row ***************************</span><br><span class="line">               Slave_IO_State: Waiting <span class="keyword">for</span> master to send event</span><br><span class="line">                  Master_Host: 172.18.203.115</span><br><span class="line">                  Master_User: repl</span><br><span class="line">                  Master_Port: 3306</span><br><span class="line">                Connect_Retry: 60</span><br><span class="line">              Master_Log_File: mysql-bin.000003</span><br><span class="line">          Read_Master_Log_Pos: 567</span><br><span class="line">               Relay_Log_File: relay-log.000002</span><br><span class="line">                Relay_Log_Pos: 851</span><br><span class="line">        Relay_Master_Log_File: mysql-bin.000003</span><br><span class="line">             Slave_IO_Running: Yes</span><br><span class="line">            Slave_SQL_Running: Yes</span><br></pre></td></tr></table></figure>
+<h2 id="MHA"><a href="#MHA" class="headerlink" title="MHA"></a>MHA</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line">[root@data-mha ~]<span class="comment"># wget http://172.18.203.1/shell/sshtrust.sh</span></span><br><span class="line"><span class="comment"># 分发密钥, MHA Cluster内的主机两两之间建立主机互信.</span></span><br><span class="line">[root@data-mha ~]<span class="comment"># bash sshtrust.sh --key</span></span><br><span class="line"><span class="comment"># 确保集群时间同步</span></span><br><span class="line">[root@data-mha ~]<span class="comment"># bash sshtrust.sh date</span></span><br><span class="line">Fri Jun 24 00:17:08 CST 2016</span><br><span class="line">Fri Jun 24 00:17:08 CST 2016</span><br><span class="line">Fri Jun 24 00:17:08 CST 2016</span><br><span class="line">Fri Jun 24 00:17:09 CST 2016</span><br><span class="line"><span class="comment"># 添加yum源, 方便安装MHA.</span></span><br><span class="line">[root@data-mha ~]<span class="comment"># bash sshtrust.sh "yum-config-manager --add-repo=http://172.18.203.1/template/tycoon-c6.repo"</span></span><br><span class="line"><span class="comment"># 集群内所有节点(包括管理节点)需要安装Node包</span></span><br><span class="line">[root@data-mha ~]<span class="comment"># bash sshtrust.sh "yum install -y mha4mysql-node"</span></span><br><span class="line"><span class="comment"># HostD作为MHA管理节点需要安装Manager包</span></span><br><span class="line">[root@data-mha ~]<span class="comment"># yum install -y mha4mysql-manager</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 默认是没有配置文件, 自己建立目录和配置文件.</span></span><br><span class="line">[root@data-mha ~]<span class="comment"># mkdir /etc/masterha</span></span><br><span class="line">[root@data-mha ~]<span class="comment"># vim /etc/masterha/app1.cnf</span></span><br><span class="line">[server default]</span><br><span class="line">user=mha</span><br><span class="line">password=tycoon</span><br><span class="line">manager_workdir=/data/masterha/app1</span><br><span class="line">manager_<span class="built_in">log</span>=/data/masterha/app1/manager.log</span><br><span class="line">remote_workdir=/data/masterha/app1</span><br><span class="line">master_binlog_dir=/data/mysql	<span class="comment"># master的binlog位置</span></span><br><span class="line">ssh_user=root</span><br><span class="line">repl_user=repl</span><br><span class="line">repl_password=tycoon</span><br><span class="line">ping_interval=1</span><br><span class="line"></span><br><span class="line">[server1]</span><br><span class="line">hostname=172.18.203.115</span><br><span class="line">candidate_master=1	<span class="comment"># 作为主节点候选</span></span><br><span class="line"></span><br><span class="line">[server2]</span><br><span class="line">hostname=172.18.203.116</span><br><span class="line">candidate_master=1	<span class="comment"># 作为主节点候选</span></span><br><span class="line"></span><br><span class="line">[server3]</span><br><span class="line">hostname=172.18.203.122</span><br><span class="line">no_master=1	<span class="comment"># 永远不作为主节点</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 用mha提供的脚本做主机信任检查.</span></span><br><span class="line">[root@data-mha ~]<span class="comment"># masterha_check_ssh --conf=/etc/masterha/app1.cnf </span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 用mha提供的脚本做数据库复制检查.</span></span><br><span class="line">[root@data-mha ~]<span class="comment"># masterha_check_repl --conf=/etc/masterha/app1.cnf</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 测试通过就可以启动MHA了</span></span><br><span class="line">[root@data-mha ~]<span class="comment"># nohup masterha_manager --conf=/etc/masterha/app1.cnf &amp;&gt; /data/masterha/app1/manager.log &amp;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看状态</span></span><br><span class="line">[root@data-mha ~]<span class="comment"># masterha_check_status --conf=/etc/masterha/app1.cnf</span></span><br><span class="line">app1 (pid:2625) is running(0:PING_OK), master:172.18.203.115</span><br><span class="line"></span><br><span class="line"><span class="comment"># 如需停止MHA, 执行以下命令.</span></span><br><span class="line">[root@data-mha ~]<span class="comment"># masterha_stop --conf=/etc/masterha/app1.cnf</span></span><br><span class="line">Stopped app1 successfully.</span><br></pre></td></tr></table></figure>
+<h2 id="Keepalived地址漂移"><a href="#Keepalived地址漂移" class="headerlink" title="Keepalived地址漂移"></a>Keepalived地址漂移</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Master</span></span><br><span class="line">[root@data-db1 ~]<span class="comment"># yum install -y keepalived</span></span><br><span class="line">[root@data-db1 ~]<span class="comment"># vim /etc/keepalived/keepalived.conf</span></span><br><span class="line">...</span><br><span class="line"><span class="comment"># 监控mysqld进程状态</span></span><br><span class="line">vrrp_script chk_mysql &#123;</span><br><span class="line">    script <span class="string">"killall -0 mysqld"</span></span><br><span class="line">    interval 2</span><br><span class="line">    weight -8</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">vrrp_instance VI_1 &#123;</span><br><span class="line">	<span class="comment"># 作为主</span></span><br><span class="line">    state MASTER</span><br><span class="line">    interface eth0</span><br><span class="line">    virtual_router_id 71</span><br><span class="line">    priority 100</span><br><span class="line">    advert_int 1</span><br><span class="line">    authentication &#123;</span><br><span class="line">        auth_<span class="built_in">type</span> PASS</span><br><span class="line">        auth_pass +OwDiaXV</span><br><span class="line">    &#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment"># 使用172.18.203.201作为VIP</span></span><br><span class="line">    virtual_ipaddress &#123;</span><br><span class="line">        172.18.203.201/32 brd 172.18.203.201 dev eth0 label eth0:0</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment"># 在此处调用mysqld进程监控脚本</span></span><br><span class="line">    track_script &#123;</span><br><span class="line">        chk_mysql</span><br><span class="line">    &#125;</span><br><span class="line">	<span class="comment"># 故障恢复主机不争用</span></span><br><span class="line">    nopreempt</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># Slave-1</span></span><br><span class="line">[root@data-db1 ~]<span class="comment"># yum install -y keepalived</span></span><br><span class="line">[root@data-db1 ~]<span class="comment"># vim /etc/keepalived/keepalived.conf</span></span><br><span class="line"><span class="comment"># 监控mysqld进程状态</span></span><br><span class="line">vrrp_script chk_mysql &#123;</span><br><span class="line">    script <span class="string">"killall -0 mysqld"</span></span><br><span class="line">    interval 2</span><br><span class="line">    weight -8</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">vrrp_instance VI_1 &#123;</span><br><span class="line">	<span class="comment"># 作为从</span></span><br><span class="line">    state BACKUP</span><br><span class="line">    interface eth0</span><br><span class="line">    virtual_router_id 71</span><br><span class="line">    priority 95</span><br><span class="line">    advert_int 1</span><br><span class="line">    authentication &#123;</span><br><span class="line">        auth_<span class="built_in">type</span> PASS</span><br><span class="line">        auth_pass +OwDiaXV</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment"># 使用172.18.203.201作为VIP</span></span><br><span class="line">    virtual_ipaddress &#123;</span><br><span class="line">        172.18.203.201/32 brd 172.18.203.201 dev eth0 label eth0:0</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment"># 在此处调用mysqld进程监控脚本</span></span><br><span class="line">    track_script &#123;</span><br><span class="line">        chk_mysql</span><br><span class="line">    &#125;</span><br><span class="line">	<span class="comment"># 故障恢复主机不争用</span></span><br><span class="line">    nopreempt</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/project/" rel="tag">#project</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/06/18/kvm/" rel="next" title="kvm">
+                <i class="fa fa-chevron-left"></i> kvm
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <div class="ds-share flat" data-thread-key="2016/06/22/实践作业/"
+     data-title="实践作业"
+     data-content=""
+     data-url="http://www.twoyang.net/2016/06/22/实践作业/">
+  <div class="ds-share-inline">
+    <ul  class="ds-share-icons-16">
+
+      <li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
+      <li><a class="ds-weibo" href="javascript:void(0);" data-service="weibo">微博</a></li>
+      <li><a class="ds-qzone" href="javascript:void(0);" data-service="qzone">QQ空间</a></li>
+      <li><a class="ds-qqt" href="javascript:void(0);" data-service="qqt">腾讯微博</a></li>
+      <li><a class="ds-wechat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+
+    </ul>
+    <div class="ds-share-icons-more">
+    </div>
+  </div>
+</div>
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/06/22/实践作业/"
+           data-title="实践作业" data-url="http://www.twoyang.net/2016/06/22/实践作业/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://7xltax.com1.z0.glb.clouddn.com/twoyang.jpg"
+               alt="twoyang" />
+          <p class="site-author-name" itemprop="name">twoyang</p>
+          <p class="site-description motion-element" itemprop="description">The quieter you become.The more you are able to hear.</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">35</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">6</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">38</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        <div class="links-of-blogroll motion-element">
+          
+            <div class="links-of-blogroll-title">友情链接</div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.magedu.com/" target="_blank">马哥教育</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="https://shadowsocks.be/9.html" target="_blank">科学上网</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.isetsuna.com/hexo/introduction/" target="_blank">Hexo博客系列</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://mrchen.org/" target="_blank">Mrchen</a>
+                </li>
+              
+            </ul>
+          
+        </div>
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#基础环境准备"><span class="nav-number">1.</span> <span class="nav-text">基础环境准备</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Mariadb-MHA"><span class="nav-number">2.</span> <span class="nav-text">Mariadb MHA</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Master"><span class="nav-number">2.1.</span> <span class="nav-text">Master</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Slave-1"><span class="nav-number">2.2.</span> <span class="nav-text">Slave-1</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Slave-2"><span class="nav-number">2.3.</span> <span class="nav-text">Slave-2</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MHA"><span class="nav-number">2.4.</span> <span class="nav-text">MHA</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Keepalived地址漂移"><span class="nav-number">2.5.</span> <span class="nav-text">Keepalived地址漂移</span></a></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">twoyang</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+
+  
+
+
+
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=0.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=0.5.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=0.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=0.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=0.5.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"twoyang"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+  
+
+
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>
