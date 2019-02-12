@@ -61,7 +61,7 @@
 启动httpd服务后，便可访问本地文档站点了http://localhost/manual/">
 <meta property="og:type" content="article">
 <meta property="og:title" content="httpd常用配置">
-<meta property="og:url" content="http://www.twoyang.net/2016/04/13/httpd常用配置/index.html">
+<meta property="og:url" content="http://www.twoyang.cf/2016/04/13/httpd常用配置/index.html">
 <meta property="og:site_name" content="TwOyAng'blog">
 <meta property="og:description" content="前言httpd的配置项是非常丰富的，本文仅是对常用配置列出个大致的目录，并就CentOS-6与CentOS-7之间存在的一些差异作比较说明。需更详细的介绍请参照官方文档，也可以本地安装一个当前版本的文档站点，便于随时翻阅。1[root@bbs ~]# yum install -y httpd-manual
 启动httpd服务后，便可访问本地文档站点了http://localhost/manual/">
@@ -361,7 +361,7 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@bbs ~]<span class="comment"># yum install -y mod_ssl</span></span><br></pre></td></tr></table></figure>
 </li>
 <li><p>修改配置文件</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@www ~]<span class="comment"># vim /etc/httpd/conf.d/ssl.conf</span></span><br><span class="line">DocumentRoot    <span class="string">"/web/https/htdocs/"</span></span><br><span class="line">ServerName        www.twoyang.net</span><br><span class="line">SSLCertificateFile    /etc/httpd/ssl/httpd.crt</span><br><span class="line">SSLCertificateKeyFile /etc/httpd/ssl/httpd.key</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@www ~]<span class="comment"># vim /etc/httpd/conf.d/ssl.conf</span></span><br><span class="line">DocumentRoot    <span class="string">"/web/https/htdocs/"</span></span><br><span class="line">ServerName        www.twoyang.cf</span><br><span class="line">SSLCertificateFile    /etc/httpd/ssl/httpd.crt</span><br><span class="line">SSLCertificateKeyFile /etc/httpd/ssl/httpd.key</span><br></pre></td></tr></table></figure>
 </li>
 </ul>
 
@@ -415,7 +415,7 @@
         <div class="ds-share flat" data-thread-key="2016/04/13/httpd常用配置/"
      data-title="httpd常用配置"
      data-content=""
-     data-url="http://www.twoyang.net/2016/04/13/httpd常用配置/">
+     data-url="http://www.twoyang.cf/2016/04/13/httpd常用配置/">
   <div class="ds-share-inline">
     <ul  class="ds-share-icons-16">
 
@@ -443,7 +443,7 @@
   <div class="comments" id="comments">
     
       <div class="ds-thread" data-thread-key="2016/04/13/httpd常用配置/"
-           data-title="httpd常用配置" data-url="http://www.twoyang.net/2016/04/13/httpd常用配置/">
+           data-title="httpd常用配置" data-url="http://www.twoyang.cf/2016/04/13/httpd常用配置/">
       </div>
     
   </div>
